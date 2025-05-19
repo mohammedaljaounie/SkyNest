@@ -1,0 +1,443 @@
+package com.example.SkyNest.service.UserService.UHotelService;
+
+import com.example.SkyNest.dto.*;
+import com.example.SkyNest.model.entity.*;
+import com.example.SkyNest.model.repository.*;
+import com.example.SkyNest.service.authService.JwtService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.nio.file.Files;
+import java.time.LocalDate;
+import java.util.*;
+
+@Service
+public class UHotelService {
+    @Autowired
+    private HotelRepository hotelRepository;
+    @Autowired
+    private HttpServletRequest request;
+    @Autowired
+    private JwtService jwtService;
+    @Autowired
+    private RoomRepository roomRepository;
+    @Autowired
+    private UserCardRepository userCardRepository;
+    @Autowired
+    private HotelCardRepository hotelCardRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private HotelBookingRepository hotelBookingRepository;
+    @Autowired
+    private UserBookingRepository userBookingRepository;
+
+    @Autowired
+    private HotelImageRepository hotelImageRepository;
+
+    public List<HotelResponse> showAllHotel(){
+
+        List<Hotel> hotelList = this.hotelRepository.findAll();
+
+        if (hotelList.isEmpty()){
+            return null;
+        }
+        List<HotelResponse> hotelResponsesList  = new ArrayList<>();
+
+        for (int i = 0; i <hotelList.size() ; i++) {
+            HotelResponse hotel  = new HotelResponse();
+            hotel.setId(hotelList.get(i).getId());
+            hotel.setName(hotelList.get(i).getName());
+            hotel.setLocation(hotelList.get(i).getLocation());
+            hotel.setDescription(hotelList.get(i).getDescription());
+            hotel.setRatingCount(hotelList.get(i).getRatingCount());
+
+            // todo : give hotel image from hotels and put this image in correct hotel
+            List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
+
+            List<ImageDTO> imageDTOS = new ArrayList<>();
+            for (int j = 0; j <hotelImageList.size() ; j++) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(hotelImageList.get(j).getId());
+                imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+hotelImageList.get(j).getName());
+                imageDTOS.add(imageDTO);
+            }
+            hotel.setImageDTOList(imageDTOS);
+
+            hotelResponsesList.add(hotel);
+
+        }
+        return hotelResponsesList;
+    }
+
+    public HotelResponse showHotelInfo(Long id){
+
+        Optional<Hotel> hotelOpt = this.hotelRepository.findById(id);
+        if (hotelOpt.isEmpty()){
+            return null;
+        }
+        Hotel hotelInfo  = hotelOpt.get();
+        HotelResponse hotelResponse  = new HotelResponse();
+        hotelResponse.setId(hotelInfo.getId());
+        hotelResponse.setName(hotelInfo.getName());
+        hotelResponse.setLocation(hotelInfo.getLocation());
+        hotelResponse.setDescription(hotelInfo.getDescription());
+        hotelResponse.setRatingCount(hotelInfo.getRatingCount());
+        hotelResponse.setAvgRating(hotelInfo.getAvgRating());
+        List<ImageDTO> imageResponseList = new ArrayList<>();
+        List<HotelImage> imageList  = hotelInfo.getHotelImageList();
+
+        for (int i = 0; i < imageList.size() ; i++) {
+            ImageDTO imageDTO = new ImageDTO();
+            imageDTO.setId(imageList.get(i).getId());
+            imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+imageList.get(i).getName());
+            imageResponseList.add(imageDTO);
+        }
+        hotelResponse.setImageDTOList(imageResponseList);
+
+        return hotelResponse;
+    }
+
+    public List<HotelResponse> showHotelDirect(){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        String location = this.jwtService.extractLocation(token);
+        List<Hotel> hotelList = this.hotelRepository.findByLocation(location);
+        if (hotelList.isEmpty()){
+            return null;
+        }
+       return getHotelResponse(hotelList);
+    }
+
+    private static List<HotelResponse> getHotelResponse(List<Hotel> hotelList){
+
+        List<HotelResponse> hotelResponseList = new ArrayList<>();
+        for (int i =0 ; i<hotelList.size();i++){
+            HotelResponse hotelResponse  = new HotelResponse();
+            hotelResponse.setId(hotelList.get(i).getId());
+            hotelResponse.setLocation(hotelList.get(i).getLocation());
+            hotelResponse.setName(hotelList.get(i).getName());
+            hotelResponse.setDescription(hotelList.get(i).getDescription());
+            hotelResponse.setAvgRating(hotelList.get(i).getAvgRating());
+            hotelResponse.setRatingCount(hotelList.get(i).getRatingCount());
+            List<ImageDTO> imageDTOS = new ArrayList<>();
+            List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
+
+            for (HotelImage hotelImage : hotelImageList) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(hotelImage.getId());
+                imageDTO.setImageUrl("http://localhost:8080/user/hotel/hotelImage/" + hotelImage.getName());
+                imageDTOS.add(imageDTO);
+            }
+
+            hotelResponse.setImageDTOList(imageDTOS);
+            hotelResponseList.add(hotelResponse);
+        }
+        return hotelResponseList;
+    }
+
+    public byte[] viewImage(String imageName) throws Exception {
+        Optional<HotelImage> image = this.hotelImageRepository.findByName( imageName);
+        if (image.isPresent()){
+            String path = image.get().getPath();
+            File file = new File(path);
+            if (!file.exists()) throw new FileNotFoundException("Image file not found");
+            return Files.readAllBytes(file.toPath());
+        }
+        return null;
+    }
+
+    // todo booking room direct
+    public Map<String,String> roomBookingDirect(Long hotelId, Long roomId, HotelRoomRequest hotelRoomRequest){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId  = jwtService.extractId(token);
+        Optional<User> user = this.userRepository.findById(userId);
+        if (user.isEmpty()){
+            return Map.of(
+                    "message",
+                    "I'm Sorry , you can't booking any thing because you not auth"
+            );
+        }
+        Optional<UserCard> userCard  = this.userCardRepository.findByUserId(userId);
+        if (userCard.isEmpty()){
+            return Map.of(
+                    "message",
+                    "I'm Sorry , you don't have card to payment booking"
+            );
+        }
+        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
+        if (hotel.isEmpty()){
+            return Map.of(
+                    "message",
+                    "I'm Sorry , This hotel is not found in our application"
+            );
+        }
+
+        Optional<Room> room  = this.roomRepository.findByIdAndHotelId(roomId,hotelId);
+
+        if (room.isEmpty()){
+            return Map.of(
+                    "message",
+                    "I'm Sorry , This room is not found in this hotel"
+            );
+        }
+        boolean status = room.get().isStatus();
+        if (status){
+            return Map.of(
+                    "message",
+                    "I'm Sorry , This room is booking"
+            );
+        }
+        double roomPrice = room.get().getPrice();
+        double totalUserBalance = userCard.get().getTotalBalance();
+        if (totalUserBalance<roomPrice){
+            savePublicBooking( hotelRoomRequest.getLaunchDate(), hotelRoomRequest.getDepartureDate(),user.get(),-1);
+        }
+        HotelBooking hotelBooking = new HotelBooking();
+        hotelBooking.setUser(user.get());
+        hotelBooking.setHotel(hotel.get());
+        hotelBooking.setNumberOfPerson(hotelRoomRequest.getNumberOfPerson());
+        hotelBooking.setNumberOfRoom(1);
+        hotelBooking.setPaymentRatio(hotelRoomRequest.getPaymentRatio());
+        hotelBooking.setRoomType(room.get().getRoomType());
+        hotelBooking.setStatus(true);
+        hotelBooking.setLaunchDate(hotelRoomRequest.getLaunchDate());
+        hotelBooking.setDepartureDate(hotelRoomRequest.getDepartureDate());
+        this.hotelBookingRepository.save(hotelBooking);
+        savePublicBooking(hotelRoomRequest.getLaunchDate(),hotelRoomRequest.getDepartureDate(),
+        user.get(),1);
+        return Map.of("message",
+                "your reservation has been successfully completed.\n" +
+                        "wr hope you have a comfortable stay",
+                "Booking start",hotelRoomRequest.getLaunchDate().toString(),
+                "End of reservation",hotelRoomRequest.getDepartureDate().toString());
+    }
+
+
+    // todo booking in hotel
+    public Map<String,String> roomBooking(Long hotelId, HotelBookingRequest hotelBookingRequest){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId  = jwtService.extractId(token);
+        Optional<User> user = this.userRepository.findById(userId);
+        if (user.isEmpty()){
+            return Map.of("message",
+                    "I'm Sorry , you can't booking any thing because is not authorization in our application");
+        }
+        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
+        if (hotel.isEmpty()){
+            return Map.of("message",
+                    "this hotel is not found in this application");
+        }
+        Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotelId);
+        if (hotelCard.isEmpty()){
+            return Map.of("message",
+                    "this hotel don't have card to payment");
+        }
+        if (checkDate(hotelBookingRequest.getLaunchDate(),hotelBookingRequest.getDepartureDate())){
+            return Map.of("message",
+                    "I'm Sorry , you can't book because the time you want has passed");
+        }
+         List<Room> allRoomInTheHotel =checkRoom(false, hotelBookingRequest.getRoomType(), hotelId);
+        if (allRoomInTheHotel.size()<hotelBookingRequest.getNumberOfRoom()){
+            return Map.of("message",
+                    "I'm Sorry , we don't have your request now");
+        }
+        double totalBookingCost = calculateTotalCost(allRoomInTheHotel,hotelBookingRequest.getNumberOfRoom());
+        double amountToBePaid  = totalBookingCost*hotelBookingRequest.getPaymentRatio()/100;
+        Optional<UserCard> userCard = this.userCardRepository.findByUserId(userId);
+        if (userCard.isEmpty()){
+            return Map.of("message","I'm Sorry , you don't have any card to payment");
+        }
+        double totalUserBalance  = userCard.get().getTotalBalance();
+        if (totalUserBalance<amountToBePaid){
+            savePublicBooking(
+                    hotelBookingRequest.getLaunchDate(),
+                    hotelBookingRequest.getDepartureDate(),
+                    user.get(),-1);
+            return Map.of("message",
+                    "I'm sorry , you don't have enough money to pay");
+        }
+        updateUserCard(userCard.get(), amountToBePaid);
+        updateHotelCard(hotelCard.get(), amountToBePaid);
+        updateRoomStatus(allRoomInTheHotel,hotelBookingRequest.getNumberOfRoom());
+        saveBooking(hotelBookingRequest,user.get(),hotel.get());
+        savePublicBooking(
+                hotelBookingRequest.getLaunchDate(),
+                hotelBookingRequest.getDepartureDate(),
+                user.get(),1);
+        return Map.of("message",
+                "your reservation has been successfully completed.\n" +
+                        "wr hope you have a comfortable stay",
+        "Booking start",hotelBookingRequest.getLaunchDate().toString(),
+            "End of reservation",hotelBookingRequest.getDepartureDate().toString());
+    }
+    private static boolean checkDate(LocalDate LaunchDate,LocalDate DepartureDate){
+        LocalDate localDate = LocalDate.now();
+        return localDate.isAfter(LaunchDate)
+                ||localDate.isAfter(DepartureDate)
+                ||LaunchDate.isAfter(DepartureDate);
+    }
+    private  List<Room> checkRoom(boolean status,String roomType,Long hotelId){
+        return roomRepository.findByStatusAndRoomTypeAndHotelId(status, roomType, hotelId);
+    }
+    private static double calculateTotalCost(List<Room> rooms ,int numberOfRoom){
+        double totalCost =0;
+        for (int i = 0; i < numberOfRoom ; i++) {
+
+            totalCost = totalCost+rooms.get(i).getPrice();
+        }
+        return totalCost;
+    }
+    private  void updateRoomStatus(List<Room> rooms ,int numberOfRoom){
+        for (int i = 0; i <numberOfRoom ; i++) {
+            Room room = rooms.get(i);
+            room.setStatus(true);
+            this.roomRepository.save(room);
+        }
+    }
+    private void updateUserCard(UserCard userCard,double amountToBePaid){
+        userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
+        this.userCardRepository.save(userCard);
+    }
+    private void updateHotelCard(HotelCard hotelCard,double amountToBePaid){
+        hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
+        this.hotelCardRepository.save(hotelCard);
+    }
+    private void saveBooking(HotelBookingRequest hotelBookingRequest,User user,Hotel hotel){
+        HotelBooking hotelBooking = new HotelBooking();
+        hotelBooking.setUser(user);
+        hotelBooking.setHotel(hotel);
+        hotelBooking.setNumberOfPerson(hotelBookingRequest.getNumberOfPerson());
+        hotelBooking.setNumberOfRoom(hotelBookingRequest.getNumberOfRoom());
+        hotelBooking.setPaymentRatio(hotelBookingRequest.getPaymentRatio());
+        hotelBooking.setRoomType(hotelBookingRequest.getRoomType());
+        hotelBooking.setStatus(true);
+        hotelBooking.setLaunchDate(hotelBookingRequest.getLaunchDate());
+        hotelBooking.setDepartureDate(hotelBookingRequest.getDepartureDate());
+        this.hotelBookingRepository.save(hotelBooking);
+    }
+    private void savePublicBooking(LocalDate LaunchDate, LocalDate DepartureDate, User user,int status){
+        UserBooking userBooking = new UserBooking();
+        userBooking.setBookingType("Hotel Reservation");
+        userBooking.setBookingStartDate(LaunchDate);
+        userBooking.setBookingEndDate(DepartureDate);
+        userBooking.setStatus(status);
+        userBooking.setUser(user);
+        this.userBookingRepository.save(userBooking);
+    }
+
+    public List<UserBookingResponse> viewActiveReservation(){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId  = jwtService.extractId(token);
+        LocalDate localDate = LocalDate.now();
+        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
+        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
+        for (UserBooking userBooking : userBookings) {
+            if (localDate.isAfter(userBooking.getBookingEndDate()) ||
+                    localDate.isEqual(userBooking.getBookingEndDate())&&
+            userBooking.getStatus()==1) {
+                UserBookingResponse userBookingResponse = new UserBookingResponse();
+                userBookingResponse.setId(userBooking.getId());
+                userBookingResponse.setBookingType(userBooking.getBookingType());
+                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
+                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                bookingResponses.add(userBookingResponse);
+            }
+        }
+return bookingResponses;
+
+    }
+
+    public List<UserBookingResponse> viewCanceledReservation(){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId  = jwtService.extractId(token);
+        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
+        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
+        for (UserBooking userBooking : userBookings) {
+            if (userBooking.getStatus()==0) {
+                UserBookingResponse userBookingResponse = new UserBookingResponse();
+                userBookingResponse.setId(userBooking.getId());
+                userBookingResponse.setBookingType(userBooking.getBookingType());
+                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
+                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                bookingResponses.add(userBookingResponse);
+            }
+        }
+        return bookingResponses;
+
+    }
+
+    public List<UserBookingResponse> viewIncorrectReservation(){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId  = jwtService.extractId(token);
+        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
+        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
+        for (UserBooking userBooking : userBookings) {
+            if (userBooking.getStatus()==-1) {
+                UserBookingResponse userBookingResponse = new UserBookingResponse();
+                userBookingResponse.setId(userBooking.getId());
+                userBookingResponse.setBookingType(userBooking.getBookingType());
+                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
+                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                bookingResponses.add(userBookingResponse);
+            }
+        }
+        return bookingResponses;
+
+    }
+
+    public List<HotelResponse> showAllHotelByLocation(String location){
+
+        List<Hotel> hotelList = this.hotelRepository.findByLocation(location);
+
+        if (hotelList.isEmpty()){
+            return null;
+        }
+        List<HotelResponse> hotelResponsesList  = new ArrayList<>();
+
+        for (int i = 0; i <hotelList.size() ; i++) {
+            HotelResponse hotel  = new HotelResponse();
+            hotel.setId(hotelList.get(i).getId());
+            hotel.setName(hotelList.get(i).getName());
+            hotel.setLocation(hotelList.get(i).getLocation());
+            hotel.setDescription(hotelList.get(i).getDescription());
+            hotel.setRatingCount(hotelList.get(i).getRatingCount());
+
+            // todo : give hotel image from hotels and put this image in correct hotel
+            List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
+
+            List<ImageDTO> imageDTOS = new ArrayList<>();
+            for (int j = 0; j <hotelImageList.size() ; j++) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(hotelImageList.get(j).getId());
+                imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+hotelImageList.get(j).getName());
+                imageDTOS.add(imageDTO);
+            }
+            hotel.setImageDTOList(imageDTOS);
+
+            hotelResponsesList.add(hotel);
+
+        }
+        return hotelResponsesList;
+    }
+
+    public double viewTotalBalance(){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<UserCard> userCard = this.userCardRepository.findByUserId(userId);
+        return userCard.map(UserCard::getTotalBalance).orElse(-1D);
+
+    }
+
+
+
+}
