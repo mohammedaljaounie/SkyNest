@@ -47,28 +47,11 @@ public class ApplicationUp implements ApplicationRunner {
             userSuperAdmin  .setFullName("Mohammed samir");
             userSuperAdmin .setEmail("so2004m@gmail.com");
             userSuperAdmin .setPassword(passwordEncoder.encode("12345"));
-            userSuperAdmin.setLocation("daraa");
+            userSuperAdmin.setLatitude(32.124);
+            userSuperAdmin.setLongitude(32.245);
             userSuperAdmin.setRole(superAdmin);
                 userRepository.save(userSuperAdmin);
 
-
-
-            User userAdmin = new User();
-            userAdmin  .setFullName("sami samir");
-            userAdmin .setEmail("mohammedaljaounisy@gmail.com");
-            userAdmin .setPassword(passwordEncoder.encode("12345"));
-            userAdmin.setLocation("damascus");
-            userAdmin.setRole(admin);
-            userRepository.save(userAdmin);
-
-
-            User userUser = new User();
-            userUser  .setFullName("ali samir");
-            userUser .setEmail("ali@gmail.com");
-            userUser .setPassword(passwordEncoder.encode("12345"));
-            userUser.setLocation("daraa");
-            userUser.setRole(user);
-            userRepository.save(userUser);
 
 
 

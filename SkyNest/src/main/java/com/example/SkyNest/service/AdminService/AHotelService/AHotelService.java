@@ -1,6 +1,5 @@
 package com.example.SkyNest.service.AdminService.AHotelService;
 
-import ch.qos.logback.core.util.StringUtil;
 import com.example.SkyNest.dto.HotelResponse;
 import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.model.entity.Hotel;
@@ -14,16 +13,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 
@@ -63,7 +58,7 @@ public class AHotelService {
         HotelResponse hotelResponse  = new HotelResponse();
         hotelResponse.setId(hotelInfo.getId());
         hotelResponse.setName(hotelInfo.getName());
-        hotelResponse.setLocation(hotelInfo.getLocation());
+        hotelResponse.setAddress(hotelInfo.getAddress());
         hotelResponse.setDescription(hotelInfo.getDescription());
         hotelResponse.setRatingCount(hotelInfo.getRatingCount());
         hotelResponse.setAvgRating(hotelInfo.getAvgRating());

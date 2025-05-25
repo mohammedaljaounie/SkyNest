@@ -12,7 +12,7 @@ public class HotelResponse {
 
     private String description;
 
-    private String location;
+    private String address;
 
     private double avgRating;
 
@@ -44,12 +44,12 @@ public class HotelResponse {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public double getAvgRating() {
@@ -75,4 +75,6 @@ public class HotelResponse {
     public void setImageDTOList(List<ImageDTO> imageDTOList) {
         this.imageDTOList = imageDTOList;
     }
+
+
 }

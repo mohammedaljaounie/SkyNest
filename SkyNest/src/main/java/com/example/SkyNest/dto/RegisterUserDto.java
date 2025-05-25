@@ -15,7 +15,9 @@ public class RegisterUserDto {
     private String fullName;
 
     @Column(nullable = false)
-    private String location;
+    private double longitude;
+    @Column(nullable = false)
+    private double latitude;
 
     public String getEmail() {
         return email;
@@ -41,11 +43,19 @@ public class RegisterUserDto {
         this.fullName = fullName;
     }
 
-    public String getLocation() {
-        return location;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

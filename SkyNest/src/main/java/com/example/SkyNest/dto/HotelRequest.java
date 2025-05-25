@@ -1,7 +1,6 @@
 package com.example.SkyNest.dto;
 
 import jakarta.persistence.Column;
-import org.hibernate.annotations.Cache;
 
 public class HotelRequest {
 
@@ -12,10 +11,15 @@ public class HotelRequest {
     private String description;
 
     @Column(nullable = false)
-    private String location;
+    private String address;
 
     @Column(nullable = false)
     private String email;
+    @Column(nullable = false)
+    private double longitude;
+    @Column(nullable = false)
+    private double latitude;
+
 
 
     public String getName() {
@@ -34,12 +38,12 @@ public class HotelRequest {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getEmail() {
@@ -48,5 +52,21 @@ public class HotelRequest {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

@@ -32,8 +32,13 @@ public class JwtService {
         return extractAllClaims(token).get("id",Long.class);
     }
 
-    public String extractLocation(String token){
-        return extractAllClaims(token).get("location",String.class);
+    public double extractLongitude(String token){
+
+        return extractAllClaims(token).get("longitude",Double.class);
+    }
+
+    public double extractLatitude(String token){
+        return extractAllClaims(token).get("latitude",Double.class);
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -45,7 +50,10 @@ public class JwtService {
         User user = (User) userDetails;
         Map<String,Object> claims = new HashMap<>();
         claims.put("id",user.getId());
-        claims.put("location",user.getLocation());
+
+        claims.put("longitude",user.getLongitude());
+        claims.put("latitude",user.getLatitude());
+
         return generateToken(claims, userDetails);
     }
 

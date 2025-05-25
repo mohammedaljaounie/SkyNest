@@ -6,8 +6,10 @@ public class SAHotelResponse {
 
     private String description;
 
-    private String location;
+    private String address;
 
+    private double longitude;
+    private double latitude;
     private double avgRating;
 
     private int ratingCount;
@@ -33,12 +35,12 @@ public class SAHotelResponse {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public double getAvgRating() {
@@ -71,5 +73,21 @@ public class SAHotelResponse {
 
     public void setOwnerEmail(String ownerEmail) {
         this.ownerEmail = ownerEmail;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

@@ -1,7 +1,6 @@
 package com.example.SkyNest.model.entity;
 
 import jakarta.persistence.*;
-import org.w3c.dom.stylesheets.LinkStyle;
 
 import java.util.List;
 
@@ -20,7 +19,12 @@ public class Hotel {
     private String description;
 
     @Column(nullable = false)
-    private String location;
+    private double longitude;
+    @Column(nullable = false)
+    private double latitude;
+
+    @Column(nullable = false)
+    private String address;
 
     @Column(nullable = false)
     private double avgRating;
@@ -59,12 +63,12 @@ public class Hotel {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public User getUser() {
@@ -97,5 +101,21 @@ public class Hotel {
 
     public void setHotelImageList(List<HotelImage> hotelImageList) {
         this.hotelImageList = hotelImageList;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

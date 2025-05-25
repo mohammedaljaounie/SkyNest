@@ -30,8 +30,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    @NotNull
-    private String location;
+
+    @Column(nullable = false)
+    private double longitude;
+
+    @Column(nullable = false)
+    private double latitude;
 
     @Column(nullable = false)
     private boolean enabled;
@@ -115,11 +119,19 @@ public class User implements UserDetails {
         this.enabled = enabled;
     }
 
-    public String getLocation() {
-        return location;
+    public double getLongitude() {
+        return longitude;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

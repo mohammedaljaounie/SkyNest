@@ -1,7 +1,6 @@
 package com.example.SkyNest.dto;
 
 import com.example.SkyNest.model.entity.Hotel;
-import jakarta.persistence.Column;
 
 public class HotelRequestUpdate {
 
@@ -9,10 +8,12 @@ public class HotelRequestUpdate {
 
     private String description;
 
-    private String location;
+    private String address;
 
     private Hotel hotel;
 
+    private double longitude;
+    private double latitude;
     public String getName() {
         return name;
     }
@@ -29,12 +30,12 @@ public class HotelRequestUpdate {
         this.description = description;
     }
 
-    public String getLocation() {
-        return location;
+    public String getAddress() {
+        return address;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public Hotel getHotel() {
@@ -43,5 +44,21 @@ public class HotelRequestUpdate {
 
     public void setHotel(Hotel hotel) {
         this.hotel = hotel;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 }

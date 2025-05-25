@@ -51,7 +51,7 @@ public class UHotelService {
             HotelResponse hotel  = new HotelResponse();
             hotel.setId(hotelList.get(i).getId());
             hotel.setName(hotelList.get(i).getName());
-            hotel.setLocation(hotelList.get(i).getLocation());
+            hotel.setAddress(hotelList.get(i).getAddress());
             hotel.setDescription(hotelList.get(i).getDescription());
             hotel.setRatingCount(hotelList.get(i).getRatingCount());
 
@@ -83,7 +83,7 @@ public class UHotelService {
         HotelResponse hotelResponse  = new HotelResponse();
         hotelResponse.setId(hotelInfo.getId());
         hotelResponse.setName(hotelInfo.getName());
-        hotelResponse.setLocation(hotelInfo.getLocation());
+        hotelResponse.setAddress(hotelInfo.getAddress());
         hotelResponse.setDescription(hotelInfo.getDescription());
         hotelResponse.setRatingCount(hotelInfo.getRatingCount());
         hotelResponse.setAvgRating(hotelInfo.getAvgRating());
@@ -104,8 +104,9 @@ public class UHotelService {
     public List<HotelResponse> showHotelDirect(){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
-        String location = this.jwtService.extractLocation(token);
-        List<Hotel> hotelList = this.hotelRepository.findByLocation(location);
+        double longitude = jwtService.extractLongitude(token);
+        double latitude  = jwtService.extractLatitude(token);
+        List<Hotel> hotelList = this.hotelRepository.findAll();
         if (hotelList.isEmpty()){
             return null;
         }
@@ -118,7 +119,7 @@ public class UHotelService {
         for (int i =0 ; i<hotelList.size();i++){
             HotelResponse hotelResponse  = new HotelResponse();
             hotelResponse.setId(hotelList.get(i).getId());
-            hotelResponse.setLocation(hotelList.get(i).getLocation());
+            hotelResponse.setAddress(hotelList.get(i).getAddress());
             hotelResponse.setName(hotelList.get(i).getName());
             hotelResponse.setDescription(hotelList.get(i).getDescription());
             hotelResponse.setAvgRating(hotelList.get(i).getAvgRating());
@@ -394,9 +395,9 @@ return bookingResponses;
 
     }
 
-    public List<HotelResponse> showAllHotelByLocation(String location){
+    public List<HotelResponse> showAllHotelByLocation(String address){
 
-        List<Hotel> hotelList = this.hotelRepository.findByLocation(location);
+        List<Hotel> hotelList = this.hotelRepository.findByAddress(address);
 
         if (hotelList.isEmpty()){
             return null;
@@ -407,7 +408,7 @@ return bookingResponses;
             HotelResponse hotel  = new HotelResponse();
             hotel.setId(hotelList.get(i).getId());
             hotel.setName(hotelList.get(i).getName());
-            hotel.setLocation(hotelList.get(i).getLocation());
+            hotel.setAddress(hotelList.get(i).getAddress());
             hotel.setDescription(hotelList.get(i).getDescription());
             hotel.setRatingCount(hotelList.get(i).getRatingCount());
 

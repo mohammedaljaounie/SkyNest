@@ -64,7 +64,8 @@ public class AuthenticationService {
         user  .setFullName(input.getFullName());
         user .setEmail(input.getEmail());
         user .setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setLocation(input.getLocation());
+        user.setLongitude(input.getLongitude());
+        user.setLatitude(input.getLatitude());
         user.setEnabled(false);
         Optional<Role> role = this.roleRepo.findByName("user");
         if (role.isPresent()){
@@ -88,7 +89,8 @@ return Map.of("message","Not Successfully added");
         user  .setFullName(input.getFullName());
         user .setEmail(input.getEmail());
         user .setPassword(passwordEncoder.encode(input.getPassword()));
-        user.setLocation(input.getLocation());
+        user.setLongitude(input.getLongitude());
+        user.setLatitude(input.getLatitude());
         user.setEnabled(false);
         Optional<Role> role = this.roleRepo.findByName("admin");
         if (role.isPresent()){

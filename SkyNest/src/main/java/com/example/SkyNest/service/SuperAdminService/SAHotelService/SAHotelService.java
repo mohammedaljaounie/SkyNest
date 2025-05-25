@@ -32,8 +32,6 @@ public class SAHotelService {
 
 
     public Map<String,String> createHotel(HotelRequest hotelInfo){
-        System.out.println(hotelInfo.getEmail());
-        System.out.println(hotelInfo.getDescription());
         Optional<User> user = this.userRepository.findByEmail(hotelInfo.getEmail());
         if (user.isPresent()){
             if (isAdmin(user.get())){
@@ -62,7 +60,9 @@ public class SAHotelService {
     private Hotel loadHotelToDB(HotelRequest hotelInfo, User user){
         Hotel hotel  = new Hotel();
         hotel.setName(hotelInfo.getName());
-        hotel.setLocation(hotelInfo.getLocation());
+        hotel.setAddress(hotelInfo.getAddress());
+        hotel.setLongitude(hotelInfo.getLongitude());
+        hotel.setLatitude(hotelInfo.getLatitude());
         hotel.setDescription(hotelInfo.getDescription());
         hotel.setAvgRating(0);
         hotel.setRatingCount(0);
@@ -83,8 +83,14 @@ public class SAHotelService {
             if (hotelInfo.getName()!=null) {
                 hotelUpdate.setName(hotelInfo.getName());
             }
-            if (hotelInfo.getLocation()!=null){
-                hotelUpdate.setLocation(hotelInfo.getLocation());
+            if (hotelInfo.getLongitude()!=0){
+                hotelUpdate.setLongitude(hotelInfo.getLongitude());
+            }
+            if (hotelInfo.getLatitude()!=0){
+                hotelUpdate.setLatitude(hotelInfo.getLatitude());
+            }
+            if (hotelInfo.getAddress()!=null){
+                hotelUpdate.setAddress(hotelInfo.getAddress());
             }
             if (hotelInfo.getDescription()!=null){
                 hotelUpdate.setDescription(hotelInfo.getDescription());
@@ -135,7 +141,9 @@ public class SAHotelService {
             for (int i = 0; i < this.hotelRepository.findAll().size(); i++) {
                 SAHotelResponse hotelResponse = new SAHotelResponse();
                 hotelResponse.setHotelName(hotelList.get(i).getName());
-                hotelResponse.setLocation(hotelList.get(i).getLocation());
+                hotelResponse.setAddress(hotelList.get(i).getAddress());
+                hotelResponse.setLongitude(hotelList.get(i).getLongitude());
+                hotelResponse.setLatitude(hotelList.get(i).getLatitude());
                 hotelResponse.setDescription(hotelList.get(i).getDescription());
                 hotelResponse.setAvgRating(hotelList.get(i).getAvgRating());
                 hotelResponse.setRatingCount(hotelList.get(i).getRatingCount());
@@ -152,7 +160,9 @@ public class SAHotelService {
         if (hotel.isPresent()){
             SAHotelResponse hotelResponse  = new SAHotelResponse();
             hotelResponse.setHotelName(hotel.get().getName());
-            hotelResponse.setLocation(hotel.get().getLocation());
+            hotelResponse.setAddress(hotel.get().getAddress());
+            hotelResponse.setLongitude(hotel.get().getLongitude());
+            hotelResponse.setLatitude(hotel.get().getLatitude());
             hotelResponse.setDescription(hotel.get().getDescription());
             hotelResponse.setAvgRating(hotel.get().getAvgRating());
             hotelResponse.setRatingCount(hotel.get().getRatingCount());
