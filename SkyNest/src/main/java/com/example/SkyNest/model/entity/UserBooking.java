@@ -15,6 +15,7 @@ public class UserBooking {
     private LocalDate bookingEndDate;
     private String bookingType;
     private int status;
+    private String listOfReservedRoomNumbers;
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
@@ -65,5 +66,13 @@ public class UserBooking {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getListOfReservedRoomNumbers() {
+        return listOfReservedRoomNumbers;
+    }
+
+    public void setListOfReservedRoomNumbers(String listOfReservedRoomNumbers) {
+        this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
     }
 }

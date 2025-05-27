@@ -86,7 +86,7 @@ return Map.of("message","Not Successfully added");
 
     public  Map<String,String>  adminRegister(RegisterUserDto input) {
         User user = new User();
-        user  .setFullName(input.getFullName());
+        user .setFullName(input.getFullName());
         user .setEmail(input.getEmail());
         user .setPassword(passwordEncoder.encode(input.getPassword()));
         user.setLongitude(input.getLongitude());
@@ -96,6 +96,14 @@ return Map.of("message","Not Successfully added");
         if (role.isPresent()){
             user.setRole(role.get());
             this.userRepository.save(user);
+            OtpToken otpToken = new OtpToken();
+            otpToken.setEmail(user.getEmail());
+            String otpCode = emailService.generateOtp();
+            otpToken.setCode(otpCode);
+            otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+            otpToken.setVerified(false);
+            this.otpRepository.save(otpToken);
+            this.emailService.sendOTP(user.getEmail(), otpCode);
             return Map.of("email",input.getEmail(),"message","Successfully added , check in your email to give code");
         }
         return Map.of("message","Not Successfully added");

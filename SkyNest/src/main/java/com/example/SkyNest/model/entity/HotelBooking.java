@@ -23,6 +23,7 @@ public class HotelBooking {
     @Min(value = 20)
     @Max(value = 100)
     private int paymentRatio;
+    private String listOfReservedRoomNumbers;
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
@@ -110,5 +111,13 @@ public class HotelBooking {
 
     public void setPaymentRatio(int paymentRatio) {
         this.paymentRatio = paymentRatio;
+    }
+
+    public String getListOfReservedRoomNumbers() {
+        return listOfReservedRoomNumbers;
+    }
+
+    public void setListOfReservedRoomNumbers(String listOfReservedRoomNumbers) {
+        this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
     }
 }
