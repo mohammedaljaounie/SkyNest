@@ -1,5 +1,6 @@
 package com.example.SkyNest.service.AdminService.AHotelService;
 
+import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.dto.RoomRequest;
 import com.example.SkyNest.dto.RoomResponse;
 import com.example.SkyNest.dto.RoomUpdateRequest;
@@ -10,14 +11,12 @@ import com.example.SkyNest.model.repository.HotelRepository;
 import com.example.SkyNest.model.repository.RoomImageRepository;
 import com.example.SkyNest.model.repository.RoomRepository;
 import com.example.SkyNest.service.authService.JwtService;
-import com.sun.source.doctree.SeeTree;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -63,7 +62,8 @@ public class ARoomService {
 
         Room room = new Room();
         room.setRoomType(roomInfo.getRoomType());
-        room.setPrice(roomInfo.getPrice());
+        room.setBasePrice(roomInfo.getPrice());
+        room.setCurrentPrice(roomInfo.getPrice());
         room.setRoomCount(rooms+1);
         room.setStatus(false);
         room.setHotel(hotel.get());
@@ -171,19 +171,28 @@ public class ARoomService {
         return getRoomResponses(rooms);
     }
 
-    private static List<RoomResponse> getRoomResponses(List<Room> rooms) {
+    private  List<RoomResponse> getRoomResponses(List<Room> rooms) {
         List<RoomResponse> roomResponseList = new ArrayList<>();
+        List<ImageDTO> imageDTOList  = new ArrayList<>();
         for (Room room : rooms){
-
+            List<RoomImage> roomImages  = roomImageRepository.findByRoomId(room.getId());
             RoomResponse roomResponse = new RoomResponse();
             roomResponse.setId(room.getId());
-            roomResponse.setPrice(room.getPrice());
+            roomResponse.setBasePrice(room.getBasePrice());
+            roomResponse.setCurrentPrice(room.getCurrentPrice());
             roomResponse.setRoom_count(room.getRoomCount());
             roomResponse.setRoom_type(room.getRoomType());
             roomResponse.setStatus(room.isStatus());
             roomResponse.setHotelName(room.getHotel().getName());
             roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
             roomResponseList.add(roomResponse);
+            for (int i = 0; i <roomImages.size() ; i++) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(roomImages.get(i).getId());
+                imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+roomImages.get(i).getName());
+                imageDTOList.add(imageDTO);
+            }
+            roomResponse.setImageDTOList(imageDTOList);
         }
         return roomResponseList;
     }
@@ -201,7 +210,7 @@ public class ARoomService {
             return Map.of("message","I'm sorry this room is not found in you hotel");
         }
         Room roomUpdate = room.get();
-        roomUpdate.setPrice(roomRequest.getPrice());
+        roomUpdate.setBasePrice(roomRequest.getPrice());
         roomUpdate.setRoomCount(roomRequest.getRoom_count());
         roomUpdate.setRoomType(roomRequest.getRoom_type());
         roomUpdate.setStatus(roomRequest.isStatus());

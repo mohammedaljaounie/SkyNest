@@ -11,7 +11,8 @@ public class Room {
     private Long id;
     private String roomType;
     private int roomCount;
-    private double price;
+    private double basePrice;
+    private double currentPrice;
     private boolean status;
 
     @ManyToOne
@@ -43,12 +44,12 @@ public class Room {
         this.roomCount = roomCount;
     }
 
-    public double getPrice() {
-        return price;
+    public double getBasePrice() {
+        return basePrice;
     }
 
-    public void setPrice(double price) {
-        this.price = price;
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
     }
 
     public boolean isStatus() {
@@ -65,5 +66,13 @@ public class Room {
 
     public void setHotel(Hotel hotel) {
         this.hotel = hotel;
+    }
+
+    public double getCurrentPrice() {
+        return currentPrice;
+    }
+
+    public void setCurrentPrice(double currentPrice) {
+        this.currentPrice = currentPrice;
     }
 }

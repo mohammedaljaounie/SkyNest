@@ -26,12 +26,12 @@ public class ARoomController {
     @Autowired
     private ARoomService aRoomService;
 
-    @PostMapping("/create/{id}")
+    @PostMapping("/create/{hotelId}")
     public ResponseEntity<Map<String,String>> createRoom(
-                                                @PathVariable Long id
+                                                @PathVariable Long hotelId
                                          , @RequestBody RoomRequest roomRequest){
 
-        Map<String,String> message = this.aRoomService.createRoom(id, roomRequest);
+        Map<String,String> message = this.aRoomService.createRoom(hotelId, roomRequest);
 
         if (message.get("message").equals("Successfully Room Added")){
             return ResponseEntity.ok(

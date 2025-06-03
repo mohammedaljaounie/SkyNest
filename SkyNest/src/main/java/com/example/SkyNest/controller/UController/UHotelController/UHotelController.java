@@ -123,6 +123,19 @@ public class UHotelController {
     }
 
 
+    // todo :booking cansel
+
+
+
+
+
+
+
+
+
+
+
+
     @GetMapping("/viewTotalBalance")
     public ResponseEntity<?> viewTotalBalance(){
         double totalBalance = this.uHotelService.viewTotalBalance();
@@ -134,6 +147,14 @@ public class UHotelController {
                 .body(Map.of("message",
                         "you don't have a balance in your bank account"));
     }
+
+
+
+
+
+
+
+
 
 
 

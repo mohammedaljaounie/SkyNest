@@ -66,6 +66,7 @@ public class AuthenticationService {
         user .setPassword(passwordEncoder.encode(input.getPassword()));
         user.setLongitude(input.getLongitude());
         user.setLatitude(input.getLatitude());
+        user.setLevel(0);
         user.setEnabled(false);
         Optional<Role> role = this.roleRepo.findByName("user");
         if (role.isPresent()){
@@ -91,6 +92,7 @@ return Map.of("message","Not Successfully added");
         user .setPassword(passwordEncoder.encode(input.getPassword()));
         user.setLongitude(input.getLongitude());
         user.setLatitude(input.getLatitude());
+        user.setLevel(0);
         user.setEnabled(false);
         Optional<Role> role = this.roleRepo.findByName("admin");
         if (role.isPresent()){
@@ -109,38 +111,43 @@ return Map.of("message","Not Successfully added");
         return Map.of("message","Not Successfully added");
     }
 
+    public LoginResponse login(LoginUserDto loginUserDto) {
+        Optional<User> user = this.userRepository.findByEmail(loginUserDto.getEmail());
+
+        if (user.isPresent()) {
+
+            if (passwordEncoder.matches(loginUserDto.getPassword(), user.get().getPassword())) {
+//               String otpCode = emailService.generateOtp();
+//               OtpToken otpToken = new OtpToken();
+//               otpToken.setEmail(user.get().getEmail());
+//               otpToken.setCode(otpCode);
+//               otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+//               otpToken.setVerified(false);
+//               otpRepository.save(otpToken);
+//               emailService.sendOTP(user.get().getEmail(),otpCode);
 
 
-    public Map<String,String> login(LoginUserDto loginUserDto) {
-       Optional<User> user = this.userRepository.findByEmail(loginUserDto.getEmail());
+                //User authenticatedUser = authenticationService.authenticate(loginUserDto);
+                String jwtToken = jwtService.generateToken(user.get());
+                LoginResponse loginResponse = new LoginResponse();
+                loginResponse.setToken(jwtToken);
+                loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
-       if (user.isPresent()){
+//               return Map.of("email",
+//                       user.get().getEmail(),
+//                       "message",
+//                       "Successfully Matches , look to your email to give code"
+//               );
+//           }
+//           return Map.of("message","Not Successfully Matches , your password it wrong");
+                return loginResponse;
+            }
+            return null;
+        }
 
-           if (passwordEncoder.matches(loginUserDto.getPassword(), user.get().getPassword())){
-               String otpCode = emailService.generateOtp();
-               OtpToken otpToken = new OtpToken();
-               otpToken.setEmail(user.get().getEmail());
-               otpToken.setCode(otpCode);
-               otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
-               otpToken.setVerified(false);
-               otpRepository.save(otpToken);
+            return null;
 
-
-               emailService.sendOTP(user.get().getEmail(),otpCode);
-
-               return Map.of("email",
-                       user.get().getEmail(),
-                       "message",
-                       "Successfully Matches , look to your email to give code"
-               );
-           }
-           return Map.of("message","Not Successfully Matches , your password it wrong");
-
-       }
-      return  Map.of("message","this email is not found");
-
-    }
-
+        }
     // TODO : start FORGET PASSWORD
 
     public Map<String,String> rememberPassword(String email){

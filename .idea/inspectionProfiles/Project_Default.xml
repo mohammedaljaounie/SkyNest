@@ -4,5 +4,12 @@
     <inspection_tool class="ExtractMethodRecommender" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="maxParameters" value="1" />
     </inspection_tool>
+    <inspection_tool class="SizeReplaceableByIsEmpty" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredTypes">
+        <set>
+          <option value="java.util.List" />
+        </set>
+      </option>
+    </inspection_tool>
   </profile>
 </component>

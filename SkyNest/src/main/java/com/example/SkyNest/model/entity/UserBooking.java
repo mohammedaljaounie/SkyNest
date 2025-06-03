@@ -16,6 +16,7 @@ public class UserBooking {
     private String bookingType;
     private int status;
     private String listOfReservedRoomNumbers;
+    private double  totalAmount;
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
@@ -74,5 +75,13 @@ public class UserBooking {
 
     public void setListOfReservedRoomNumbers(String listOfReservedRoomNumbers) {
         this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
     }
 }

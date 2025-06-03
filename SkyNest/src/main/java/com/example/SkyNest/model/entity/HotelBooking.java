@@ -4,8 +4,10 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
+import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "hotel_booking")
@@ -23,7 +25,13 @@ public class HotelBooking {
     @Min(value = 20)
     @Max(value = 100)
     private int paymentRatio;
-    private String listOfReservedRoomNumbers;
+    private List<Long> listOfReservedRoomNumbers;
+
+    private double totalAmount;
+    private double amountPaid;
+
+
+
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
@@ -113,11 +121,27 @@ public class HotelBooking {
         this.paymentRatio = paymentRatio;
     }
 
-    public String getListOfReservedRoomNumbers() {
+    public List<Long> getListOfReservedRoomNumbers() {
         return listOfReservedRoomNumbers;
     }
 
-    public void setListOfReservedRoomNumbers(String listOfReservedRoomNumbers) {
+    public void setListOfReservedRoomNumbers(List<Long> listOfReservedRoomNumbers) {
         this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
+    }
+
+    public double getTotalAmount() {
+        return totalAmount;
+    }
+
+    public void setTotalAmount(double totalAmount) {
+        this.totalAmount = totalAmount;
+    }
+
+    public double getAmountPaid() {
+        return amountPaid;
+    }
+
+    public void setAmountPaid(double amountPaid) {
+        this.amountPaid = amountPaid;
     }
 }

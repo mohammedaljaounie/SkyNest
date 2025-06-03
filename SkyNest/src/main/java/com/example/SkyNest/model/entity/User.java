@@ -40,6 +40,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean enabled;
 
+    private int level;
+
     @ManyToOne
     @JoinColumn(name = "role_id",referencedColumnName = "id")
     private Role role;
@@ -133,5 +135,14 @@ public class User implements UserDetails {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+
+    public int getLevel() {
+        return level;
+    }
+
+    public void setLevel(int level) {
+        this.level = level;
     }
 }

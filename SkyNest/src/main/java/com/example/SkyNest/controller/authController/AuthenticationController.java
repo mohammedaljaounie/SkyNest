@@ -79,21 +79,23 @@ public class AuthenticationController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String,String>> authenticate(@RequestBody LoginUserDto loginUserDto) {
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginUserDto loginUserDto) {
 //        User authenticatedUser = authenticationService.authenticate(loginUserDto);
 //        String jwtToken = jwtService.generateToken(authenticatedUser);
 //        LoginResponse loginResponse = new LoginResponse();
 //        loginResponse.setToken(jwtToken);
 //        loginResponse.setExpiresIn(jwtService.getExpirationTime());
 
-        Map<String,String> message = authenticationService.login(loginUserDto);
-        if (message.get("message").equals("Successfully Matches , look to your email to give code")){
-            return ResponseEntity.ok(message);
-        }
+       LoginResponse loginResponse = authenticationService.login(loginUserDto);
+//        if (message.get("message").equals("Successfully Matches , look to your email to give code")){
+//            return ResponseEntity.ok(message);
+//        }
 //        return ResponseEntity.ok(authenticationService.login(loginUserDto));
 
-        return ResponseEntity.status(304).body(message);
-
+        if (loginResponse!=null){
+            return ResponseEntity.ok(loginResponse);
+        }
+        return ResponseEntity.status(304).body(null);
     }
 
     @PostMapping("/verify-otp")
@@ -106,12 +108,17 @@ public class AuthenticationController {
             loginResponse.setExpiresIn(jwtService.getExpirationTime());
             return ResponseEntity.ok(loginResponse);
         }
-       return ResponseEntity.status(304).body(Map.of("message",jwtToken));
+       return ResponseEntity.status(400).body(Map.of("message",jwtToken));
     }
 
 
     @PostMapping("/remember-password")
     public ResponseEntity<Map<String,String>> rememberPassword(@RequestParam String email){
+
+        Map<String,String> message = this.authenticationService.rememberPassword(email);
+        if (message.get("message").equals("this email is wrong")){
+            return ResponseEntity.status(400).body(message);
+        }
         return ResponseEntity.ok(authenticationService.rememberPassword(email));
     }
 
