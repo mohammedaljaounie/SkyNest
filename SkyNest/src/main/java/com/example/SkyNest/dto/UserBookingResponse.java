@@ -7,6 +7,7 @@ public class UserBookingResponse {
     private LocalDate bookingStartDate;
     private LocalDate bookingEndDate;
     private String bookingType;
+    private String listOfReservedRoomNumbers;
 
 
     public Long getId() {
@@ -41,4 +42,11 @@ public class UserBookingResponse {
         this.bookingType = bookingType;
     }
 
+    public String getListOfReservedRoomNumbers() {
+        return listOfReservedRoomNumbers;
+    }
+
+    public void setListOfReservedRoomNumbers(String listOfReservedRoomNumbers) {
+        this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
+    }
 }

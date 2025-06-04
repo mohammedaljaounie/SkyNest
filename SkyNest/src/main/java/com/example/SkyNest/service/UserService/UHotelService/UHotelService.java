@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -37,6 +38,8 @@ public class UHotelService {
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
+
+    private static  String textOfRoom ="";
 
     public List<HotelResponse> showAllHotel(){
 
@@ -198,7 +201,7 @@ public class UHotelService {
         double amountToBePaid  = roomPrice*hotelRoomRequest.getPaymentRatio()/100;
         double totalUserBalance = userCard.get().getTotalBalance();
         if (totalUserBalance<amountToBePaid){
-            savePublicBooking( hotelRoomRequest.getLaunchDate(), hotelRoomRequest.getDepartureDate(),user.get(),-1,null,0);
+            savePublicBooking( hotelRoomRequest.getLaunchDate(), hotelRoomRequest.getDepartureDate(),user.get(),-1,null,0,null);
         }
         int roomNumber = room.get().getRoomCount();
         String reservedRoomNumber = ""+roomNumber;
@@ -217,9 +220,9 @@ public class UHotelService {
         hotelBooking.setListOfReservedRoomNumbers(list);
         hotelBooking.setTotalAmount(roomPrice);
         hotelBooking.setAmountPaid(amountToBePaid);
-        this.hotelBookingRepository.save(hotelBooking);
+        HotelBooking hotelBooking1 = this.hotelBookingRepository.save(hotelBooking);
         savePublicBooking(hotelRoomRequest.getLaunchDate(),hotelRoomRequest.getDepartureDate(),
-        user.get(),1,reservedRoomNumber,roomPrice);
+        user.get(),1,reservedRoomNumber,roomPrice,hotelBooking1);
         return Map.of("message",
                 "your reservation has been successfully completed.\n" +
                         "wr hope you have a comfortable stay",
@@ -268,20 +271,19 @@ public class UHotelService {
                     hotelBookingRequest.getLaunchDate(),
                     hotelBookingRequest.getDepartureDate(),
                     user.get(),-1,null
-            ,totalBookingCost);
+                    ,totalBookingCost,null);
             return Map.of("message",
                     "I'm sorry , you don't have enough money to pay");
         }
         updateUserCard(userCard.get(), amountToBePaid);
         updateHotelCard(hotelCard.get(), amountToBePaid);
         List<Long> listOfReservedRoomNumbers = updateRoomStatus(allRoomInTheHotel,hotelBookingRequest.getNumberOfRoom());
-        saveBooking(hotelBookingRequest,user.get(),hotel.get(),listOfReservedRoomNumbers,totalBookingCost,amountToBePaid);
-        String listRoomBooking = convertToString(listOfReservedRoomNumbers);
+        HotelBooking hotelBooking =saveBooking(hotelBookingRequest,user.get(),hotel.get(),listOfReservedRoomNumbers,totalBookingCost,amountToBePaid);
         savePublicBooking(
                 hotelBookingRequest.getLaunchDate(),
                 hotelBookingRequest.getDepartureDate(),
                 user.get(),1
-        ,listRoomBooking,totalBookingCost);
+        ,textOfRoom,totalBookingCost,hotelBooking);
         return Map.of("message",
                 "your reservation has been successfully completed.\n" +
                         "wr hope you have a comfortable stay",
@@ -306,22 +308,18 @@ public class UHotelService {
         return totalCost;
     }
     private  List<Long> updateRoomStatus(List<Room> rooms ,int numberOfRoom){
-       String listRoomBooking = "";
+        textOfRoom ="";
        List<Long> listOfRoomBooking  = new ArrayList<>();
         for (int i = 0; i <numberOfRoom ; i++) {
             Room room = rooms.get(i);
             room.setStatus(true);
             listOfRoomBooking.add(room.getId());
-            listRoomBooking = listRoomBooking+rooms.get(i).getRoomCount();
+            textOfRoom = textOfRoom+rooms.get(i).getRoomCount();
             if (i<numberOfRoom-1)
-                listRoomBooking = listRoomBooking+"-";
+                textOfRoom = textOfRoom+"-";
             this.roomRepository.save(room);
         }
-        returnListOfRoom(listRoomBooking);
         return listOfRoomBooking;
-    }
-    private String returnListOfRoom(String listOfRoom){
-        return listOfRoom;
     }
     private void updateUserCard(UserCard userCard,double amountToBePaid){
         userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
@@ -331,7 +329,7 @@ public class UHotelService {
         hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
         this.hotelCardRepository.save(hotelCard);
     }
-    private void saveBooking(HotelBookingRequest hotelBookingRequest,User user,Hotel hotel,List<Long> listOfReservedRoomNumbers
+    private HotelBooking saveBooking(HotelBookingRequest hotelBookingRequest,User user,Hotel hotel,List<Long> listOfReservedRoomNumbers
            ,double totalAmount,double amountPaid){
         HotelBooking hotelBooking = new HotelBooking();
         hotelBooking.setUser(user);
@@ -346,9 +344,10 @@ public class UHotelService {
         hotelBooking.setListOfReservedRoomNumbers(listOfReservedRoomNumbers);
         hotelBooking.setTotalAmount(totalAmount);
         hotelBooking.setAmountPaid(amountPaid);
-        this.hotelBookingRepository.save(hotelBooking);
+       return this.hotelBookingRepository.save(hotelBooking);
     }
-    private void savePublicBooking(LocalDate LaunchDate, LocalDate DepartureDate, User user,int status,String listOfReservedRoomNumbers,double totalAmount){
+    private void savePublicBooking(LocalDate LaunchDate, LocalDate DepartureDate, User user,int status,String listOfReservedRoomNumbers,double totalAmount,
+                                   HotelBooking hotelBooking){
         UserBooking userBooking = new UserBooking();
         userBooking.setBookingType("Hotel Reservation");
         userBooking.setBookingStartDate(LaunchDate);
@@ -357,20 +356,8 @@ public class UHotelService {
         userBooking.setUser(user);
         userBooking.setListOfReservedRoomNumbers(listOfReservedRoomNumbers);
         userBooking.setTotalAmount(totalAmount);
+        userBooking.setHotelBooking(hotelBooking);
         this.userBookingRepository.save(userBooking);
-    }
-
-    private String convertToString(List<Long> roomList){
-
-        String listRoomBooking  = "";
-        for (int i = 0; i <roomList.size(); i++) {
-
-            listRoomBooking = listRoomBooking + this.roomRepository.findById(roomList.get(i));
-            if (i<roomList.size()-1)
-                listRoomBooking += "-";
-        }
-
-        return listRoomBooking;
     }
 
     public List<UserBookingResponse> viewActiveReservation(){
@@ -389,6 +376,7 @@ public class UHotelService {
                 userBookingResponse.setBookingType(userBooking.getBookingType());
                 userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
                 userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
                 bookingResponses.add(userBookingResponse);
             }
         }
@@ -409,6 +397,7 @@ return bookingResponses;
                 userBookingResponse.setBookingType(userBooking.getBookingType());
                 userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
                 userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
                 bookingResponses.add(userBookingResponse);
             }
         }
@@ -429,6 +418,7 @@ return bookingResponses;
                 userBookingResponse.setBookingType(userBooking.getBookingType());
                 userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
                 userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
+                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
                 bookingResponses.add(userBookingResponse);
             }
         }
@@ -480,19 +470,97 @@ return bookingResponses;
 
     }
 
-    public void bookingCansel(Long booking_id){
 
-        Long userId = 1L;
-        Optional<HotelBooking>  hotelBooking = this.hotelBookingRepository.
-                findByIdAndUserId(booking_id,userId);
+    public Map<String,String> bookingCansel(Long userBookingId){
+
+        String jwt = request.getHeader("Authorization");
+        String token =jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty())
+            return Map.of(
+                    "message",
+                    "you can't do any thing , because you isn't aut"
+            );
+
+        Optional<UserBooking> userBooking = this.userBookingRepository.findByIdAndUserId(userBookingId,userId);
+
+        if (userBooking.isEmpty())
+            return Map.of("message"
+            ,"this booking is not found");
+
+        if ((userBooking.get().getStatus()==-1))
+          return Map.of("message",
+                  "This reservation is not acceptable in principle, meaning that the cancellation process cannot be completed. ");
+        if(userBooking.get().getBookingStartDate().isBefore(LocalDate.now())){
+            return Map.of("message",
+                    "you can't cansel this booking because you led in date");
+        }
+
+        Optional<HotelBooking> hotelBooking = this.hotelBookingRepository.findById(userBooking.get().getHotelBooking().getId());
+
+        if (hotelBooking.isEmpty())
+            return Map.of("message",
+                    "This hotel is not found in our application now");
+
+            List<Room> rooms = this.roomRepository.findAllById(hotelBooking.get().getListOfReservedRoomNumbers());
+
+        for (Room room : rooms) {
+            room.setStatus(false);
+            System.out.println(room.getId());
+            this.roomRepository.save(room);
+        }
+
+        // todo : update userBooking && hotelBooking
+        UserBooking userBookingUpdate = userBooking.get();
+        userBookingUpdate.setStatus(0);
+        this.userBookingRepository.save(userBookingUpdate);
+
+        HotelBooking hotelBookingUpdate = hotelBooking.get();
+        hotelBookingUpdate.setStatus(false);
+        this.hotelBookingRepository.save(hotelBookingUpdate);
 
 
 
+        // todo : update userCard && hotelCard
+        double cancellationTax = (hotelBooking.get().getTotalAmount())*0.05;
+        double amountPaid = hotelBooking.get().getAmountPaid();
+        updateModifyAmounts(hotelBooking.get().getHotel().getId(),
+                userId,(amountPaid-cancellationTax));
+        return Map.of(
 
-
-
+                "message",
+                "Successfully Canceled"
+        );
 
     }
+
+
+    private void updateModifyAmounts(Long hotelId,Long userId,double cancellationTax){
+
+        Optional<HotelCard> hotelCardOptional = this.hotelCardRepository.findByHotelId(hotelId);
+        if (hotelCardOptional.isEmpty())
+            return;
+        else {
+
+            Optional<UserCard> userCardOptional  = this.userCardRepository.findByUserId(userId);
+            if (userCardOptional.isEmpty())
+                return;
+            HotelCard hotelCard = hotelCardOptional.get();
+            hotelCard.setTotalBalance((hotelCard.getTotalBalance()-cancellationTax));
+            this.hotelCardRepository.save(hotelCard);
+
+
+            UserCard userCard = userCardOptional.get();
+            userCard.setTotalBalance(userCard.getTotalBalance()+cancellationTax);
+            this.userCardRepository.save(userCard);
+        }
+
+    }
+
+
+
+
 
 
     

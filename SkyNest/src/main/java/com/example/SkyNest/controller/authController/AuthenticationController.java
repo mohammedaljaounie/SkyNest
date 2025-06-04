@@ -62,20 +62,6 @@ public class AuthenticationController {
         return ResponseEntity.status(403).body(listOfMessage);
     }
 
-    @PostMapping("/admin-register")
-    public ResponseEntity<Map<String,String>> adminRegister(@RequestBody RegisterUserDto registerUserDto) {
-        // User registeredUser = authenticationService.signup(registerUserDto);
-        //String jwtToken = jwtService.generateToken(registeredUser);
-//        LoginResponse loginResponse = new LoginResponse();
-//        loginResponse.setToken(jwtToken);
-//        loginResponse.setExpiresIn(jwtService.getExpirationTime());
-//        return ResponseEntity.ok(loginResponse);
-        Map<String ,String > message = authenticationService.adminRegister(registerUserDto);
-        if (!message.get("message").equals("Not Successfully added")){
-            return ResponseEntity.ok(message);
-        }
-        return ResponseEntity.status(304).body(message);
-    }
 
 
     @PostMapping("/login")

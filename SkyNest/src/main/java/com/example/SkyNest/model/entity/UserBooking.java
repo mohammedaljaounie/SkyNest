@@ -21,6 +21,10 @@ public class UserBooking {
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
 
+    @OneToOne
+    @JoinColumn(name = "hotelBooking_id",referencedColumnName = "id")
+    private HotelBooking hotelBooking;
+
     public Long getId() {
         return id;
     }
@@ -83,5 +87,13 @@ public class UserBooking {
 
     public void setTotalAmount(double totalAmount) {
         this.totalAmount = totalAmount;
+    }
+
+    public HotelBooking getHotelBooking() {
+        return hotelBooking;
+    }
+
+    public void setHotelBooking(HotelBooking hotelBooking) {
+        this.hotelBooking = hotelBooking;
     }
 }

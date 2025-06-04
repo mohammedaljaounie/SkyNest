@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
@@ -231,7 +232,9 @@ return Map.of("message","Not Successfully added");
                 user.get().setEnabled(true);
                 userRepository.save(user.get());
 
-                if (userCardRepository.findByUserId(user.get().getId()).isPresent()){
+                Optional<UserCard> userCard = this.userCardRepository.findByUserId(user.get().getId());
+
+                if (userCard.isPresent()){
                     return jwtService.generateToken(user.get());
                 }else {
 
@@ -249,7 +252,7 @@ return Map.of("message","Not Successfully added");
         UserCard userCard = new UserCard();
         userCard.setUser(user);
         userCard.setTotalBalance(0);
-        userCardRepository.save(userCard);
+        this.userCardRepository.save(userCard);
     }
 
 

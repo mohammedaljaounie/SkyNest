@@ -149,7 +149,17 @@ public class UHotelController {
     }
 
 
+    @PostMapping("/bookingCansel/{userBookingId}")
+    public ResponseEntity<Map<String,String>> bookingCancel(@PathVariable Long userBookingId){
 
+        Map<String,String> message = this.uHotelService.bookingCansel(userBookingId);
+
+       if (!message.get("message").equals("Successfully Canceled"))
+            return ResponseEntity.status(400).body(message);
+
+      else
+            return ResponseEntity.ok(message);
+    }
 
 
 
