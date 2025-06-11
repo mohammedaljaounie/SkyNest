@@ -123,18 +123,6 @@ public class UHotelController {
     }
 
 
-    // todo :booking cansel
-
-
-
-
-
-
-
-
-
-
-
 
     @GetMapping("/viewTotalBalance")
     public ResponseEntity<?> viewTotalBalance(){
@@ -149,6 +137,7 @@ public class UHotelController {
     }
 
 
+    // todo :booking cansel
     @PostMapping("/bookingCansel/{userBookingId}")
     public ResponseEntity<Map<String,String>> bookingCancel(@PathVariable Long userBookingId){
 
@@ -163,9 +152,30 @@ public class UHotelController {
 
 
 
+    @GetMapping("/filterByRating")
+    public ResponseEntity<List<HotelResponse>> filterHotelByRating(){
 
+        List<HotelResponse> hotelResponseList = this.uHotelService.filterHotelByRating();
 
+        if (hotelResponseList==null||hotelResponseList.isEmpty()){
+            return ResponseEntity.status(400).body(null);
+        }
 
+        return ResponseEntity.ok().body(hotelResponseList);
+    }
+
+    @PostMapping("hotelEvaluation/{hotelId}")
+    public ResponseEntity<?> hotelEvaluation(@PathVariable Long hotelId,
+                                             @RequestParam int rating,
+                                             @RequestParam String comment)
+    {
+
+        Map<String ,String> message = this.uHotelService.hotelEvaluation(hotelId, rating, comment);
+        if (message.get("message").equals("Successfully Rating")){
+            return ResponseEntity.ok().body(message);
+        }
+        return ResponseEntity.status(400).body(message);
+    }
 
 
 

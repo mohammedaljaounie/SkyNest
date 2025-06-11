@@ -7,8 +7,8 @@ import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
@@ -35,6 +35,8 @@ public class UHotelService {
     private HotelBookingRepository hotelBookingRepository;
     @Autowired
     private UserBookingRepository userBookingRepository;
+    @Autowired
+    private  HotelRatingRepository hotelRatingRepository;
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
@@ -558,10 +560,127 @@ return bookingResponses;
 
     }
 
+    public List<HotelResponse> filterHotelByRating(){
+        List<Hotel> hotelList = this.hotelRepository.filterHotelByRating();
+
+        if (hotelList.isEmpty())
+            return null;
+        List<HotelResponse> hotelResponseList = new ArrayList<>();
+        for (int i = 0; i <hotelList.size() ; i++) {
+
+            Hotel hotel = hotelList.get(i);
+            HotelResponse hotelResponse  = new HotelResponse();
+            hotelResponse.setId(hotel.getId());
+            hotelResponse.setName(hotel.getName());
+            hotelResponse.setDescription(hotel.getDescription());
+            hotelResponse.setAvgRating(hotel.getAvgRating());
+            hotelResponse.setRatingCount(hotel.getRatingCount());
+            hotelResponse.setAddress(hotel.getAddress());
+
+            // todo : this array to put hotel image
+            List<ImageDTO> imageDTOList = new ArrayList<>();
+            for (int j = 0; j <hotel.getHotelImageList().size() ; j++) {
+
+                HotelImage hotelImage = hotel.getHotelImageList().get(j);
+
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(hotelImage.getId());
+                imageDTO.setImageUrl("http://localhost:8080/user/hotel/hotelImage/"+hotelImage.getName());
+                imageDTOList.add(imageDTO);
+            }
+
+            hotelResponse.setImageDTOList(imageDTOList);
+            hotelResponseList.add(hotelResponse);
+
+        }
+
+        return hotelResponseList;
+    }
+
+
+
+    @Transactional
+    public Map<String ,String> hotelEvaluation(Long hotelId,int rating,String comment){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+
+        Optional<User> user = this.userRepository.findById(userId);
+        if (user.isEmpty())
+            return Map.of("message",
+                    "Sorry , your account is not found in our app");
+
+        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
+        if (hotel.isEmpty())
+            return Map.of("message",
+                    "Sorry , this hotel is not found in our system");
+
+        Optional<HotelRating> hotelRating  = this.hotelRatingRepository.findByUserIdAndHotelId(userId,hotelId);
+
+        if (hotelRating.isEmpty()){
+        HotelRating newHotelRating = new HotelRating();
+        newHotelRating.setUser(user.get());
+        newHotelRating.setRating(rating);
+        newHotelRating.setComment(comment);
+        newHotelRating.setHotel(hotel.get());
+        this.hotelRatingRepository.save(newHotelRating);
+        int sumRating  = this.hotelRatingRepository.sumForAllRating(hotelId);
+         boolean isUpdated = updateHotelRating(hotelId, sumRating,true);
+        if (isUpdated)
+         return Map.of("message",
+                "Successfully Rating");
+
+       return Map.of("message",
+                    "Not Successfully Rating");
+
+        }else {
+            HotelRating  hotelRating1 = hotelRating.get();
+            hotelRating1.setRating(rating);
+            hotelRating1.setComment(comment);
+            this.hotelRatingRepository.save(hotelRating1);
+            int sumRating = this.hotelRatingRepository.sumForAllRating(hotelId);
+            boolean isUpdated = updateHotelRating(hotel.get().getId(),sumRating,false);
+            if (isUpdated)
+            return Map.of("message",
+                        "Successfully Rating");
+
+            return Map.of("message",
+                    "Not Successfully Rating");
+        }
+
+
+    }
+
+    private  boolean updateHotelRating(Long hotelId,double sumRating,boolean isNew){
+        Optional<Hotel> hotel  =  this.hotelRepository.findById(hotelId);
+        if (hotel.isEmpty())
+            return false;
+        Hotel updatedHotel = hotel.get();
+        if (isNew) {
+            updatedHotel.setRatingCount(updatedHotel.getRatingCount() + 1);
+        }
+        if (sumRating==0){
+            updatedHotel.setAvgRating(sumRating);
+        }else {
+            int ratingCount = updatedHotel.getRatingCount();
+            if (ratingCount==0)
+                updatedHotel.setAvgRating(0);
+            else {
+                updatedHotel.setAvgRating(sumRating /ratingCount);
+            }
+        }
+        this.hotelRepository.save(updatedHotel);
+        return true;
+
+    }
 
 
 
 
 
-    
+
+
+
+
+
 }

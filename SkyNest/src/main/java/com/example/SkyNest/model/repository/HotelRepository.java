@@ -37,4 +37,7 @@ public interface HotelRepository extends JpaRepository<Hotel,Long>{
             @Param("limit") int limit);
 
 
+    @Query(value = "select h from Hotel h order by h.avgRating")
+    List<Hotel> filterHotelByRating();
+
 }
