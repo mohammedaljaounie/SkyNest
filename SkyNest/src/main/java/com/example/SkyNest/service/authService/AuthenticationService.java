@@ -60,6 +60,7 @@ public class AuthenticationService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional
     public Map<String,String> register(RegisterUserDto input) {
         User user = new User();
         user  .setFullName(input.getFullName());

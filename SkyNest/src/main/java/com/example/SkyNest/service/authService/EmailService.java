@@ -12,6 +12,7 @@ public class EmailService {
 
     public void sendOTP(String toEmail,String otp){
         SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("mohammedsamiraljaouny@gmail.com");
         message.setTo(toEmail);
         message.setSubject("SkyNest");
         message.setText("SkyNest\n" +
