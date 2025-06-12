@@ -541,8 +541,8 @@ return bookingResponses;
     private void updateModifyAmounts(Long hotelId,Long userId,double cancellationTax){
 
         Optional<HotelCard> hotelCardOptional = this.hotelCardRepository.findByHotelId(hotelId);
-        if (hotelCardOptional.isEmpty())
-            return;
+        if (hotelCardOptional.isEmpty()) {
+        }
         else {
 
             Optional<UserCard> userCardOptional  = this.userCardRepository.findByUserId(userId);
@@ -615,6 +615,14 @@ return bookingResponses;
             return Map.of("message",
                     "Sorry , this hotel is not found in our system");
 
+        System.out.println(userId);
+        System.out.println(hotelId);
+
+        if (!isReservation(userId,hotelId)){
+            return Map.of("message",
+                    "Sorry , you can't rate this hotel now because you may not have booked or the review time is not right");
+        }
+
         Optional<HotelRating> hotelRating  = this.hotelRatingRepository.findByUserIdAndHotelId(userId,hotelId);
 
         if (hotelRating.isEmpty()){
@@ -674,13 +682,27 @@ return bookingResponses;
 
     }
 
+    private boolean isReservation(Long userId , Long hotelId){
+
+        List<HotelBooking> hotelBookingList   = this.
+                hotelBookingRepository.findByUserIdAndHotelId(userId, hotelId);
+
+       if (hotelBookingList.isEmpty()){
+           return false;
+       }else {
+
+           for (HotelBooking hotelBooking : hotelBookingList) {
+
+               if (hotelBooking.isStatus()&&
+                   !LocalDate.now().isBefore(hotelBooking.getLaunchDate())){
+                   return true;
+               }
+           }
+           return false;
+
+       }
 
 
 
-
-
-
-
-
-
+    }
 }
