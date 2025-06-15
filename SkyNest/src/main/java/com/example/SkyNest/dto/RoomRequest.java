@@ -2,8 +2,6 @@ package com.example.SkyNest.dto;
 
 public class RoomRequest {
 
-
-
     private String roomType;
 
     private double price;

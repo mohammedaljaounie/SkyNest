@@ -118,6 +118,9 @@ return Map.of("message","Not Successfully added");
 
         if (user.isPresent()) {
 
+            if(!user.get().isEnabled()){
+                return null;
+            }
             if (passwordEncoder.matches(loginUserDto.getPassword(), user.get().getPassword())) {
 //               String otpCode = emailService.generateOtp();
 //               OtpToken otpToken = new OtpToken();

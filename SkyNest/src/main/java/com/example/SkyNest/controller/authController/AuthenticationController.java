@@ -81,7 +81,7 @@ public class AuthenticationController {
         if (loginResponse!=null){
             return ResponseEntity.ok(loginResponse);
         }
-        return ResponseEntity.status(304).body(null);
+        return ResponseEntity.status(400).body(null);
     }
 
     @PostMapping("/verify-otp")

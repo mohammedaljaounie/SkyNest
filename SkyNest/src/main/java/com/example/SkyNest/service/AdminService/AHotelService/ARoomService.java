@@ -7,14 +7,19 @@ import com.example.SkyNest.dto.RoomUpdateRequest;
 import com.example.SkyNest.model.entity.Hotel;
 import com.example.SkyNest.model.entity.Room;
 import com.example.SkyNest.model.entity.RoomImage;
+import com.example.SkyNest.model.entity.User;
 import com.example.SkyNest.model.repository.HotelRepository;
 import com.example.SkyNest.model.repository.RoomImageRepository;
 import com.example.SkyNest.model.repository.RoomRepository;
+import com.example.SkyNest.model.repository.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
+
 import jakarta.servlet.http.HttpServletRequest;
+import org.hibernate.query.spi.QueryOptionsAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -40,6 +45,9 @@ public class ARoomService {
     private HttpServletRequest request;
     @Autowired
     private RoomImageRepository roomImageRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     // fetch hotel by user id then check  if user can accesses to this hotel
     public Map<String,String> createRoom(Long hotel_id, RoomRequest roomInfo){
@@ -242,7 +250,43 @@ public class ARoomService {
                 "Successfully Deleted");
     }
 
+    @Transactional
+    public Map<String ,String> updateRoomPrice(Long roomId, double price){
+        String jwt = request.getHeader("Authorization");
+        String token  = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return Map.of("message",
+                    "Sorry , this account is not found in our system");
+        }
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userId);
+        if (hotelOptional.isEmpty()){
+            return Map.of("message",
+                    "Sorry , this hotel is not found in our app");
+        }
 
+        if (price<=0){
+            return Map.of("message",
+                    "Sorry , Wrong price should not be zero or down");
+        }
+        Optional<Room> roomOptional = this.roomRepository.findById(roomId);
+        if (roomOptional.isEmpty()){
+            return Map.of("message",
+                    "Sorry , this room is not found in our system");
+        }
+
+        if(!roomOptional.get().getHotel().getId().equals(hotelOptional.get().getId())){
+          return Map.of("message",
+                  "Sorry , you can't update room price your not authorization");
+        }
+
+        Room room = roomOptional.get();
+        room.setCurrentPrice(price);
+        this.roomRepository.save(room);
+        return Map.of("message",
+                "Successfully  updated price");
+    }
 
 
 

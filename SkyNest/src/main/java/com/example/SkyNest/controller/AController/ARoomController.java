@@ -135,6 +135,21 @@ public class ARoomController {
                 .body(message);
     }
 
+    @PutMapping("/update_price/{roomId}")
+    public ResponseEntity<?> updateRoomPrice(@PathVariable Long roomId,@RequestParam double price){
+        Map<String ,String> message = this.aRoomService.updateRoomPrice(roomId, price);
+        if (message.get("message").equals("Successfully  updated price")){
+            return ResponseEntity.ok(message);
+        } else if (message.get("message").equals("Sorry , Wrong price should not be zero or down")) {
+
+            return ResponseEntity.status(400).body(message);
+        } else {
+            return ResponseEntity.status(403).body(message);
+        }
+    }
+
+
+
 
 
 }
