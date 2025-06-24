@@ -1,13 +1,13 @@
 package com.example.SkyNest.dto;
 
 import java.util.List;
+import java.util.Objects;
 
 public class RoomResponse {
 
      private Long id;
      private double basePrice;
      private double currentPrice;
-
      private int  room_count ;
      private String   room_type;
      private boolean status;
@@ -86,4 +86,28 @@ public class RoomResponse {
     public void setImageDTOList(List<ImageDTO> imageDTOList) {
         this.imageDTOList = imageDTOList;
     }
+
+
+    @Override
+    public boolean equals(Object o){
+        if (!(o instanceof RoomResponse roomResponse)) return false;
+        return id.equals(roomResponse.id) &&
+                basePrice==roomResponse.basePrice&&
+                currentPrice==roomResponse.currentPrice&&
+                room_count==roomResponse.room_count&&
+                room_type.equals(roomResponse.room_type)&&
+                status==roomResponse.status&&
+                hotelName.equals(roomResponse.hotelName)&&
+                ownerName.equals(roomResponse.ownerName)&&
+                imageDTOList.size()==roomResponse.imageDTOList.size();
+    }
+
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(id,basePrice,currentPrice,room_count,room_type,status,hotelName,ownerName,imageDTOList.size());
+    }
+
+
+
 }

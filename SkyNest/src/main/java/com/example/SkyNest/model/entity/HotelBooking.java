@@ -7,7 +7,9 @@ import jakarta.validation.constraints.Min;
 import java.lang.reflect.Array;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "hotel_booking")
@@ -18,27 +20,26 @@ public class HotelBooking {
     private Long id;
     private int numberOfPerson;
     private int numberOfRoom;
-    private String roomType;
     private boolean status;
     private LocalDate launchDate;
     private LocalDate departureDate;
     @Min(value = 20)
     @Max(value = 100)
     private int paymentRatio;
-    private List<Long> listOfReservedRoomNumbers;
-
     private double totalAmount;
     private double amountPaid;
-
-
 
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
-
     @ManyToOne
     @JoinColumn(name = "hotel_id",referencedColumnName = "id")
     private Hotel hotel;
+    @ManyToMany
+    @JoinTable(name = "booking_room",joinColumns = @JoinColumn(name = "booking_id"),
+     inverseJoinColumns = @JoinColumn(name = "room_id"))
+    private Set<Room> rooms = new HashSet<>();
+
 
 
     public Long getId() {
@@ -63,14 +64,6 @@ public class HotelBooking {
 
     public void setNumberOfRoom(int numberOfRoom) {
         this.numberOfRoom = numberOfRoom;
-    }
-
-    public String getRoomType() {
-        return roomType;
-    }
-
-    public void setRoomType(String roomType) {
-        this.roomType = roomType;
     }
 
     public boolean isStatus() {
@@ -121,14 +114,6 @@ public class HotelBooking {
         this.paymentRatio = paymentRatio;
     }
 
-    public List<Long> getListOfReservedRoomNumbers() {
-        return listOfReservedRoomNumbers;
-    }
-
-    public void setListOfReservedRoomNumbers(List<Long> listOfReservedRoomNumbers) {
-        this.listOfReservedRoomNumbers = listOfReservedRoomNumbers;
-    }
-
     public double getTotalAmount() {
         return totalAmount;
     }
@@ -143,5 +128,13 @@ public class HotelBooking {
 
     public void setAmountPaid(double amountPaid) {
         this.amountPaid = amountPaid;
+    }
+
+    public Set<Room> getRooms() {
+        return rooms;
+    }
+
+    public void setRooms(Set<Room> rooms) {
+        this.rooms = rooms;
     }
 }

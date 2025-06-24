@@ -50,6 +50,7 @@ public class ApplicationUp implements ApplicationRunner {
             userSuperAdmin.setLatitude(32.124);
             userSuperAdmin.setLongitude(32.245);
             userSuperAdmin.setRole(superAdmin);
+            userSuperAdmin.setEnabled(true);
                 userRepository.save(userSuperAdmin);
 
 

@@ -47,7 +47,7 @@ public class AHotelController {
                 String message = aHotelService.uploadImage(id,file);
                 return ResponseEntity.ok(message);
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("فشل في رفع الصورة");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body( "");
             }
         }
 

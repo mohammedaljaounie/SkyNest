@@ -52,7 +52,7 @@ public class UserService {
 
     private static UserInfo getProfileInfo(User user) {
 
-        return new UserInfo(user.getId(), user.getFullName(), user.getEmail(), user.getLongitude(), user.getLatitude(), user.getLevel());
+        return new UserInfo(user.getId(), user.getFullName(), user.getEmail(),user.getLatitude() ,user.getLongitude(), user.getLevel());
     }
 
 

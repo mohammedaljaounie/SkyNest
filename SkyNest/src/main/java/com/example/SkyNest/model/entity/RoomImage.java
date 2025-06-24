@@ -1,5 +1,6 @@
 package com.example.SkyNest.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -15,6 +16,7 @@ public class RoomImage {
 
     @ManyToOne
     @JoinColumn(name = "room_id",referencedColumnName = "id")
+    @JsonIgnore
     private Room room;
 
 

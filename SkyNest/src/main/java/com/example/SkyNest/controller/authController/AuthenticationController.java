@@ -1,11 +1,12 @@
 package com.example.SkyNest.controller.authController;
 
-import com.example.SkyNest.dto.LoginResponse;
-import com.example.SkyNest.dto.LoginUserDto;
-import com.example.SkyNest.dto.OtpRequest;
-import com.example.SkyNest.dto.RegisterUserDto;
+import com.example.SkyNest.dto.*;
+import com.example.SkyNest.model.entity.Hotel;
+import com.example.SkyNest.model.entity.Room;
+import com.example.SkyNest.model.repository.HotelRepository;
 import com.example.SkyNest.model.repository.OtpRepository;
 import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import com.example.SkyNest.service.authService.AuthenticationService;
 import com.example.SkyNest.service.authService.EmailService;
 import com.example.SkyNest.service.authService.JwtService;
@@ -14,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 @RequestMapping("/auth")
@@ -27,7 +31,6 @@ public class AuthenticationController {
 
 
     @Autowired
-
     private AuthenticationService authenticationService;
 
     @Autowired
@@ -38,6 +41,8 @@ public class AuthenticationController {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private UHotelService uHotelService;
 
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
         this.jwtService = jwtService;
@@ -130,5 +135,13 @@ public class AuthenticationController {
     public ResponseEntity<Map<String,String>> logout(){
         return ResponseEntity.ok(authenticationService.logout());
     }
+
+
+    @GetMapping("/hotels")
+    public List<HotelResponse> getHotels(@RequestParam String address){
+        return this.uHotelService.showAllHotelByLocation(address);
+    }
+
+
 
 }

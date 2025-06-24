@@ -70,23 +70,6 @@ public class UHotelController {
 
     }
 
-    @PostMapping("/booking/{hotelId}")
-    public ResponseEntity<Map<String,String>> roomBooking(@PathVariable Long hotelId,
-                                                          @RequestBody HotelBookingRequest hotelBookingRequest){
-        Map<String,String> message = this.uHotelService.roomBooking(hotelId, hotelBookingRequest);
-        if (message.get("message").equals(
-                "your reservation has been successfully completed.\n" +
-                "wr hope you have a comfortable stay")){
-            return ResponseEntity.ok()
-                    .body(message);
-        }
-        return ResponseEntity.status(403)
-                .body(message);
-
-    }
-
-
-
 
     @GetMapping("/activeReservation")
     public ResponseEntity<List<UserBookingResponse>> viewActiveReservation(){
@@ -107,22 +90,6 @@ public class UHotelController {
     }
 
 
-    @GetMapping("/bookingDirect/{hotelId}")
-    public ResponseEntity<Map<String,String >> roomBookingDirect(
-            @PathVariable Long hotelId,
-            @RequestParam Long roomId,
-            @RequestBody HotelRoomRequest hotelRoomRequest
-            ){
-        Map<String,String> message = this.uHotelService.roomBookingDirect(hotelId, roomId, hotelRoomRequest);
-        if (message.get("message").equals("your reservation has been successfully completed.\n" +
-                "wr hope you have a comfortable stay")){
-            return ResponseEntity.ok()
-                    .body(message);
-        }
-        return ResponseEntity.status(403)
-                .body(message);
-    }
-
 
 
     @GetMapping("/viewTotalBalance")
@@ -136,22 +103,6 @@ public class UHotelController {
                 .body(Map.of("message",
                         "you don't have a balance in your bank account"));
     }
-
-
-    // todo :booking cansel
-    @PostMapping("/bookingCansel/{userBookingId}")
-    public ResponseEntity<Map<String,String>> bookingCancel(@PathVariable Long userBookingId){
-
-        Map<String,String> message = this.uHotelService.bookingCansel(userBookingId);
-
-       if (!message.get("message").equals("Successfully Canceled"))
-            return ResponseEntity.status(400).body(message);
-
-      else
-            return ResponseEntity.ok(message);
-    }
-
-
 
     @GetMapping("/filterByRating")
     public ResponseEntity<List<HotelResponse>> filterHotelByRating(){

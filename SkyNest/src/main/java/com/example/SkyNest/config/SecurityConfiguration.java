@@ -46,7 +46,7 @@ public class SecurityConfiguration {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/image/**").permitAll()
+                        .requestMatchers("/auth/**", "/image/**","/api/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("admin")
                         .requestMatchers("/user/**").hasAuthority("user")
                         .requestMatchers("/super_admin/**").hasAuthority("super_admin")

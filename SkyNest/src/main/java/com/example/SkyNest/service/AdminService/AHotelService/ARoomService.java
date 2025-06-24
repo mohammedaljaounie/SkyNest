@@ -13,9 +13,7 @@ import com.example.SkyNest.model.repository.RoomImageRepository;
 import com.example.SkyNest.model.repository.RoomRepository;
 import com.example.SkyNest.model.repository.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
-
 import jakarta.servlet.http.HttpServletRequest;
-import org.hibernate.query.spi.QueryOptionsAdapter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -197,7 +195,7 @@ public class ARoomService {
             for (int i = 0; i <roomImages.size() ; i++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImages.get(i).getId());
-                imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+roomImages.get(i).getName());
+                imageDTO.setImageUrl("8080/admin/hotel/"+roomImages.get(i).getName());
                 imageDTOList.add(imageDTO);
             }
             roomResponse.setImageDTOList(imageDTOList);

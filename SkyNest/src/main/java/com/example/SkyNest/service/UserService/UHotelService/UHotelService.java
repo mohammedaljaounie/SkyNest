@@ -6,6 +6,7 @@ import com.example.SkyNest.model.repository.*;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,11 +38,13 @@ public class UHotelService {
     private UserBookingRepository userBookingRepository;
     @Autowired
     private  HotelRatingRepository hotelRatingRepository;
+    @Autowired
+    private RoomImageRepository roomImageRepository;
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
 
-    private static  String textOfRoom ="";
+    private static final String textOfRoom ="";
 
     public List<HotelResponse> showAllHotel(){
 
@@ -67,7 +70,7 @@ public class UHotelService {
             for (int j = 0; j <hotelImageList.size() ; j++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImageList.get(j).getId());
-                imageDTO.setImageUrl("http://localhost:8080/user/hotel/hotelImage/"+hotelImageList.get(j).getName());
+                imageDTO.setImageUrl("8080/user/hotel/hotelImage/"+hotelImageList.get(j).getName());
                 imageDTOS.add(imageDTO);
             }
             hotel.setImageDTOList(imageDTOS);
@@ -98,7 +101,7 @@ public class UHotelService {
         for (int i = 0; i < imageList.size() ; i++) {
             ImageDTO imageDTO = new ImageDTO();
             imageDTO.setId(imageList.get(i).getId());
-            imageDTO.setImageUrl("http://localhost:8080/user/hotel/"+imageList.get(i).getName());
+            imageDTO.setImageUrl("8080/user/hotel/"+imageList.get(i).getName());
             imageResponseList.add(imageDTO);
         }
         hotelResponse.setImageDTOList(imageResponseList);
@@ -136,7 +139,7 @@ public class UHotelService {
             for (HotelImage hotelImage : hotelImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImage.getId());
-                imageDTO.setImageUrl("http://localhost:8080/user/hotel/hotelImage/" + hotelImage.getName());
+                imageDTO.setImageUrl("8080/user/hotel/hotelImage/" + hotelImage.getName());
                 imageDTOS.add(imageDTO);
             }
 
@@ -157,172 +160,6 @@ public class UHotelService {
         return null;
     }
 
-    // todo booking room direct
-    public Map<String,String> roomBookingDirect(Long hotelId, Long roomId, HotelRoomRequest hotelRoomRequest){
-        String jwt = request.getHeader("Authorization");
-        String token = jwt.substring(7);
-        Long userId  = jwtService.extractId(token);
-        Optional<User> user = this.userRepository.findById(userId);
-        if (user.isEmpty()){
-            return Map.of(
-                    "message",
-                    "I'm Sorry , you can't booking any thing because you not auth"
-            );
-        }
-        Optional<UserCard> userCard  = this.userCardRepository.findByUserId(userId);
-        if (userCard.isEmpty()){
-            return Map.of(
-                    "message",
-                    "I'm Sorry , you don't have card to payment booking"
-            );
-        }
-        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
-        if (hotel.isEmpty()){
-            return Map.of(
-                    "message",
-                    "I'm Sorry , This hotel is not found in our application"
-            );
-        }
-
-        Optional<Room> room  = this.roomRepository.findByIdAndHotelId(roomId,hotelId);
-
-        if (room.isEmpty()){
-            return Map.of(
-                    "message",
-                    "I'm Sorry , This room is not found in this hotel"
-            );
-        }
-        boolean status = room.get().isStatus();
-        if (status){
-            return Map.of(
-                    "message",
-                    "I'm Sorry , This room is booking"
-            );
-        }
-        double roomPrice = room.get().getBasePrice();
-        double amountToBePaid  = roomPrice*hotelRoomRequest.getPaymentRatio()/100;
-        double totalUserBalance = userCard.get().getTotalBalance();
-        if (totalUserBalance<amountToBePaid){
-            savePublicBooking( hotelRoomRequest.getLaunchDate(), hotelRoomRequest.getDepartureDate(),user.get(),-1,null,0,null);
-        }
-        int roomNumber = room.get().getRoomCount();
-        String reservedRoomNumber = ""+roomNumber;
-        List<Long> list = new ArrayList<>();
-        list.add(room.get().getId());
-        HotelBooking hotelBooking = new HotelBooking();
-        hotelBooking.setUser(user.get());
-        hotelBooking.setHotel(hotel.get());
-        hotelBooking.setNumberOfPerson(hotelRoomRequest.getNumberOfPerson());
-        hotelBooking.setNumberOfRoom(1);
-        hotelBooking.setPaymentRatio(hotelRoomRequest.getPaymentRatio());
-        hotelBooking.setRoomType(room.get().getRoomType());
-        hotelBooking.setStatus(true);
-        hotelBooking.setLaunchDate(hotelRoomRequest.getLaunchDate());
-        hotelBooking.setDepartureDate(hotelRoomRequest.getDepartureDate());
-        hotelBooking.setListOfReservedRoomNumbers(list);
-        hotelBooking.setTotalAmount(roomPrice);
-        hotelBooking.setAmountPaid(amountToBePaid);
-        HotelBooking hotelBooking1 = this.hotelBookingRepository.save(hotelBooking);
-        savePublicBooking(hotelRoomRequest.getLaunchDate(),hotelRoomRequest.getDepartureDate(),
-        user.get(),1,reservedRoomNumber,roomPrice,hotelBooking1);
-        return Map.of("message",
-                "your reservation has been successfully completed.\n" +
-                        "wr hope you have a comfortable stay",
-                "Booking start",hotelRoomRequest.getLaunchDate().toString(),
-                "End of reservation",hotelRoomRequest.getDepartureDate().toString());
-    }
-
-    // todo booking in hotel
-    public Map<String,String> roomBooking(Long hotelId, HotelBookingRequest hotelBookingRequest){
-        String jwt = request.getHeader("Authorization");
-        String token = jwt.substring(7);
-        Long userId  = jwtService.extractId(token);
-        Optional<User> user = this.userRepository.findById(userId);
-        if (user.isEmpty()){
-            return Map.of("message",
-                    "I'm Sorry , you can't booking any thing because is not authorization in our application");
-        }
-        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
-        if (hotel.isEmpty()){
-            return Map.of("message",
-                    "this hotel is not found in this application");
-        }
-        Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotelId);
-        if (hotelCard.isEmpty()){
-            return Map.of("message",
-                    "this hotel don't have card to payment");
-        }
-        if (checkDate(hotelBookingRequest.getLaunchDate(),hotelBookingRequest.getDepartureDate())){
-            return Map.of("message",
-                    "I'm Sorry , you can't book because the time you want has passed");
-        }
-         List<Room> allRoomInTheHotel =checkRoom(false, hotelBookingRequest.getRoomType(), hotelId);
-        if (allRoomInTheHotel.size()<hotelBookingRequest.getNumberOfRoom()){
-            return Map.of("message",
-                    "I'm Sorry , we don't have your request now");
-        }
-        double totalBookingCost = calculateTotalCost(allRoomInTheHotel,hotelBookingRequest.getNumberOfRoom());
-        double amountToBePaid  = totalBookingCost*hotelBookingRequest.getPaymentRatio()/100;
-        Optional<UserCard> userCard = this.userCardRepository.findByUserId(userId);
-        if (userCard.isEmpty()){
-            return Map.of("message","I'm Sorry , you don't have any card to payment");
-        }
-        double totalUserBalance  = userCard.get().getTotalBalance();
-        if (totalUserBalance<amountToBePaid){
-            savePublicBooking(
-                    hotelBookingRequest.getLaunchDate(),
-                    hotelBookingRequest.getDepartureDate(),
-                    user.get(),-1,null
-                    ,totalBookingCost,null);
-            return Map.of("message",
-                    "I'm sorry , you don't have enough money to pay");
-        }
-        updateUserCard(userCard.get(), amountToBePaid);
-        updateHotelCard(hotelCard.get(), amountToBePaid);
-        List<Long> listOfReservedRoomNumbers = updateRoomStatus(allRoomInTheHotel,hotelBookingRequest.getNumberOfRoom());
-        HotelBooking hotelBooking =saveBooking(hotelBookingRequest,user.get(),hotel.get(),listOfReservedRoomNumbers,totalBookingCost,amountToBePaid);
-        savePublicBooking(
-                hotelBookingRequest.getLaunchDate(),
-                hotelBookingRequest.getDepartureDate(),
-                user.get(),1
-        ,textOfRoom,totalBookingCost,hotelBooking);
-        return Map.of("message",
-                "your reservation has been successfully completed.\n" +
-                        "wr hope you have a comfortable stay",
-        "Booking start",hotelBookingRequest.getLaunchDate().toString(),
-            "End of reservation",hotelBookingRequest.getDepartureDate().toString());
-    }
-    private static boolean checkDate(LocalDate LaunchDate,LocalDate DepartureDate){
-        LocalDate localDate = LocalDate.now();
-        return localDate.isAfter(LaunchDate)
-                ||localDate.isAfter(DepartureDate)
-                ||LaunchDate.isAfter(DepartureDate);
-    }
-    private  List<Room> checkRoom(boolean status,String roomType,Long hotelId){
-        return roomRepository.findByStatusAndRoomTypeAndHotelId(status, roomType, hotelId);
-    }
-    private static double calculateTotalCost(List<Room> rooms ,int numberOfRoom){
-        double totalCost =0;
-        for (int i = 0; i < numberOfRoom ; i++) {
-
-            totalCost = totalCost+rooms.get(i).getCurrentPrice();
-        }
-        return totalCost;
-    }
-    private  List<Long> updateRoomStatus(List<Room> rooms ,int numberOfRoom){
-        textOfRoom ="";
-       List<Long> listOfRoomBooking  = new ArrayList<>();
-        for (int i = 0; i <numberOfRoom ; i++) {
-            Room room = rooms.get(i);
-            room.setStatus(true);
-            listOfRoomBooking.add(room.getId());
-            textOfRoom = textOfRoom+rooms.get(i).getRoomCount();
-            if (i<numberOfRoom-1)
-                textOfRoom = textOfRoom+"-";
-            this.roomRepository.save(room);
-        }
-        return listOfRoomBooking;
-    }
     private void updateUserCard(UserCard userCard,double amountToBePaid){
         userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
         this.userCardRepository.save(userCard);
@@ -331,36 +168,7 @@ public class UHotelService {
         hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
         this.hotelCardRepository.save(hotelCard);
     }
-    private HotelBooking saveBooking(HotelBookingRequest hotelBookingRequest,User user,Hotel hotel,List<Long> listOfReservedRoomNumbers
-           ,double totalAmount,double amountPaid){
-        HotelBooking hotelBooking = new HotelBooking();
-        hotelBooking.setUser(user);
-        hotelBooking.setHotel(hotel);
-        hotelBooking.setNumberOfPerson(hotelBookingRequest.getNumberOfPerson());
-        hotelBooking.setNumberOfRoom(hotelBookingRequest.getNumberOfRoom());
-        hotelBooking.setPaymentRatio(hotelBookingRequest.getPaymentRatio());
-        hotelBooking.setRoomType(hotelBookingRequest.getRoomType());
-        hotelBooking.setStatus(true);
-        hotelBooking.setLaunchDate(hotelBookingRequest.getLaunchDate());
-        hotelBooking.setDepartureDate(hotelBookingRequest.getDepartureDate());
-        hotelBooking.setListOfReservedRoomNumbers(listOfReservedRoomNumbers);
-        hotelBooking.setTotalAmount(totalAmount);
-        hotelBooking.setAmountPaid(amountPaid);
-       return this.hotelBookingRepository.save(hotelBooking);
-    }
-    private void savePublicBooking(LocalDate LaunchDate, LocalDate DepartureDate, User user,int status,String listOfReservedRoomNumbers,double totalAmount,
-                                   HotelBooking hotelBooking){
-        UserBooking userBooking = new UserBooking();
-        userBooking.setBookingType("Hotel Reservation");
-        userBooking.setBookingStartDate(LaunchDate);
-        userBooking.setBookingEndDate(DepartureDate);
-        userBooking.setStatus(status);
-        userBooking.setUser(user);
-        userBooking.setListOfReservedRoomNumbers(listOfReservedRoomNumbers);
-        userBooking.setTotalAmount(totalAmount);
-        userBooking.setHotelBooking(hotelBooking);
-        this.userBookingRepository.save(userBooking);
-    }
+
 
     public List<UserBookingResponse> viewActiveReservation(){
         String jwt = request.getHeader("Authorization");
@@ -452,7 +260,7 @@ return bookingResponses;
             for (int j = 0; j <hotelImageList.size() ; j++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImageList.get(j).getId());
-                imageDTO.setImageUrl("http://localhost:8080/user/hotel/"+hotelImageList.get(j).getName());
+                imageDTO.setImageUrl("8080/user/hotel/"+hotelImageList.get(j).getName());
                 imageDTOS.add(imageDTO);
             }
             hotel.setImageDTOList(imageDTOS);
@@ -472,93 +280,6 @@ return bookingResponses;
 
     }
 
-
-    public Map<String,String> bookingCansel(Long userBookingId){
-
-        String jwt = request.getHeader("Authorization");
-        String token =jwt.substring(7);
-        Long userId = jwtService.extractId(token);
-        Optional<User> userOptional = this.userRepository.findById(userId);
-        if (userOptional.isEmpty())
-            return Map.of(
-                    "message",
-                    "you can't do any thing , because you isn't aut"
-            );
-
-        Optional<UserBooking> userBooking = this.userBookingRepository.findByIdAndUserId(userBookingId,userId);
-
-        if (userBooking.isEmpty())
-            return Map.of("message"
-            ,"this booking is not found");
-
-        if ((userBooking.get().getStatus()==-1))
-          return Map.of("message",
-                  "This reservation is not acceptable in principle, meaning that the cancellation process cannot be completed. ");
-        if(userBooking.get().getBookingStartDate().isBefore(LocalDate.now())){
-            return Map.of("message",
-                    "you can't cansel this booking because you led in date");
-        }
-
-        Optional<HotelBooking> hotelBooking = this.hotelBookingRepository.findById(userBooking.get().getHotelBooking().getId());
-
-        if (hotelBooking.isEmpty())
-            return Map.of("message",
-                    "This hotel is not found in our application now");
-
-            List<Room> rooms = this.roomRepository.findAllById(hotelBooking.get().getListOfReservedRoomNumbers());
-
-        for (Room room : rooms) {
-            room.setStatus(false);
-            System.out.println(room.getId());
-            this.roomRepository.save(room);
-        }
-
-        // todo : update userBooking && hotelBooking
-        UserBooking userBookingUpdate = userBooking.get();
-        userBookingUpdate.setStatus(0);
-        this.userBookingRepository.save(userBookingUpdate);
-
-        HotelBooking hotelBookingUpdate = hotelBooking.get();
-        hotelBookingUpdate.setStatus(false);
-        this.hotelBookingRepository.save(hotelBookingUpdate);
-
-
-
-        // todo : update userCard && hotelCard
-        double cancellationTax = (hotelBooking.get().getTotalAmount())*0.05;
-        double amountPaid = hotelBooking.get().getAmountPaid();
-        updateModifyAmounts(hotelBooking.get().getHotel().getId(),
-                userId,(amountPaid-cancellationTax));
-        return Map.of(
-
-                "message",
-                "Successfully Canceled"
-        );
-
-    }
-
-
-    private void updateModifyAmounts(Long hotelId,Long userId,double cancellationTax){
-
-        Optional<HotelCard> hotelCardOptional = this.hotelCardRepository.findByHotelId(hotelId);
-        if (hotelCardOptional.isEmpty()) {
-        }
-        else {
-
-            Optional<UserCard> userCardOptional  = this.userCardRepository.findByUserId(userId);
-            if (userCardOptional.isEmpty())
-                return;
-            HotelCard hotelCard = hotelCardOptional.get();
-            hotelCard.setTotalBalance((hotelCard.getTotalBalance()-cancellationTax));
-            this.hotelCardRepository.save(hotelCard);
-
-
-            UserCard userCard = userCardOptional.get();
-            userCard.setTotalBalance(userCard.getTotalBalance()+cancellationTax);
-            this.userCardRepository.save(userCard);
-        }
-
-    }
 
     public List<HotelResponse> filterHotelByRating(){
         List<Hotel> hotelList = this.hotelRepository.filterHotelByRating();
@@ -585,7 +306,7 @@ return bookingResponses;
 
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImage.getId());
-                imageDTO.setImageUrl("http://localhost:8080/user/hotel/hotelImage/"+hotelImage.getName());
+                imageDTO.setImageUrl("8080/user/hotel/hotelImage/"+hotelImage.getName());
                 imageDTOList.add(imageDTO);
             }
 
@@ -705,4 +426,158 @@ return bookingResponses;
 
 
     }
+
+    /**
+     * Booking List Of Room
+     * */
+
+    public void bookingRooms()
+    {
+
+    }
+
+
+    // todo filter room that not bocked
+    public Set<RoomResponse> filterAvailableRoomsInHotel(Long hotelId, LocalDate startDate, LocalDate endDate){
+
+        if (!UHotelService.checkDate(startDate,endDate)){
+           return null;
+       }
+
+
+        Optional<Hotel> hotel = this.hotelRepository.findById(hotelId);
+        if (hotel.isEmpty()){
+            return null;
+        }
+        List<RoomResponse> roomResponseList = convertRoomToDTO(this.roomRepository.findByHotelId(hotelId));
+
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.filterByDate(hotelId, startDate, endDate,true);
+
+        Set<RoomResponse> notBockedRoom  = new HashSet<>();
+        if (!hotelBookingList.isEmpty()) {
+            Set<Room> bockedRoom = new HashSet<>(); // list of room
+
+            for (HotelBooking hotelBooking : hotelBookingList) {
+                bockedRoom.addAll(hotelBooking.getRooms());
+            }
+
+            Set<RoomResponse> roomResponseSet = convertRoomToDTO(bockedRoom);// set of room response
+
+
+            assert roomResponseList != null;
+            for (RoomResponse roomResponse : roomResponseList) {
+                assert roomResponseSet != null;
+                if (!roomResponseSet.contains(roomResponse)) {
+                    notBockedRoom.add(roomResponse);
+                }
+            }
+
+        }else {
+
+            assert roomResponseList != null;
+            notBockedRoom.addAll(roomResponseList);
+        }
+        return notBockedRoom;
+    }
+
+    public Map<Long,Set<RoomResponse>> filterAvailableRoomsInAllHotel(
+            String address,LocalDate startDate,LocalDate endDate ){
+        if (!UHotelService.checkDate(startDate,endDate)){
+            return null;
+        }
+
+        List<Hotel> hotelList = this.hotelRepository.findByAddress(address);
+
+        if (hotelList.isEmpty()){
+            return null;
+        }
+
+        Map<Long , Set<RoomResponse>> availableRooms = new HashMap<>();
+        for (Hotel hotel : hotelList){
+            availableRooms.put(
+
+                    hotel.getId(),
+                    filterAvailableRoomsInHotel(
+                            hotel.getId(),
+                            startDate,
+                            endDate
+                    )
+            );
+        }
+
+
+        return availableRooms;
+            }
+
+    private List<RoomResponse> convertRoomToDTO(List<Room> rooms) {
+
+        if (rooms.isEmpty())
+            return null;
+
+        List<RoomResponse> listOfRoom = new ArrayList<>();
+
+
+        for (Room room : rooms) {
+            List<ImageDTO> roomImages = new ArrayList<>();
+            RoomResponse roomResponse = getRoomResponse(room);
+            List<RoomImage> roomImageList = this.roomImageRepository.findByRoomId(room.getId());
+            for (RoomImage roomImage : roomImageList) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(roomImage.getId());
+                imageDTO.setImageUrl("8080/user/hotel/" + roomImage.getName());
+                roomImages.add(imageDTO);
+            }
+            roomResponse.setImageDTOList(roomImages);
+            listOfRoom.add(roomResponse);
+
+        }
+        return listOfRoom;
+    }
+
+    private static boolean checkDate(LocalDate startDate,LocalDate endDate){
+        return !startDate.isBefore(LocalDate.now()) &&
+                !startDate.isAfter(endDate) &&
+                !startDate.isBefore(LocalDate.now());
+    }
+    private  Set<RoomResponse> convertRoomToDTO(Set<Room> rooms){
+
+        if (rooms.isEmpty())
+            return null;
+
+        Set<RoomResponse> listOfRoom = new HashSet<>();
+
+
+        for (Room room : rooms) {
+            List<ImageDTO> roomImages = new ArrayList<>();
+            RoomResponse roomResponse = getRoomResponse(room);
+            List<RoomImage> roomImageList = this.roomImageRepository.findByRoomId(room.getId());
+            for (RoomImage roomImage : roomImageList ){
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(roomImage.getId());
+                imageDTO.setImageUrl("8080/user/hotel/"+roomImage.getName());
+                roomImages.add(imageDTO);
+
+            }
+            roomResponse.setImageDTOList(roomImages);
+
+            listOfRoom.add(roomResponse);
+
+        }
+
+        return listOfRoom;
+
+    }
+    private static RoomResponse getRoomResponse(Room room) {
+        RoomResponse roomResponse = new RoomResponse();
+        roomResponse.setId(room.getId());
+        roomResponse.setHotelName(room.getHotel().getName());
+        roomResponse.setRoom_count(room.getRoomCount());
+        roomResponse.setRoom_type(room.getRoomType());
+        roomResponse.setStatus(room.isStatus());
+        roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
+        roomResponse.setBasePrice(room.getBasePrice());
+        roomResponse.setCurrentPrice(room.getCurrentPrice());
+        return roomResponse;
+    }
+
 }

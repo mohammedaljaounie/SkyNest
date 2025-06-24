@@ -2,6 +2,11 @@ package com.example.SkyNest.model.entity;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 @Entity
 @Table(name = "room")
 public class Room {
@@ -18,6 +23,9 @@ public class Room {
     @ManyToOne
     @JoinColumn(name = "hotel_id",referencedColumnName = "id")
     private Hotel hotel;
+
+    @ManyToMany(mappedBy = "rooms")
+    private Set<HotelBooking> hotelBookings = new HashSet<>();
 
 
     public Long getId() {
@@ -75,4 +83,13 @@ public class Room {
     public void setCurrentPrice(double currentPrice) {
         this.currentPrice = currentPrice;
     }
+
+    public Set<HotelBooking> getHotelBookings() {
+        return hotelBookings;
+    }
+
+    public void setHotelBookings(Set<HotelBooking> hotelBookings) {
+        this.hotelBookings = hotelBookings;
+    }
+
 }
