@@ -40,7 +40,25 @@ public class HotelBooking {
      inverseJoinColumns = @JoinColumn(name = "room_id"))
     private Set<Room> rooms = new HashSet<>();
 
+    public HotelBooking() {
+    }
 
+    public HotelBooking(int numberOfPerson, int numberOfRoom, boolean status
+            , LocalDate launchDate, LocalDate departureDate, int paymentRatio
+            , double totalAmount, double amountPaid, User user, Hotel hotel
+            , Set<Room> rooms) {
+        this.numberOfPerson = numberOfPerson;
+        this.numberOfRoom = numberOfRoom;
+        this.status = status;
+        this.launchDate = launchDate;
+        this.departureDate = departureDate;
+        this.paymentRatio = paymentRatio;
+        this.totalAmount = totalAmount;
+        this.amountPaid = amountPaid;
+        this.user = user;
+        this.hotel = hotel;
+        this.rooms = rooms;
+    }
 
     public Long getId() {
         return id;

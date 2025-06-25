@@ -129,7 +129,11 @@ public class UHotelController {
         return ResponseEntity.status(400).body(message);
     }
 
+    @PostMapping("/reservation")
+    public ResponseEntity<?> bookRooms(@RequestBody HotelBookingRequest hotelBookingRequest){
 
+        return this.uHotelService.bookingRooms(hotelBookingRequest);
+    }
 
 
 

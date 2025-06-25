@@ -136,12 +136,20 @@ public class AuthenticationController {
         return ResponseEntity.ok(authenticationService.logout());
     }
 
-
     @GetMapping("/hotels")
-    public List<HotelResponse> getHotels(@RequestParam String address){
+    public List<HotelResponse> getA(@RequestParam String address){
+
         return this.uHotelService.showAllHotelByLocation(address);
     }
+    @GetMapping("/filterAvailableRoomsInHotel/{hotelId}")
+    public Set<RoomResponse> filter(@PathVariable Long hotelId,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate){
+       return uHotelService.filterAvailableRoomsInHotel(hotelId,startDate,endDate);
+    }
 
+    @GetMapping("/filterAvailableRoomsInHotel")
+    public Map<Long,Set<RoomResponse>> filterAll(@RequestParam String address,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate){
+        return uHotelService.filterAvailableRoomsInAllHotel(address,startDate,endDate);
+    }
 
 
 }

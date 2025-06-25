@@ -26,7 +26,7 @@ public class Hotel {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
+    @Column(nullable = false,name = "avgRating")
     private double avgRating;
 
     @Column(nullable = false)

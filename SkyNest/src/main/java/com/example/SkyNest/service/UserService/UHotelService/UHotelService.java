@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class UHotelService {
@@ -27,9 +29,9 @@ public class UHotelService {
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
-    private UserCardRepository userCardRepository;
+    private  UserCardRepository userCardRepository;
     @Autowired
-    private HotelCardRepository hotelCardRepository;
+    private  HotelCardRepository hotelCardRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -158,15 +160,6 @@ public class UHotelService {
             return Files.readAllBytes(file.toPath());
         }
         return null;
-    }
-
-    private void updateUserCard(UserCard userCard,double amountToBePaid){
-        userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
-        this.userCardRepository.save(userCard);
-    }
-    private void updateHotelCard(HotelCard hotelCard,double amountToBePaid){
-        hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
-        this.hotelCardRepository.save(hotelCard);
     }
 
 
@@ -431,8 +424,128 @@ return bookingResponses;
      * Booking List Of Room
      * */
 
-    public void bookingRooms()
+    @Transactional
+    public ResponseEntity<?> bookingRooms(HotelBookingRequest  bookingRequest)
     {
+      if (!UHotelService.checkDate(bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate())){
+          // todo : stop because the date is wrong
+          return ResponseEntity.status(400).body("Wrong in date");
+      }
+
+      String jwt = request.getHeader("Authorization");
+      String token = jwt.substring(7);
+      Long userId = jwtService.extractId(token);
+      Optional<User> user = this.userRepository.findById(userId);
+      if (user.isEmpty()){
+
+          //todo : stop because this user is not register
+           return ResponseEntity.status(403).body("your not register in our application");
+      }
+        System.out.println("User");
+      Optional<UserCard> userCard = this.userCardRepository.findByUserId(user.get().getId());
+      if (userCard.isEmpty()){
+
+          //todo : stop because user not has card to pay
+          return ResponseEntity.status(403).body("you don't have card to pay");
+      }
+        System.out.println("UserCard");
+
+      Optional<Hotel> hotel = this.hotelRepository.findById(bookingRequest.getHotel().getId());
+      if (hotel.isEmpty()){
+          // todo : stop because  the hotel is not found
+          return ResponseEntity.status(400).body("This hotel is not found in our app, booking in other hotel");
+      }
+
+        System.out.println("Hotel");
+      Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotel.get().getId());
+      if (hotelCard.isEmpty()){
+
+          // todo : stop because the hotel is not has card
+          return ResponseEntity.status(403).body("i'm sorry , this hotel don't have card now,you can't booking in this hotel");
+      }
+//        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
+//                .stream()
+//                .map(Room::getId)
+//                .collect(Collectors.toSet());
+//
+//        List<Room> realRooms = roomRepository.findAllById(selectedRoomIds);
+        System.out.println("HotelCard");
+
+        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
+                .stream()
+                .map(Room::getId)
+                .collect(Collectors.toSet());
+
+        List<Room> realRooms = roomRepository.findAllById(selectedRoomIds);
+
+                for (Room room : realRooms) {
+                    if (room.getHotel()==null||!(room.getHotel().getId() .equals( hotel.get().getId()))) {
+
+                        //todo : stop because this room is not found in same hotel
+                        return ResponseEntity.status(400).body("some room is not found in same hotel");
+
+                    }
+
+                }
+
+        System.out.println("Check if same hotel");
+       Set<RoomResponse> notBockedRoom =filterAvailableRoomsInHotel(
+               bookingRequest.getHotel().getId(),
+               bookingRequest.getLaunchDate(),
+               bookingRequest.getDepartureDate()
+       );
+        System.out.println("get not bocked room");
+        if (notBockedRoom.isEmpty()||notBockedRoom.size()<bookingRequest.getSetOfRooms().size()){
+            //todo : stop because all room is bocked
+            return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
+        }
+        System.out.println("تحقق من اذا الغرف محجوزه بالحجم");
+
+        int counter = 0;
+           for (Room room : bookingRequest.getSetOfRooms()){
+
+               for (RoomResponse roomResponse : notBockedRoom){
+                   if (room.getId().equals(roomResponse.getId())){
+                       counter++;
+                       break;
+                   }
+               }
+           }
+           if (counter!=bookingRequest.getSetOfRooms().size()){
+               // todo : some rooms are bocked
+               return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
+           }
+        System.out.println("تحقق من خلال المقارنه");
+
+        double totalCost = UHotelService.calculateTotalPrice(realRooms,bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate());
+
+        double theAmountToBePaid = totalCost* bookingRequest.getPaymentRatio()/100;
+
+
+        if (!UHotelService.checkUserCard(userCard.get(),theAmountToBePaid)){
+
+            // todo : stop because user don't have Sufficient amount
+            return ResponseEntity.status(400).body("i'm sorry , you don't have mony ");
+        }
+
+        updateUserCard(userCard.get(), theAmountToBePaid);
+        updateHotelCard(hotelCard.get(), theAmountToBePaid);
+
+        // update room status if start date = today
+        this.hotelBookingRepository.save(
+                new HotelBooking(
+                        bookingRequest.getNumberOfPerson(),
+                        bookingRequest.getNumberOfRoom(),
+                        true,bookingRequest.getLaunchDate(),
+                        bookingRequest.getDepartureDate(),
+                        bookingRequest.getPaymentRatio(),totalCost,theAmountToBePaid,
+                        user.get(),
+                        hotel.get(),
+                        bookingRequest.getSetOfRooms()
+                )
+        );
+
+        return ResponseEntity.ok("Successfully booking");
 
     }
 
@@ -536,8 +649,7 @@ return bookingResponses;
 
     private static boolean checkDate(LocalDate startDate,LocalDate endDate){
         return !startDate.isBefore(LocalDate.now()) &&
-                !startDate.isAfter(endDate) &&
-                !startDate.isBefore(LocalDate.now());
+                !startDate.isAfter(endDate);
     }
     private  Set<RoomResponse> convertRoomToDTO(Set<Room> rooms){
 
@@ -580,4 +692,34 @@ return bookingResponses;
         return roomResponse;
     }
 
+    private static double calculateTotalPrice(List<Room> rooms,LocalDate startDate,LocalDate endDate){
+
+        long totalDaysOfStay = ChronoUnit.DAYS.between(startDate,endDate)+1;
+
+        double totalCost = 0;
+        for (Room room : rooms) {
+
+            totalCost = totalCost +( room.getCurrentPrice()*totalDaysOfStay);
+        }
+        return totalCost;
+    }
+
+    private static boolean checkUserCard(UserCard  userCard,double $Mon){
+        return userCard.getTotalBalance() >= $Mon;
+    }
+
+    private  void updateUserCard(UserCard userCard,double amountToBePaid){
+        userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
+        this.userCardRepository.save(userCard);
+    }
+    private  void updateHotelCard(HotelCard hotelCard,double amountToBePaid){
+        hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
+       this.hotelCardRepository.save(hotelCard);
+    }
+
+
+
+
 }
+
+

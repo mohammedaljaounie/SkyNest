@@ -52,7 +52,7 @@ public class ARoomService {
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userID = jwtService.extractId(token);
-        Optional<Hotel> hotel = this.hotelRepository.findByUserId(userID);
+        Optional<Hotel> hotel = this.hotelRepository.findByIdAndUserId(hotel_id,userID);
         if (hotel.isEmpty()){
             return Map.of(
                     "message",

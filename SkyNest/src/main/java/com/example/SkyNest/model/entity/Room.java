@@ -1,11 +1,9 @@
 package com.example.SkyNest.model.entity;
 
+import com.example.SkyNest.dto.RoomResponse;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "room")
@@ -91,5 +89,20 @@ public class Room {
     public void setHotelBookings(Set<HotelBooking> hotelBookings) {
         this.hotelBookings = hotelBookings;
     }
+
+
+//
+//    @Override
+//    public boolean equals(Object o){
+//        RoomResponse room = (RoomResponse) o;
+//        return id.equals(room.getId()) ;
+//    }
+//
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(id);
+//    }
+//
 
 }
