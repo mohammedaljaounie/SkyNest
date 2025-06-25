@@ -72,7 +72,7 @@ public class UHotelService {
             for (int j = 0; j <hotelImageList.size() ; j++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImageList.get(j).getId());
-                imageDTO.setImageUrl("8080/user/hotel/hotelImage/"+hotelImageList.get(j).getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage/"+hotelImageList.get(j).getName());
                 imageDTOS.add(imageDTO);
             }
             hotel.setImageDTOList(imageDTOS);
@@ -103,7 +103,7 @@ public class UHotelService {
         for (int i = 0; i < imageList.size() ; i++) {
             ImageDTO imageDTO = new ImageDTO();
             imageDTO.setId(imageList.get(i).getId());
-            imageDTO.setImageUrl("8080/user/hotel/"+imageList.get(i).getName());
+            imageDTO.setImageUrl("/user/hotel/"+imageList.get(i).getName());
             imageResponseList.add(imageDTO);
         }
         hotelResponse.setImageDTOList(imageResponseList);
@@ -141,7 +141,7 @@ public class UHotelService {
             for (HotelImage hotelImage : hotelImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImage.getId());
-                imageDTO.setImageUrl("8080/user/hotel/hotelImage/" + hotelImage.getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage/" + hotelImage.getName());
                 imageDTOS.add(imageDTO);
             }
 
@@ -253,7 +253,7 @@ return bookingResponses;
             for (int j = 0; j <hotelImageList.size() ; j++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImageList.get(j).getId());
-                imageDTO.setImageUrl("8080/user/hotel/"+hotelImageList.get(j).getName());
+                imageDTO.setImageUrl("/user/hotel/"+hotelImageList.get(j).getName());
                 imageDTOS.add(imageDTO);
             }
             hotel.setImageDTOList(imageDTOS);
@@ -299,7 +299,7 @@ return bookingResponses;
 
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImage.getId());
-                imageDTO.setImageUrl("8080/user/hotel/hotelImage/"+hotelImage.getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage/"+hotelImage.getName());
                 imageDTOList.add(imageDTO);
             }
 
@@ -637,7 +637,7 @@ return bookingResponses;
             for (RoomImage roomImage : roomImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("8080/user/hotel/" + roomImage.getName());
+                imageDTO.setImageUrl("/user/hotel/" + roomImage.getName());
                 roomImages.add(imageDTO);
             }
             roomResponse.setImageDTOList(roomImages);
@@ -666,7 +666,7 @@ return bookingResponses;
             for (RoomImage roomImage : roomImageList ){
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("8080/user/hotel/"+roomImage.getName());
+                imageDTO.setImageUrl("/user/hotel/"+roomImage.getName());
                 roomImages.add(imageDTO);
 
             }

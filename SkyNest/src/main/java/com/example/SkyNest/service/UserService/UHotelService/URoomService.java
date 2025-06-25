@@ -59,7 +59,7 @@ public class URoomService {
                 for (RoomImage roomImage : roomImages) {
                     ImageDTO imageDTO = new ImageDTO();
                     imageDTO.setId(roomImage.getId());
-                    imageDTO.setImageUrl("8080/admin/hotel/" + roomImage.getName());
+                    imageDTO.setImageUrl("/user/hotel/" + roomImage.getName());
                     imageDTOList.add(imageDTO);
                 }
                 roomResponse.setImageDTOList(imageDTOList);
@@ -84,7 +84,7 @@ public class URoomService {
             for (RoomImage roomImage : roomImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("8080/user/room/" + roomImage.getName());
+                imageDTO.setImageUrl("/user/room/" + roomImage.getName());
                 imageDTOList.add(imageDTO);
             }
             roomResponse.setImageDTOList(imageDTOList);
