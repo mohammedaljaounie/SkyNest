@@ -65,7 +65,7 @@ public class UHotelService {
             hotel.setDescription(hotelList.get(i).getDescription());
             hotel.setRatingCount(hotelList.get(i).getRatingCount());
 
-            // todo : give hotel image from hotels and put this image in correct hotel
+            //  todo : give hotel image from hotels and put this image in correct hotel
             List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
 
             List<ImageDTO> imageDTOS = new ArrayList<>();
