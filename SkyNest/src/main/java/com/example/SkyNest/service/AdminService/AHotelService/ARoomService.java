@@ -14,8 +14,10 @@ import com.example.SkyNest.model.repository.RoomRepository;
 import com.example.SkyNest.model.repository.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.eclipse.angus.mail.iap.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -115,27 +117,19 @@ public class ARoomService {
        return null;
     }
     
-    public List<RoomResponse> getAllRoom(Long id){
+    public ResponseEntity<List<RoomResponse>> getAllRoom(Long hotelID){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userID = jwtService.extractId(token);
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userID);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelID,userID);
         if (hotelOptional.isEmpty()){
-            return null;
+            return ResponseEntity.status(400).body(null);
         }
-        if (!Objects.equals(hotelOptional.get().getId(), id)){
-            return null;
-        }
-        Optional<Hotel> hotel  = this.hotelRepository.findById(id);
-        if (hotel.isEmpty()){
-            return null;
-        }
-        
-        List<Room> rooms = this.roomRepository.findByHotelId(id);
+        List<Room> rooms = this.roomRepository.findByHotelId(hotelID);
         if (rooms.isEmpty()){
             return null;
         }
-        return getRoomResponses(rooms);
+        return ResponseEntity.ok(getRoomResponses(rooms));
 
     }
 
@@ -225,25 +219,31 @@ public class ARoomService {
                 "Successfully Updated");
     }
 
+    @Transactional
     public Map<String, String> deleteRoom(Long hotelId, Long roomId) {
+        System.out.println("START");
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = this.jwtService.extractId(token);
-        Optional<Hotel> hotelOpt = this.hotelRepository.findByUserId(userId);
+        System.out.println("SECOND");
+        Optional<Hotel> hotelOpt = this.hotelRepository.findById(hotelId);
+        System.out.println("USERID");
         if (hotelOpt.isEmpty()) {
             return Map.of("message",
-                    "I'm Sorry , you don't have hotel yet");
+                    "I'm Sorry , this hotel is not found");
         }
-        if (!Objects.equals(hotelOpt.get().getId(), hotelId)) {
+        System.out.println("HotelOPT");
+        if (!Objects.equals(hotelOpt.get().getUser().getId(), userId)) {
             return Map.of("message",
                     "I'm Sorry , you can't access to this hotel");
         }
+        System.out.println("IF EQUAL");
         Optional<Room> room = this.roomRepository.findByIdAndHotelId(roomId, hotelId);
         if (room.isEmpty()) {
             return Map.of("message",
                     "I'm Sorry , this room is not found in your hotel");
         }
-        this.roomRepository.delete(room.get());
+        this.roomRepository.deleteById(room.get().getId());
         return Map.of("message",
                 "Successfully Deleted");
     }

@@ -80,12 +80,7 @@ public class ARoomController {
     @GetMapping("/showAllRoom/{hotelId}")
     public ResponseEntity<List<RoomResponse>> getAllRoom(@PathVariable Long hotelId){
 
-        List<RoomResponse> roomResponseList = this.aRoomService.getAllRoom(hotelId);
-        if (roomResponseList!=null)
-            return ResponseEntity.ok()
-                    .body(roomResponseList);
-        return ResponseEntity.status(403)
-                .body(null);
+       return this.aRoomService.getAllRoom(hotelId);
     }
 
     @GetMapping("/showBookingRoom/{hotelId}")
