@@ -26,6 +26,9 @@ public interface HotelBookingRepository extends JpaRepository<HotelBooking,Long>
             "h.launchDate <=  :newEnd And h.departureDate >= :newStart And h.status = :status")
     List<HotelBooking> filterByDate(Long hotelId, LocalDate newStart,LocalDate newEnd , boolean status);
 
+    @Query(value = "select h from HotelBooking h where h.hotel.id = :hotelId And "+
+    "h.launchDate <= :nowDate And h.departureDate >= :nowDate And h.status = :status")
+    List<HotelBooking> filterBookingByLocalDate(Long hotelId,LocalDate nowDate,boolean status);
 
 
 

@@ -4,18 +4,14 @@ import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.dto.RoomRequest;
 import com.example.SkyNest.dto.RoomResponse;
 import com.example.SkyNest.dto.RoomUpdateRequest;
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.Room;
-import com.example.SkyNest.model.entity.RoomImage;
-import com.example.SkyNest.model.entity.User;
-import com.example.SkyNest.model.repository.HotelRepository;
-import com.example.SkyNest.model.repository.RoomImageRepository;
-import com.example.SkyNest.model.repository.RoomRepository;
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.entity.*;
+import com.example.SkyNest.model.repository.*;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.eclipse.angus.mail.iap.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +20,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Service
@@ -46,6 +44,13 @@ public class ARoomService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private HotelBookingRepository hotelBookingRepository;
+    @Autowired
+    private HotelCardRepository hotelCardRepository ;
+    @Autowired
+    private UserCardRepository userCardRepository;
 
     // fetch hotel by user id then check  if user can accesses to this hotel
     public Map<String,String> createRoom(Long hotel_id, RoomRequest roomInfo){
@@ -115,27 +120,19 @@ public class ARoomService {
        return null;
     }
     
-    public List<RoomResponse> getAllRoom(Long id){
+    public ResponseEntity<List<RoomResponse>> getAllRoom(Long hotelID){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userID = jwtService.extractId(token);
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userID);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelID,userID);
         if (hotelOptional.isEmpty()){
-            return null;
+            return ResponseEntity.status(400).body(null);
         }
-        if (!Objects.equals(hotelOptional.get().getId(), id)){
-            return null;
-        }
-        Optional<Hotel> hotel  = this.hotelRepository.findById(id);
-        if (hotel.isEmpty()){
-            return null;
-        }
-        
-        List<Room> rooms = this.roomRepository.findByHotelId(id);
+        List<Room> rooms = this.roomRepository.findByHotelId(hotelID);
         if (rooms.isEmpty()){
             return null;
         }
-        return getRoomResponses(rooms);
+        return ResponseEntity.ok(getRoomResponses(rooms));
 
     }
 
@@ -207,6 +204,12 @@ public class ARoomService {
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = jwtService.extractId(token);
+        Optional<User> userOptional  = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+
+            return Map.of("message",
+                    "This user is not register in our application");
+        }
         Optional<Hotel> hotel = this.hotelRepository.findByUserId(userId);
         if (!Objects.equals(hotel.get().getId(),hotelId)){
             return Map.of("message","I'm sorry you can't access to this hotel");
@@ -225,16 +228,26 @@ public class ARoomService {
                 "Successfully Updated");
     }
 
+    @Transactional
     public Map<String, String> deleteRoom(Long hotelId, Long roomId) {
+        System.out.println("START");
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = this.jwtService.extractId(token);
-        Optional<Hotel> hotelOpt = this.hotelRepository.findByUserId(userId);
+
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return Map.of("message",
+                    "Sorry , this account is not found in our system");
+        }
+
+        Optional<Hotel> hotelOpt = this.hotelRepository.findById(hotelId);
         if (hotelOpt.isEmpty()) {
             return Map.of("message",
-                    "I'm Sorry , you don't have hotel yet");
+                    "I'm Sorry , this hotel is not found");
         }
-        if (!Objects.equals(hotelOpt.get().getId(), hotelId)) {
+
+        if (!Objects.equals(hotelOpt.get().getUser().getId(), userId)) {
             return Map.of("message",
                     "I'm Sorry , you can't access to this hotel");
         }
@@ -243,9 +256,92 @@ public class ARoomService {
             return Map.of("message",
                     "I'm Sorry , this room is not found in your hotel");
         }
-        this.roomRepository.delete(room.get());
+
+        delete(hotelId,userId,room.get());
+
+        this.roomRepository.deleteById(room.get().getId());
         return Map.of("message",
                 "Successfully Deleted");
+    }
+
+
+    private void delete(Long hotelId, Long userId,Room roomInfo){
+        List<HotelBooking> bookingList = this.hotelBookingRepository.findAll();
+
+        for (HotelBooking hotelBooking : bookingList){
+          Set<Room> updateRoom = new HashSet<>();
+         for (Room room : hotelBooking.getRooms()){
+
+             if ((room.getId().equals(roomInfo.getId())))
+             {
+                 LocalDate today = LocalDate.now();
+                 LocalDate start = hotelBooking.getLaunchDate();
+                 LocalDate end = hotelBooking.getDepartureDate();
+                 boolean isActive = hotelBooking.isStatus();
+
+                 if (( !today.isBefore(start) && !today.isAfter(end) ) && isActive) {
+
+                     //المبلغ الكلي للغرفه خلال الايام يلي رح يتم الغائها من الحجز
+                     double totalPrice = ARoomService.calculateTotalPrice(LocalDate.now(), hotelBooking.getDepartureDate(), room.getCurrentPrice());
+                     double discountedAmount = totalPrice + (hotelBooking.getCurrentTotalAmount() * 5 / 100);
+                     System.out.println(discountedAmount);
+                     if (hotelBooking.getPaymentRatio() == 100) {
+
+                         // todo : update user card and hotel card + 5%
+                         updateHotelCard(hotelId, discountedAmount);
+                         updateUserCard(hotelBooking.getUser().getId(), discountedAmount);
+                         hotelBooking.setCurrentTotalAmount(hotelBooking.getCurrentTotalAmount() - discountedAmount);
+                         // todo : send notification
+
+                     } else {
+
+                         // todo : update total cost to booking  + 5%
+                         hotelBooking.setCurrentTotalAmount(hotelBooking.getCurrentTotalAmount() - discountedAmount);
+                         // todo : send notification
+
+                     }
+                 }
+
+             }
+
+             else
+             {
+                 updateRoom.add(room);
+             }
+
+
+
+         }
+            hotelBooking.setRooms(updateRoom);
+
+        }
+        this.hotelBookingRepository.saveAll(bookingList);
+
+    }
+
+    private static double calculateTotalPrice(LocalDate startDate,LocalDate endDate,double roomPrice){
+        long totalDays = ChronoUnit.DAYS.between(startDate,endDate)+1;
+
+        return roomPrice*totalDays;
+    }
+
+    private void updateUserCard(Long  userId, double amount){
+
+        Optional<UserCard> userCardOptional = this.userCardRepository.findByUserId(userId);
+        if (userCardOptional.isEmpty())
+            return;
+        UserCard userCard = userCardOptional.get();
+        userCard.setTotalBalance(userCard.getTotalBalance()+amount);
+        this.userCardRepository.save(userCard);
+    }
+
+    private void updateHotelCard(Long  hotelId , double amount){
+        Optional<HotelCard> hotelCardOptional = this.hotelCardRepository.findByHotelId(hotelId);
+        if (hotelCardOptional.isEmpty())
+            return;
+        HotelCard hotelCard = hotelCardOptional.get();
+        hotelCard.setTotalBalance(hotelCard.getTotalBalance()-amount);
+        this.hotelCardRepository.save(hotelCard);
     }
 
     @Transactional
@@ -285,8 +381,5 @@ public class ARoomService {
         return Map.of("message",
                 "Successfully  updated price");
     }
-
-
-
 
 }

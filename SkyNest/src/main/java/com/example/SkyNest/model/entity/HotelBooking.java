@@ -28,6 +28,7 @@ public class HotelBooking {
     private int paymentRatio;
     private double totalAmount;
     private double amountPaid;
+    private double currentTotalAmount;
 
     @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
@@ -45,7 +46,7 @@ public class HotelBooking {
 
     public HotelBooking(int numberOfPerson, int numberOfRoom, boolean status
             , LocalDate launchDate, LocalDate departureDate, int paymentRatio
-            , double totalAmount, double amountPaid, User user, Hotel hotel
+            , double totalAmount,double currentTotalAmount, double amountPaid, User user, Hotel hotel
             , Set<Room> rooms) {
         this.numberOfPerson = numberOfPerson;
         this.numberOfRoom = numberOfRoom;
@@ -54,6 +55,7 @@ public class HotelBooking {
         this.departureDate = departureDate;
         this.paymentRatio = paymentRatio;
         this.totalAmount = totalAmount;
+        this.currentTotalAmount = currentTotalAmount;
         this.amountPaid = amountPaid;
         this.user = user;
         this.hotel = hotel;
@@ -154,5 +156,13 @@ public class HotelBooking {
 
     public void setRooms(Set<Room> rooms) {
         this.rooms = rooms;
+    }
+
+    public double getCurrentTotalAmount() {
+        return currentTotalAmount;
+    }
+
+    public void setCurrentTotalAmount(double currentTotalAmount) {
+        this.currentTotalAmount = currentTotalAmount;
     }
 }
