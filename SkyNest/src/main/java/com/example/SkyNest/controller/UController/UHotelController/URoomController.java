@@ -27,10 +27,10 @@ public class URoomController {
 
 
     @GetMapping("/view-rooms/{hotelId}")
-    public ResponseEntity<List<UserRoomResponse>>  viewAllRoomInHotel(Long hotelId){
+    public ResponseEntity<List<UserRoomResponse>>  viewAllRoomInHotel(@PathVariable Long hotelId){
         List<UserRoomResponse> userRoomResponses = this.uRoomService.getAllRoomInHotel(hotelId);
 
-        if (userRoomResponses.size()==0){
+        if (userRoomResponses == null){
             return ResponseEntity.status(204).body(null);
         }
 
@@ -42,7 +42,7 @@ public class URoomController {
     }
 
     @GetMapping("/details/{roomId}")
-    public ResponseEntity<UserRoomResponse>  viewRoomDetails(Long roomId){
+    public ResponseEntity<UserRoomResponse>  viewRoomDetails(@PathVariable Long roomId){
         UserRoomResponse userRoomResponses = this.uRoomService.getRoomInformation(roomId);
 
         if (userRoomResponses==null){
