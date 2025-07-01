@@ -14,8 +14,6 @@ public class HotelBookingRequest {
     @Column(nullable = false)
     private int numberOfPerson;
     @Column(nullable = false)
-    private int numberOfRoom;
-    @Column(nullable = false)
     private LocalDate launchDate;
     @Column(nullable = false)
     private LocalDate departureDate;
@@ -34,13 +32,6 @@ public class HotelBookingRequest {
         this.numberOfPerson = numberOfPerson;
     }
 
-    public int getNumberOfRoom() {
-        return numberOfRoom;
-    }
-
-    public void setNumberOfRoom(int numberOfRoom) {
-        this.numberOfRoom = numberOfRoom;
-    }
 
     public LocalDate getLaunchDate() {
         return launchDate;
