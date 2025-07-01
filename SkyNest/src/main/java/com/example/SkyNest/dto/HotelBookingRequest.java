@@ -22,7 +22,7 @@ public class HotelBookingRequest {
     @Column(nullable = false)
     private int paymentRatio;
     private Set<Long> setOfRooms;
-    private Hotel hotel;
+    private long  hotelId;
 
     public int getNumberOfPerson() {
         return numberOfPerson;
@@ -65,11 +65,11 @@ public class HotelBookingRequest {
         this.setOfRooms = setOfRooms;
     }
 
-    public Hotel getHotel() {
-        return hotel;
+    public long  getHotelId() {
+        return hotelId;
     }
 
-    public void setHotel(Hotel hotel) {
-        this.hotel = hotel;
+    public void setHotelId(long  hotel) {
+        this.hotelId = hotel;
     }
 }

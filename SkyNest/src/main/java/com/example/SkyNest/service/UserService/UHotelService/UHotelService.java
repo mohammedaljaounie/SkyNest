@@ -454,7 +454,7 @@ public class UHotelService {
       }
         System.out.println("UserCard");
 
-      Optional<Hotel> hotel = this.hotelRepository.findById(bookingRequest.getHotel().getId());
+      Optional<Hotel> hotel = this.hotelRepository.findById(bookingRequest.getHotelId());
       if (hotel.isEmpty()){
           // todo : stop because  the hotel is not found
           return ResponseEntity.status(400).body("This hotel is not found in our app, booking in other hotel");
@@ -495,7 +495,7 @@ public class UHotelService {
 
         System.out.println("get not bocked room");
        Set<RoomResponse> notBockedRoom =filterAvailableRoomsInHotel(
-               bookingRequest.getHotel().getId(),
+               bookingRequest.getHotelId(),
                bookingRequest.getLaunchDate(),
                bookingRequest.getDepartureDate()
        );
