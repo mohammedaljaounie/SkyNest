@@ -3,12 +3,12 @@ package com.example.SkyNest.service.UserService.UHotelService;
 
 import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.dto.UserRoomResponse;
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.Room;
-import com.example.SkyNest.model.entity.RoomImage;
-import com.example.SkyNest.model.repository.HotelRepository;
-import com.example.SkyNest.model.repository.RoomImageRepository;
-import com.example.SkyNest.model.repository.RoomRepository;
+import com.example.SkyNest.model.entity.hotel.Hotel;
+import com.example.SkyNest.model.entity.hotel.Room;
+import com.example.SkyNest.model.entity.hotel.RoomImage;
+import com.example.SkyNest.model.repository.hotel.HotelRepository;
+import com.example.SkyNest.model.repository.hotel.RoomImageRepository;
+import com.example.SkyNest.model.repository.hotel.RoomRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

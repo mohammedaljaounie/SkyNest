@@ -1,8 +1,15 @@
 package com.example.SkyNest.service.UserService.UHotelService;
 
 import com.example.SkyNest.dto.*;
-import com.example.SkyNest.model.entity.*;
-import com.example.SkyNest.model.repository.*;
+import com.example.SkyNest.model.entity.flight.FlightBooking;
+import com.example.SkyNest.model.entity.hotel.*;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.entity.userDetails.UserCard;
+import com.example.SkyNest.model.repository.flight.FlightBookingRepo;
+import com.example.SkyNest.model.repository.hotel.*;
+import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
+import com.example.SkyNest.myEnum.StatusEnum;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,15 +36,13 @@ public class UHotelService {
     @Autowired
     private RoomRepository roomRepository;
     @Autowired
-    private  UserCardRepository userCardRepository;
+    private UserCardRepository userCardRepository;
     @Autowired
-    private  HotelCardRepository hotelCardRepository;
+    private HotelCardRepository hotelCardRepository;
     @Autowired
     private UserRepository userRepository;
     @Autowired
     private HotelBookingRepository hotelBookingRepository;
-    @Autowired
-    private UserBookingRepository userBookingRepository;
     @Autowired
     private  HotelRatingRepository hotelRatingRepository;
     @Autowired
@@ -45,7 +50,6 @@ public class UHotelService {
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
-
     private static final String textOfRoom ="";
 
     public List<HotelResponse> showAllHotel(){
@@ -64,7 +68,7 @@ public class UHotelService {
             hotel.setAddress(hotelList.get(i).getAddress());
             hotel.setDescription(hotelList.get(i).getDescription());
             hotel.setRatingCount(hotelList.get(i).getRatingCount());
-
+            hotel.setAvgRating(hotelList.get(i).getAvgRating());
             //  todo : give hotel image from hotels and put this image in correct hotel
             List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
 
@@ -116,8 +120,10 @@ public class UHotelService {
         String token = jwt.substring(7);
         double longitude = jwtService.extractLongitude(token);
         double latitude  = jwtService.extractLatitude(token);
+        System.out.println(longitude);
+        System.out.println(latitude);
 //        List<Hotel> hotelList = this.hotelRepository.findAll();
-        List<Hotel> hotelList = this.hotelRepository.findClosestHotels(longitude,latitude,20);
+        List<Hotel> hotelList = this.hotelRepository.findNearestHotels(latitude,longitude,20);
         if (hotelList.isEmpty()){
             return null;
         }
@@ -163,71 +169,68 @@ public class UHotelService {
     }
 
 
+    //حجوزات ساريه
     public List<UserBookingResponse> viewActiveReservation(){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        LocalDate localDate = LocalDate.now();
-        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
-        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
-        for (UserBooking userBooking : userBookings) {
-            if (localDate.isAfter(userBooking.getBookingEndDate()) ||
-                    localDate.isEqual(userBooking.getBookingEndDate())&&
-            userBooking.getStatus()==1) {
-                UserBookingResponse userBookingResponse = new UserBookingResponse();
-                userBookingResponse.setId(userBooking.getId());
-                userBookingResponse.setBookingType(userBooking.getBookingType());
-                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
-                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
-                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
-                bookingResponses.add(userBookingResponse);
-            }
-        }
-return bookingResponses;
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Activated,userId);
 
+        return  getUserBookingResponse(hotelBookingList,StatusEnum.Activated);
     }
 
+    // حجوزات ملغيه
     public List<UserBookingResponse> viewCanceledReservation(){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
-        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
-        for (UserBooking userBooking : userBookings) {
-            if (userBooking.getStatus()==0) {
-                UserBookingResponse userBookingResponse = new UserBookingResponse();
-                userBookingResponse.setId(userBooking.getId());
-                userBookingResponse.setBookingType(userBooking.getBookingType());
-                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
-                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
-                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
-                bookingResponses.add(userBookingResponse);
-            }
-        }
-        return bookingResponses;
+        List<HotelBooking> hotelBookingList    = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Canceled,userId);
 
+        return getUserBookingResponse(hotelBookingList,StatusEnum.Canceled);
     }
 
+    // حجوزات مرفوضه
     public List<UserBookingResponse> viewIncorrectReservation(){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        List<UserBooking> userBookings = this.userBookingRepository.findByUserId(userId);
-        List<UserBookingResponse> bookingResponses  = new ArrayList<>();
-        for (UserBooking userBooking : userBookings) {
-            if (userBooking.getStatus()==-1) {
-                UserBookingResponse userBookingResponse = new UserBookingResponse();
-                userBookingResponse.setId(userBooking.getId());
-                userBookingResponse.setBookingType(userBooking.getBookingType());
-                userBookingResponse.setBookingStartDate(userBooking.getBookingStartDate());
-                userBookingResponse.setBookingEndDate(userBooking.getBookingEndDate());
-                userBookingResponse.setListOfReservedRoomNumbers(userBooking.getListOfReservedRoomNumbers());
-                bookingResponses.add(userBookingResponse);
-            }
-        }
-        return bookingResponses;
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Unacceptable,userId);
+
+   return getUserBookingResponse(hotelBookingList,StatusEnum.Unacceptable);
 
     }
+
+
+    private List<UserBookingResponse> getUserBookingResponse(
+            List<HotelBooking> hotelBookingList, StatusEnum statusEnum){
+
+        List<UserBookingResponse> userBookingResponseArrayList = new ArrayList<>();
+        for (HotelBooking hotelBooking : hotelBookingList){
+            UserBookingResponse userBookingResponse = new UserBookingResponse();
+            userBookingResponse.setBookingId(hotelBooking.getId());
+            userBookingResponse.setBookingStartDate(hotelBooking.getLaunchDate());
+            userBookingResponse.setBookingEndDate(hotelBooking.getDepartureDate());
+            userBookingResponse.setBookingType("Hotel reservation");
+            userBookingResponse.setHotelName(hotelBooking.getHotel().getName());
+            userBookingResponse.setNumberOfNights(UHotelService.calculateDaysBetweenTowDate(hotelBooking.getLaunchDate(),hotelBooking.getDepartureDate()));
+            userBookingResponse.setAddress(hotelBooking.getHotel().getAddress());
+            userBookingResponse.setTotalCost(hotelBooking.getTotalAmount());
+           if (statusEnum==StatusEnum.Activated)
+            userBookingResponse.setStatusBooking("Activated");
+           else if (statusEnum==StatusEnum.Canceled)
+                userBookingResponse.setStatusBooking("Canceled");
+           else
+               userBookingResponse.setStatusBooking("Unacceptable");
+
+
+            userBookingResponseArrayList.add(userBookingResponse);
+        }
+
+        return userBookingResponseArrayList;
+    }
+
+
+
 
     public List<HotelResponse> showAllHotelByLocation(String address){
 
@@ -245,7 +248,7 @@ return bookingResponses;
             hotel.setAddress(hotelList.get(i).getAddress());
             hotel.setDescription(hotelList.get(i).getDescription());
             hotel.setRatingCount(hotelList.get(i).getRatingCount());
-
+            hotel.setAvgRating(hotelList.get(i).getAvgRating());
             // todo : give hotel image from hotels and put this image in correct hotel
             List<HotelImage> hotelImageList =  hotelList.get(i).getHotelImageList();
 
@@ -315,6 +318,11 @@ return bookingResponses;
 
     @Transactional
     public Map<String ,String> hotelEvaluation(Long hotelId,int rating,String comment){
+         if (rating>5||rating<1){
+             return Map.of("message",
+                     "this rating is not allow , it is high");
+         }
+
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = jwtService.extractId(token);
@@ -328,9 +336,6 @@ return bookingResponses;
         if (hotel.isEmpty())
             return Map.of("message",
                     "Sorry , this hotel is not found in our system");
-
-        System.out.println(userId);
-        System.out.println(hotelId);
 
         if (!isReservation(userId,hotelId)){
             return Map.of("message",
@@ -399,7 +404,7 @@ return bookingResponses;
     private boolean isReservation(Long userId , Long hotelId){
 
         List<HotelBooking> hotelBookingList   = this.
-                hotelBookingRepository.findByUserIdAndHotelId(userId, hotelId);
+                hotelBookingRepository.findByUserIdAndHotelIdAndStatus(userId, hotelId,StatusEnum.Activated);
 
        if (hotelBookingList.isEmpty()){
            return false;
@@ -407,8 +412,7 @@ return bookingResponses;
 
            for (HotelBooking hotelBooking : hotelBookingList) {
 
-               if (hotelBooking.isStatus()&&
-                   !LocalDate.now().isBefore(hotelBooking.getLaunchDate())){
+               if (!LocalDate.now().isBefore(hotelBooking.getLaunchDate())){
                    return true;
                }
            }
@@ -471,13 +475,14 @@ return bookingResponses;
 //        List<Room> realRooms = roomRepository.findAllById(selectedRoomIds);
         System.out.println("HotelCard");
 
-        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
-                .stream()
-                .map(Room::getId)
-                .collect(Collectors.toSet());
+//        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
+//                .stream()
+//                .map(Room::getId)
+//                .collect(Collectors.toSet());
+            //      الغرف يلي موجوده بالطلب
+        List<Room> realRooms = roomRepository.findAllById(bookingRequest.getSetOfRooms());
 
-        List<Room> realRooms = roomRepository.findAllById(selectedRoomIds);
-
+        //  todo : check if all rooms in same hotel
                 for (Room room : realRooms) {
                     if (room.getHotel()==null||!(room.getHotel().getId() .equals( hotel.get().getId()))) {
 
@@ -488,21 +493,23 @@ return bookingResponses;
 
                 }
 
-        System.out.println("Check if same hotel");
+        System.out.println("get not bocked room");
        Set<RoomResponse> notBockedRoom =filterAvailableRoomsInHotel(
                bookingRequest.getHotel().getId(),
                bookingRequest.getLaunchDate(),
                bookingRequest.getDepartureDate()
        );
-        System.out.println("get not bocked room");
+
+
+        System.out.println("تحقق من اذا الغرف محجوزه بالحجم");
         if (notBockedRoom.isEmpty()||notBockedRoom.size()<bookingRequest.getSetOfRooms().size()){
             //todo : stop because all room is bocked
             return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
         }
-        System.out.println("تحقق من اذا الغرف محجوزه بالحجم");
 
+// حساب عدد الغرف المتوفره لعملية الحجز (يعني بشوف الغرف يلي طلبها المستخدم اذا كلها متوفره ضمن الغرف الفاضيه او لا )
         int counter = 0;
-           for (Room room : bookingRequest.getSetOfRooms()){
+           for (Room room :realRooms){
 
                for (RoomResponse roomResponse : notBockedRoom){
                    if (room.getId().equals(roomResponse.getId())){
@@ -511,6 +518,7 @@ return bookingResponses;
                    }
                }
            }
+           // التحقق اذا عدد الغرف المتوفره هو نفسه عدد الغرف المطلوبه
            if (counter!=bookingRequest.getSetOfRooms().size()){
                // todo : some rooms are bocked
                return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
@@ -524,6 +532,22 @@ return bookingResponses;
 
         if (!UHotelService.checkUserCard(userCard.get(),theAmountToBePaid)){
 
+ // todo : update hotel booking
+
+
+            this.hotelBookingRepository.save(
+                    new HotelBooking(
+                            bookingRequest.getNumberOfPerson(),
+                            bookingRequest.getSetOfRooms().size(),
+                            StatusEnum.Unacceptable,bookingRequest.getLaunchDate(),
+                            bookingRequest.getDepartureDate(),
+                            bookingRequest.getPaymentRatio(),totalCost,totalCost,0,
+                            user.get(),
+                            hotel.get(),
+                            new HashSet<>(realRooms)
+                    )
+            );
+
             // todo : stop because user don't have Sufficient amount
             return ResponseEntity.status(400).body("i'm sorry , you don't have mony ");
         }
@@ -536,19 +560,18 @@ return bookingResponses;
                 new HotelBooking(
                         bookingRequest.getNumberOfPerson(),
                         bookingRequest.getSetOfRooms().size(),
-                        true,bookingRequest.getLaunchDate(),
+                        StatusEnum.Activated,bookingRequest.getLaunchDate(),
                         bookingRequest.getDepartureDate(),
                         bookingRequest.getPaymentRatio(),totalCost,totalCost,theAmountToBePaid,
                         user.get(),
                         hotel.get(),
-                        bookingRequest.getSetOfRooms()
+                        new HashSet<>(realRooms)
                 )
         );
 
         return ResponseEntity.ok("Successfully booking");
 
     }
-
 
     // todo filter room that not bocked
     public Set<RoomResponse> filterAvailableRoomsInHotel(Long hotelId, LocalDate startDate, LocalDate endDate){
@@ -564,7 +587,7 @@ return bookingResponses;
         }
         List<RoomResponse> roomResponseList = convertRoomToDTO(this.roomRepository.findByHotelId(hotelId));
 
-        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.filterByDate(hotelId, startDate, endDate,true);
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.filterByDate(hotelId, startDate, endDate,StatusEnum.Activated);
 
         Set<RoomResponse> notBockedRoom  = new HashSet<>();
         if (!hotelBookingList.isEmpty()) {
@@ -694,7 +717,7 @@ return bookingResponses;
 
     private static double calculateTotalPrice(List<Room> rooms,LocalDate startDate,LocalDate endDate){
 
-        long totalDaysOfStay = ChronoUnit.DAYS.between(startDate,endDate)+1;
+        long totalDaysOfStay = UHotelService.calculateDaysBetweenTowDate(startDate, endDate);
 
         double totalCost = 0;
         for (Room room : rooms) {
@@ -702,6 +725,11 @@ return bookingResponses;
             totalCost = totalCost +( room.getCurrentPrice()*totalDaysOfStay);
         }
         return totalCost;
+    }
+
+    private  static long  calculateDaysBetweenTowDate(LocalDate startDate,LocalDate endDate){
+
+        return ChronoUnit.DAYS.between(startDate,endDate)+1;
     }
 
     private static boolean checkUserCard(UserCard  userCard,double $Mon){

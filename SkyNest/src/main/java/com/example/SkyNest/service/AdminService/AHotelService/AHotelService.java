@@ -2,12 +2,12 @@ package com.example.SkyNest.service.AdminService.AHotelService;
 
 import com.example.SkyNest.dto.HotelResponse;
 import com.example.SkyNest.dto.ImageDTO;
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.HotelCard;
-import com.example.SkyNest.model.entity.HotelImage;
-import com.example.SkyNest.model.repository.HotelCardRepository;
-import com.example.SkyNest.model.repository.HotelImageRepository;
-import com.example.SkyNest.model.repository.HotelRepository;
+import com.example.SkyNest.model.entity.hotel.Hotel;
+import com.example.SkyNest.model.entity.hotel.HotelCard;
+import com.example.SkyNest.model.entity.hotel.HotelImage;
+import com.example.SkyNest.model.repository.hotel.HotelCardRepository;
+import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
+import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

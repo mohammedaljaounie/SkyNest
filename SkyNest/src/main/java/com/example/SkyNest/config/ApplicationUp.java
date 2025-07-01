@@ -1,17 +1,14 @@
 package com.example.SkyNest.config;
 
-import com.example.SkyNest.model.entity.Role;
-import com.example.SkyNest.model.entity.User;
-import com.example.SkyNest.model.repository.RoleRepo;
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.entity.userDetails.Role;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.repository.userDetails.RoleRepo;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-
-import java.util.Base64;
-import java.util.Optional;
 
 @Component
 public class ApplicationUp implements ApplicationRunner {

@@ -1,13 +1,12 @@
 package com.example.SkyNest.dto;
 
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.Room;
+import com.example.SkyNest.model.entity.hotel.Hotel;
+import com.example.SkyNest.model.entity.hotel.Room;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Set;
 
 public class HotelBookingRequest {
@@ -24,7 +23,7 @@ public class HotelBookingRequest {
     @Max(value = 100)
     @Column(nullable = false)
     private int paymentRatio;
-    private Set<Room> setOfRooms;
+    private Set<Long> setOfRooms;
     private Hotel hotel;
 
     public int getNumberOfPerson() {
@@ -67,11 +66,11 @@ public class HotelBookingRequest {
         this.paymentRatio = paymentRatio;
     }
 
-    public Set<Room> getSetOfRooms() {
+    public Set<Long> getSetOfRooms() {
         return setOfRooms;
     }
 
-    public void setSetOfRooms(Set<Room> setOfRooms) {
+    public void setSetOfRooms(Set<Long> setOfRooms) {
         this.setOfRooms = setOfRooms;
     }
 

@@ -1,11 +1,9 @@
 package com.example.SkyNest.service.SuperAdminService.SAHotelService;
 
 import com.example.SkyNest.dto.UserInfo;
-import com.example.SkyNest.model.entity.Role;
-import com.example.SkyNest.model.entity.User;
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

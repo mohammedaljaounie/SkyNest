@@ -3,9 +3,7 @@ package com.example.SkyNest.controller.UController.UHotelController;
 
 import com.example.SkyNest.dto.HotelBookingRequest;
 import com.example.SkyNest.dto.HotelResponse;
-import com.example.SkyNest.dto.HotelRoomRequest;
 import com.example.SkyNest.dto.UserBookingResponse;
-import com.example.SkyNest.model.entity.HotelBooking;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

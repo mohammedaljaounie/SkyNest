@@ -2,8 +2,8 @@ package com.example.SkyNest.service.UserService;
 
 import com.example.SkyNest.dto.UserInfo;
 import com.example.SkyNest.dto.UserRequestInfo;
-import com.example.SkyNest.model.entity.User;
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;

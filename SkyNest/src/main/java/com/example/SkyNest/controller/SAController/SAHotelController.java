@@ -3,7 +3,6 @@ package com.example.SkyNest.controller.SAController;
 import com.example.SkyNest.dto.HotelRequest;
 import com.example.SkyNest.dto.HotelRequestUpdate;
 import com.example.SkyNest.dto.SAHotelResponse;
-import com.example.SkyNest.model.entity.Hotel;
 import com.example.SkyNest.service.SuperAdminService.SAHotelService.SAHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

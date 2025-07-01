@@ -1,6 +1,6 @@
 package com.example.SkyNest.dto;
 
-import com.example.SkyNest.model.entity.Hotel;
+import com.example.SkyNest.model.entity.hotel.Hotel;
 
 public class HotelRequestUpdate {
 

@@ -1,6 +1,6 @@
 package com.example.SkyNest.service.authService;
 
-import com.example.SkyNest.model.entity.User;
+import com.example.SkyNest.model.entity.userDetails.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

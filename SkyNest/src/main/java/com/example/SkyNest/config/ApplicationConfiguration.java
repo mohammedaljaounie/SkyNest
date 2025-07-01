@@ -1,6 +1,6 @@
 package com.example.SkyNest.config;
 
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

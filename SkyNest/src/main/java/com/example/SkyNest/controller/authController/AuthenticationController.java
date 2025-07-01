@@ -1,11 +1,8 @@
 package com.example.SkyNest.controller.authController;
 
 import com.example.SkyNest.dto.*;
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.Room;
-import com.example.SkyNest.model.repository.HotelRepository;
-import com.example.SkyNest.model.repository.OtpRepository;
-import com.example.SkyNest.model.repository.UserRepository;
+import com.example.SkyNest.model.repository.userDetails.OtpRepository;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import com.example.SkyNest.service.authService.AuthenticationService;
 import com.example.SkyNest.service.authService.EmailService;

@@ -1,24 +1,19 @@
 package com.example.SkyNest.controller.AController;
 
 import com.example.SkyNest.dto.HotelResponse;
-import com.example.SkyNest.model.entity.Hotel;
-import com.example.SkyNest.model.entity.HotelImage;
-import com.example.SkyNest.model.repository.HotelRepository;
+import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
-import jakarta.annotation.security.PermitAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authorization.method.AuthorizeReturnObject;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
 @RestController

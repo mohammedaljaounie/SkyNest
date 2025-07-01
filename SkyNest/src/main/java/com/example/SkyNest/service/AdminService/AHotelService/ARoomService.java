@@ -4,11 +4,15 @@ import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.dto.RoomRequest;
 import com.example.SkyNest.dto.RoomResponse;
 import com.example.SkyNest.dto.RoomUpdateRequest;
-import com.example.SkyNest.model.entity.*;
-import com.example.SkyNest.model.repository.*;
+import com.example.SkyNest.model.entity.hotel.*;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.entity.userDetails.UserCard;
+import com.example.SkyNest.model.repository.hotel.*;
+import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
+import com.example.SkyNest.myEnum.StatusEnum;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
-import org.eclipse.angus.mail.iap.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -277,9 +281,9 @@ public class ARoomService {
                  LocalDate today = LocalDate.now();
                  LocalDate start = hotelBooking.getLaunchDate();
                  LocalDate end = hotelBooking.getDepartureDate();
-                 boolean isActive = hotelBooking.isStatus();
+                 StatusEnum isActive = hotelBooking.isStatus();
 
-                 if (( !today.isBefore(start) && !today.isAfter(end) ) && isActive) {
+                 if (( !today.isBefore(start) && !today.isAfter(end) ) && isActive==StatusEnum.Activated) {
 
                      //المبلغ الكلي للغرفه خلال الايام يلي رح يتم الغائها من الحجز
                      double totalPrice = ARoomService.calculateTotalPrice(LocalDate.now(), hotelBooking.getDepartureDate(), room.getCurrentPrice());
