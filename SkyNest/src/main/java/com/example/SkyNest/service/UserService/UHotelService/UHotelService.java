@@ -9,6 +9,7 @@ import com.example.SkyNest.model.repository.flight.FlightBookingRepo;
 import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
+import com.example.SkyNest.myEnum.DateStatus;
 import com.example.SkyNest.myEnum.StatusEnum;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -229,9 +230,6 @@ public class UHotelService {
         return userBookingResponseArrayList;
     }
 
-
-
-
     public List<HotelResponse> showAllHotelByLocation(String address){
 
         List<Hotel> hotelList = this.hotelRepository.findByAddress(address);
@@ -433,7 +431,8 @@ public class UHotelService {
     {
       if (!UHotelService.checkDate(bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate())){
           // todo : stop because the date is wrong
-          return ResponseEntity.status(400).body("Wrong in date");
+          return ResponseEntity.status(400).body(Map.of("message",
+                  "Wrong in date"));
       }
 
       String jwt = request.getHeader("Authorization");
@@ -443,42 +442,31 @@ public class UHotelService {
       if (user.isEmpty()){
 
           //todo : stop because this user is not register
-           return ResponseEntity.status(403).body("your not register in our application");
+           return ResponseEntity.status(403).body(Map.of("message",
+                   "your not register in our application"));
       }
         System.out.println("User");
       Optional<UserCard> userCard = this.userCardRepository.findByUserId(user.get().getId());
       if (userCard.isEmpty()){
 
           //todo : stop because user not has card to pay
-          return ResponseEntity.status(403).body("you don't have card to pay");
+          return ResponseEntity.status(403).body(Map.of("message","you don't have card to pay"));
       }
         System.out.println("UserCard");
 
       Optional<Hotel> hotel = this.hotelRepository.findById(bookingRequest.getHotelId());
       if (hotel.isEmpty()){
           // todo : stop because  the hotel is not found
-          return ResponseEntity.status(400).body("This hotel is not found in our app, booking in other hotel");
+          return ResponseEntity.status(400).body(Map.of("message","This hotel is not found in our app, booking in other hotel"));
       }
 
-        System.out.println("Hotel");
       Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotel.get().getId());
       if (hotelCard.isEmpty()){
 
           // todo : stop because the hotel is not has card
-          return ResponseEntity.status(403).body("i'm sorry , this hotel don't have card now,you can't booking in this hotel");
+          return ResponseEntity.status(403).body(Map.of("message","i'm sorry , this hotel don't have card now,you can't booking in this hotel"));
       }
-//        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
-//                .stream()
-//                .map(Room::getId)
-//                .collect(Collectors.toSet());
-//
-//        List<Room> realRooms = roomRepository.findAllById(selectedRoomIds);
-        System.out.println("HotelCard");
 
-//        Set<Long> selectedRoomIds = bookingRequest.getSetOfRooms()
-//                .stream()
-//                .map(Room::getId)
-//                .collect(Collectors.toSet());
             //      الغرف يلي موجوده بالطلب
         List<Room> realRooms = roomRepository.findAllById(bookingRequest.getSetOfRooms());
 
@@ -493,7 +481,6 @@ public class UHotelService {
 
                 }
 
-        System.out.println("get not bocked room");
        Set<RoomResponse> notBockedRoom =filterAvailableRoomsInHotel(
                bookingRequest.getHotelId(),
                bookingRequest.getLaunchDate(),
@@ -501,10 +488,10 @@ public class UHotelService {
        );
 
 
-        System.out.println("تحقق من اذا الغرف محجوزه بالحجم");
+        // check by size
         if (notBockedRoom.isEmpty()||notBockedRoom.size()<bookingRequest.getSetOfRooms().size()){
             //todo : stop because all room is bocked
-            return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
+            return ResponseEntity.status(400).body(Map.of("message","i'm sorry , all rooms are bocked "));
         }
 
 // حساب عدد الغرف المتوفره لعملية الحجز (يعني بشوف الغرف يلي طلبها المستخدم اذا كلها متوفره ضمن الغرف الفاضيه او لا )
@@ -521,9 +508,9 @@ public class UHotelService {
            // التحقق اذا عدد الغرف المتوفره هو نفسه عدد الغرف المطلوبه
            if (counter!=bookingRequest.getSetOfRooms().size()){
                // todo : some rooms are bocked
-               return ResponseEntity.status(400).body("i'm sorry , all rooms are bocked ");
+               return ResponseEntity.status(400).body(Map.of("message","i'm sorry , all rooms are bocked "));
            }
-        System.out.println("تحقق من خلال المقارنه");
+
 
         double totalCost = UHotelService.calculateTotalPrice(realRooms,bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate());
 
@@ -549,11 +536,11 @@ public class UHotelService {
             );
 
             // todo : stop because user don't have Sufficient amount
-            return ResponseEntity.status(400).body("i'm sorry , you don't have mony ");
+            return ResponseEntity.status(400).body(Map.of("message","i'm sorry , you don't have mony "));
         }
 
-        updateUserCard(userCard.get(), theAmountToBePaid);
-        updateHotelCard(hotelCard.get(), theAmountToBePaid);
+        updateUserCard(userCard.get(), theAmountToBePaid,false);
+        updateHotelCard(hotelCard.get(), theAmountToBePaid,true);
 
         // update room status if start date = today
         this.hotelBookingRepository.save(
@@ -569,7 +556,8 @@ public class UHotelService {
                 )
         );
 
-        return ResponseEntity.ok("Successfully booking");
+        return ResponseEntity.ok(Map.of("message",
+                "Successfully booking"));
 
     }
 
@@ -736,18 +724,122 @@ public class UHotelService {
         return userCard.getTotalBalance() >= $Mon;
     }
 
-    private  void updateUserCard(UserCard userCard,double amountToBePaid){
-        userCard.setTotalBalance(userCard.getTotalBalance()-amountToBePaid);
+    private  void updateUserCard(UserCard userCard,double amountToBePaid,boolean isDecrease){
+        if (isDecrease) {
+            userCard.setTotalBalance(userCard.getTotalBalance() + amountToBePaid);
+        }else {
+            userCard.setTotalBalance(userCard.getTotalBalance() - amountToBePaid);
+        }
         this.userCardRepository.save(userCard);
     }
-    private  void updateHotelCard(HotelCard hotelCard,double amountToBePaid){
-        hotelCard.setTotalBalance(hotelCard.getTotalBalance()+amountToBePaid);
+    private  void updateHotelCard(HotelCard hotelCard,double amountToBePaid,boolean isDecrease){
+        if (isDecrease) {
+            hotelCard.setTotalBalance(hotelCard.getTotalBalance() + amountToBePaid);
+        }
+        else {
+            hotelCard.setTotalBalance(hotelCard.getTotalBalance() - amountToBePaid);
+        }
        this.hotelCardRepository.save(hotelCard);
     }
 
 
+    @Transactional
+    public Map<String,String> cancelBooking(Long bookingId){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            // message explain that this user is not found in our application
+            return Map.of("message",
+                    "sorry,you are  not found in our application");
+        }
+        Optional<UserCard>  userCard = this.userCardRepository.findByUserId(userId);
+        if (userCard.isEmpty()){
+            return Map.of("message",
+                    "sorry, you don't have card to return your mony on it");
+        }
+        Optional<HotelBooking> hotelBooking = this.hotelBookingRepository.findById(bookingId);
+        if (hotelBooking.isEmpty()){
+            // message explain that this booking is not found
+            return Map.of("message",
+                    "sorry , this reservation is not found in system yet");
+        }
+        if (hotelBooking.get().getStatus()!=StatusEnum.Activated){
+            return Map.of("message",
+                    "sorry , this reservation isn't Activated");
+        }
+
+        if (!hotelBooking.get().getUser().getId().equals(userId)){
+            // message explain , the person that send this request is not equal the person that have this booking
+            return Map.of("message",
+                    "sorry , this reservation is not found in your reservation");
+        }
+
+        Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotelBooking.get().getHotel().getId());
+        if (hotelCard.isEmpty()){
+            return Map.of("message",
+                    "sorry , this hotel isn't have card to get mony from it");
+        }
 
 
+        DateStatus dateStatus=verifyTheFine(hotelBooking.get().getLaunchDate());
+
+        boolean isCancel = false;
+        switch (dateStatus){
+            case FREE : {
+                System.out.println("FREE");
+                HotelBooking updateHotelBooking = hotelBooking.get();
+                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid(),true);
+                updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid(),false);
+                this.hotelBookingRepository.save(updateHotelBooking);
+                isCancel=true;
+            }
+                break;
+            case A_FINE:{
+                System.out.println("A_FINE");
+                HotelBooking updateHotelBooking = hotelBooking.get();
+                double fine = updateHotelBooking.getCurrentTotalAmount()*5/100;
+                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid()-fine,true);
+                updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid()-fine,false);
+                this.hotelBookingRepository.save(updateHotelBooking);
+                isCancel=true;
+
+            }
+                break;
+            case FULL_AMOUNT:{
+                System.out.println("FULL_AMOUNT");
+                HotelBooking updateHotelBooking = hotelBooking.get();
+                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                this.hotelBookingRepository.save(updateHotelBooking);
+                isCancel=true;
+
+            }
+                break;
+
+        }
+        if (isCancel){
+            return Map.of("message",
+                    "Successfully Canceled");
+        }
+        return Map.of("message",
+                "Not Successfully Canceled");
+
+    }
+
+    private DateStatus verifyTheFine(LocalDate startDate) {
+        long afterDate = ChronoUnit.DAYS.between(LocalDate.now(), startDate);
+        if (afterDate >= 3 && LocalDate.now().isBefore(startDate)) {
+            return DateStatus.FREE;
+        } else if (afterDate < 3 && afterDate > 0 && LocalDate.now().isBefore(startDate)) {
+            return DateStatus.A_FINE;
+        } else {
+            return DateStatus.FULL_AMOUNT;
+        }
+    }
 }
 
 

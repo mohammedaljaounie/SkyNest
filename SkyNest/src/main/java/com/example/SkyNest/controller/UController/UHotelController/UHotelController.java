@@ -133,6 +133,16 @@ public class UHotelController {
         return this.uHotelService.bookingRooms(hotelBookingRequest);
     }
 
+    @PutMapping("cancelReservation/{bookingId}")
+    public ResponseEntity<Map<String,String>> cancelReservation(@PathVariable Long bookingId){
+        Map<String,String > message = this.uHotelService.cancelBooking(bookingId);
+
+        if (message.get("message").equals("Successfully Canceled")){
+            return ResponseEntity.ok(message);
+        }
+        return ResponseEntity.status(400).body(message);
+    }
+
 
 
 }

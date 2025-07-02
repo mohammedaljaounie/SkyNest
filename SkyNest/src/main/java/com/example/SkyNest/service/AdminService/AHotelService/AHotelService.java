@@ -107,17 +107,17 @@ public class AHotelService {
         return null;
     }
 
-    public Double getTotalBalanceForHotel(Long id){
+    public Double getTotalBalanceForHotel(Long hotelId){
         String jwt  = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = jwtService.extractId(token);
-        Optional<Hotel> optionalHotel = this.hotelRepository.findByUserId(userId);
+        Optional<Hotel> optionalHotel = this.hotelRepository.findByIdAndUserId(hotelId,userId);
         if (optionalHotel.isEmpty())
            return -1D;
-        if (!Objects.equals(optionalHotel.get().getId(), id))
+        if (!Objects.equals(optionalHotel.get().getId(), hotelId))
            return -1D;
 
-        Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(id);
+        Optional<HotelCard> hotelCard = this.hotelCardRepository.findByHotelId(hotelId);
         return hotelCard.map(HotelCard::getTotalBalance).orElse(-1D);
 
     }

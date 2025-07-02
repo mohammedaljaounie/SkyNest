@@ -153,6 +153,10 @@ public class HotelBooking {
         return rooms;
     }
 
+    public StatusEnum getStatus() {
+        return status;
+    }
+
     public void setRooms(Set<Room> rooms) {
         this.rooms = rooms;
     }
