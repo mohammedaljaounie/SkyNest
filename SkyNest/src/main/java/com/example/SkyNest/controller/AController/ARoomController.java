@@ -47,10 +47,11 @@ public class ARoomController {
 
     @PostMapping("/uploadRoomImage")
     public ResponseEntity<Map<String,String>> uploadRoomImage(
-                                                           @RequestParam Long id
+                                  @PathVariable Long hotelId ,
+                                                           @RequestParam Long roomId
                                                     , @RequestParam MultipartFile image)
                                                         throws IOException {
-        Map<String,String> message = this.aRoomService.uploadImageToRoom(id, image);
+        Map<String,String> message = this.aRoomService.uploadImageToRoom(hotelId,roomId, image);
         if (message.get("message").equals("Successfully Upload")){
             return ResponseEntity.ok()
                     .body(message);
@@ -130,9 +131,9 @@ public class ARoomController {
                 .body(message);
     }
 
-    @PutMapping("/update_price/{roomId}")
-    public ResponseEntity<?> updateRoomPrice(@PathVariable Long roomId,@RequestParam double price){
-        Map<String ,String> message = this.aRoomService.updateRoomPrice(roomId, price);
+    @PutMapping("/update_price/{hotelId}")
+    public ResponseEntity<?> updateRoomPrice(@PathVariable Long hotelId,@RequestParam Long roomId,@RequestParam double price){
+        Map<String ,String> message = this.aRoomService.updateRoomPrice(hotelId,roomId, price);
         if (message.get("message").equals("Successfully  updated price")){
             return ResponseEntity.ok(message);
         } else if (message.get("message").equals("Sorry , Wrong price should not be zero or down")) {

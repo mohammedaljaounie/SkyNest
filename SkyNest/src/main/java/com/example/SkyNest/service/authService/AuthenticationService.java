@@ -94,19 +94,19 @@ return Map.of("message","Not Successfully added");
         user.setLongitude(input.getLongitude());
         user.setLatitude(input.getLatitude());
         user.setLevel(0);
-        user.setEnabled(false);
+        user.setEnabled(true);
         Optional<Role> role = this.roleRepo.findByName("admin");
         if (role.isPresent()){
             user.setRole(role.get());
             this.userRepository.save(user);
-            OtpToken otpToken = new OtpToken();
-            otpToken.setEmail(user.getEmail());
-            String otpCode = emailService.generateOtp();
-            otpToken.setCode(otpCode);
-            otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
-            otpToken.setVerified(false);
-            this.otpRepository.save(otpToken);
-            this.emailService.sendOTP(user.getEmail(), otpCode);
+//            OtpToken otpToken = new OtpToken();
+//            otpToken.setEmail(user.getEmail());
+//            String otpCode = emailService.generateOtp();
+//            otpToken.setCode(otpCode);
+//            otpToken.setExpiresAt(LocalDateTime.now().plusMinutes(5));
+//            otpToken.setVerified(false);
+//            this.otpRepository.save(otpToken);
+//            this.emailService.sendOTP(user.getEmail(), otpCode);
             return Map.of("email",input.getEmail(),"message","Successfully added , check in your email to give code");
         }
         return Map.of("message","Not Successfully added");

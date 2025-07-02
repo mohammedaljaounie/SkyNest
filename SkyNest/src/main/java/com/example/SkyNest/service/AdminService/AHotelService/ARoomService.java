@@ -89,11 +89,11 @@ public class ARoomService {
                 "Successfully Room Added");
     }
 
-    public Map<String,String> uploadImageToRoom(Long roomId,MultipartFile image) throws IOException {
+    public Map<String,String> uploadImageToRoom(Long hotelId,Long roomId,MultipartFile image) throws IOException {
         String jwt = request.getHeader("Authorization");
         String token  = jwt.substring(7);
         Long userId = jwtService.extractId(token);
-        Optional<Hotel> hotel = this.hotelRepository.findByUserId(userId);
+        Optional<Hotel> hotel = this.hotelRepository.findByIdAndUserId(hotelId,userId);
         if (hotel.isEmpty()){
             return Map.of("message","this hotel is not found");
         }
@@ -140,18 +140,18 @@ public class ARoomService {
 
     }
 
-    public List<RoomResponse> getBookingRoom(Long id){
+    public List<RoomResponse> getBookingRoom(Long hotelId){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userID = jwtService.extractId(token);
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userID);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelId,userID);
         if (hotelOptional.isEmpty()){
             return null;
         }
-        if (!Objects.equals(hotelOptional.get().getId(), id)){
+        if (!Objects.equals(hotelOptional.get().getId(), hotelId)){
             return null;
         }
-        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(true,id);
+        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(true,hotelId);
         if (rooms.isEmpty()){
             return null;
         }
@@ -159,18 +159,18 @@ public class ARoomService {
         return getRoomResponses(rooms);
     }
 
-    public List<RoomResponse> getNotBookingRoom(Long id){
+    public List<RoomResponse> getNotBookingRoom(Long hotelId){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userID = jwtService.extractId(token);
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userID);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelId,userID);
         if (hotelOptional.isEmpty()){
             return null;
         }
-        if (!Objects.equals(hotelOptional.get().getId(), id)){
+        if (!Objects.equals(hotelOptional.get().getId(), hotelId)){
             return null;
         }
-        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(false,id);
+        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(false,hotelId);
         if (rooms.isEmpty()){
             return null;
         }
@@ -214,7 +214,7 @@ public class ARoomService {
             return Map.of("message",
                     "This user is not register in our application");
         }
-        Optional<Hotel> hotel = this.hotelRepository.findByUserId(userId);
+        Optional<Hotel> hotel = this.hotelRepository.findByIdAndUserId(hotelId,userId);
         if (!Objects.equals(hotel.get().getId(),hotelId)){
             return Map.of("message","I'm sorry you can't access to this hotel");
         }
@@ -349,7 +349,7 @@ public class ARoomService {
     }
 
     @Transactional
-    public Map<String ,String> updateRoomPrice(Long roomId, double price){
+    public Map<String ,String> updateRoomPrice(Long hotelId,Long roomId, double price){
         String jwt = request.getHeader("Authorization");
         String token  = jwt.substring(7);
         Long userId = jwtService.extractId(token);
@@ -358,7 +358,7 @@ public class ARoomService {
             return Map.of("message",
                     "Sorry , this account is not found in our system");
         }
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByUserId(userId);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(1L,userId);
         if (hotelOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this hotel is not found in our app");

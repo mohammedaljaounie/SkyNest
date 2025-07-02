@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface HotelRepository extends JpaRepository<Hotel,Long>{
     Optional<Hotel> findByIdAndUserId(Long hotelId,Long userId);
 
-    Optional<Hotel> findByUserId(Long id);
+    List<Hotel> findByUserId(Long id);
 
     @Query(value = "select h from Hotel h where h.address like concat('%',:location,'%')")
     List<Hotel> findByAddress(String location);

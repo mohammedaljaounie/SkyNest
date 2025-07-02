@@ -3,6 +3,7 @@ package com.example.SkyNest.service.AdminService.AHotelService;
 import com.example.SkyNest.dto.HotelResponse;
 import com.example.SkyNest.dto.ImageDTO;
 import com.example.SkyNest.model.entity.hotel.Hotel;
+import com.example.SkyNest.model.entity.hotel.HotelBooking;
 import com.example.SkyNest.model.entity.hotel.HotelCard;
 import com.example.SkyNest.model.entity.hotel.HotelImage;
 import com.example.SkyNest.model.repository.hotel.HotelCardRepository;
@@ -44,43 +45,45 @@ public class AHotelService {
     private String uploadDir;
 
 
-    public HotelResponse showHotelInfo(){
+    public List<HotelResponse> showHotelInfo(){
 
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long id = jwtService.extractId(token);
-        Optional<Hotel> hotelOpt = this.hotelRepository.findByUserId(id);
+        List<Hotel> hotelOpt = this.hotelRepository.findByUserId(id);
         if (hotelOpt.isEmpty()){
             return null;
         }
+        List<HotelResponse> hotelResponseList = new ArrayList<>();
+        for (Hotel hotel : hotelOpt) {
+            HotelResponse hotelResponse = new HotelResponse();
+            hotelResponse.setId(hotel.getId());
+            hotelResponse.setName(hotel.getName());
+            hotelResponse.setAddress(hotel.getAddress());
+            hotelResponse.setDescription(hotel.getDescription());
+            hotelResponse.setRatingCount(hotel.getRatingCount());
+            hotelResponse.setAvgRating(hotel.getAvgRating());
 
-        Hotel hotelInfo  = hotelOpt.get();
-        HotelResponse hotelResponse  = new HotelResponse();
-        hotelResponse.setId(hotelInfo.getId());
-        hotelResponse.setName(hotelInfo.getName());
-        hotelResponse.setAddress(hotelInfo.getAddress());
-        hotelResponse.setDescription(hotelInfo.getDescription());
-        hotelResponse.setRatingCount(hotelInfo.getRatingCount());
-        hotelResponse.setAvgRating(hotelInfo.getAvgRating());
-        List<ImageDTO> imageResponseList = new ArrayList<>();
-        List<HotelImage> imageList  = hotelInfo.getHotelImageList();
+            List<HotelImage> imageList = hotel.getHotelImageList();
 
-        for (int i = 0; i < imageList.size() ; i++) {
-            ImageDTO imageDTO = new ImageDTO();
-            imageDTO.setId(imageList.get(i).getId());
-            imageDTO.setImageUrl("http://localhost:8080/admin/hotel/"+imageList.get(i).getName());
-            imageResponseList.add(imageDTO);
+            List<ImageDTO> imageResponseList = new ArrayList<>();
+            for (int i = 0; i < imageList.size(); i++) {
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(imageList.get(i).getId());
+                imageDTO.setImageUrl("http://localhost:8080/admin/hotel/" + imageList.get(i).getName());
+                imageResponseList.add(imageDTO);
+            }
+            hotelResponse.setImageDTOList(imageResponseList);
+            hotelResponseList.add(hotelResponse);
         }
-        hotelResponse.setImageDTOList(imageResponseList);
-
-        return hotelResponse;
+        return hotelResponseList;
 
     }
 
-    public String uploadImage(Long id,MultipartFile image) throws IOException {
-        Optional<Hotel> hotelOpt = this.hotelRepository.findById(id);
+    public Map<String,String> uploadImage(Long hotelId,MultipartFile image) throws IOException {
+        Optional<Hotel> hotelOpt = this.hotelRepository.findById(hotelId);
         if (hotelOpt.isEmpty()){
-            return "This hotel is not found in our application";
+            return Map.of("message","This hotel is not found in our application");
         }
         String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
         String imagePath = uploadDir+image.getOriginalFilename();
@@ -92,7 +95,7 @@ public class AHotelService {
         hotelImage.setHotel(hotelOpt.get());
         this.hotelImageRepository.save(hotelImage);
         image.transferTo(new File(imagePath).toPath());
-        return "Successfully Upload";
+        return Map.of("message","Successfully Upload");
 
     }
 

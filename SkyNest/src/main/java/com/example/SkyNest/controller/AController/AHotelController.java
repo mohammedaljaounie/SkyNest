@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,19 +31,19 @@ public class AHotelController {
     private HotelRepository hotelRepository;
 
     @GetMapping("/showHotel_direct")
-    public ResponseEntity<HotelResponse> showHotelDirect(){
+    public ResponseEntity<List<HotelResponse>> showHotelDirect(){
 
         return ResponseEntity.
                 ok(this.aHotelService.showHotelInfo());
     }
 
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadImage(@RequestParam Long id,@RequestParam MultipartFile file) {
+    public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId,@RequestParam MultipartFile file) {
             try {
-                String message = aHotelService.uploadImage(id,file);
+                Map<String,String > message = aHotelService.uploadImage(hotelId,file);
                 return ResponseEntity.ok(message);
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body( "");
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message","Not Successfully uploaded"));
             }
         }
 
