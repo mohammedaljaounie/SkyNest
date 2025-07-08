@@ -40,6 +40,9 @@ public class Hotel {
     @OneToMany(mappedBy = "hotel")
     private List<HotelImage> hotelImageList;
 
+    @OneToMany(mappedBy = "hotel")
+    private List<PlaceNearTheHotel> placeNearTheHotelList;
+
     public Long getId() {
         return id;
     }
@@ -118,5 +121,13 @@ public class Hotel {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    public List<PlaceNearTheHotel> getPlaceNearTheHotelList() {
+        return placeNearTheHotelList;
+    }
+
+    public void setPlaceNearTheHotelList(List<PlaceNearTheHotel> placeNearTheHotelList) {
+        this.placeNearTheHotelList = placeNearTheHotelList;
     }
 }

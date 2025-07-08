@@ -840,6 +840,7 @@ public class UHotelService {
             return DateStatus.FULL_AMOUNT;
         }
     }
+
 }
 
 

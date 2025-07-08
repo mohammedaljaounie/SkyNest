@@ -196,7 +196,7 @@ public class ARoomService {
             for (int i = 0; i <roomImages.size() ; i++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImages.get(i).getId());
-                imageDTO.setImageUrl("8080/admin/hotel/"+roomImages.get(i).getName());
+                imageDTO.setImageUrl("http://localhost:8080/admin/room/"+roomImages.get(i).getName());
                 imageDTOList.add(imageDTO);
             }
             roomResponse.setImageDTOList(imageDTOList);

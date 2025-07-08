@@ -3,7 +3,9 @@ package com.example.SkyNest.controller.UController.UHotelController;
 
 import com.example.SkyNest.dto.HotelBookingRequest;
 import com.example.SkyNest.dto.HotelResponse;
+import com.example.SkyNest.dto.PlaceNearHotelResponse;
 import com.example.SkyNest.dto.UserBookingResponse;
+import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,8 +26,15 @@ public class UHotelController {
     @Value("${image.upload.dir}")
     private String imageUploadUser;
 
+    @Value("${image.upload.place.near.hotel}")
+    private String uploadImagePlace;
+
+
     @Autowired
     private UHotelService uHotelService;
+
+    @Autowired
+    private AHotelService aHotelService;
 
     @GetMapping("/all_hotel")
     public ResponseEntity<List<HotelResponse>> showAllHotel() {
@@ -144,6 +153,28 @@ public class UHotelController {
     }
 
 
+    @GetMapping("/showHotelPlace/{hotelId}")
+    public ResponseEntity<List<PlaceNearHotelResponse>> showPlaceNearHotel(@PathVariable Long hotelId){
+
+        List<PlaceNearHotelResponse> placeResponse = this.aHotelService.showAllPlaceNearHotel(hotelId,false);
+        if (placeResponse!=null) {
+            return ResponseEntity.ok(placeResponse);
+        }
+        return ResponseEntity.status(400).body(null);
+     }
+
+
+    @GetMapping("/placeImage/{imageName}")
+    public ResponseEntity<byte[]> viewPaceHotelImage(@PathVariable String imageName) throws Exception {
+
+        byte[] image = this.uHotelService.viewImage(imageName);
+
+        String contentType = Files.probeContentType(Path.of(uploadImagePlace + imageName));
+
+        return ResponseEntity.ok().
+                contentType(MediaType.parseMediaType(contentType)).body(image);
+
+    }
 
 }
 

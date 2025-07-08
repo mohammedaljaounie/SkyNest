@@ -2,20 +2,21 @@ package com.example.SkyNest.service.AdminService.AHotelService;
 
 import com.example.SkyNest.dto.HotelResponse;
 import com.example.SkyNest.dto.ImageDTO;
-import com.example.SkyNest.model.entity.hotel.Hotel;
-import com.example.SkyNest.model.entity.hotel.HotelBooking;
-import com.example.SkyNest.model.entity.hotel.HotelCard;
-import com.example.SkyNest.model.entity.hotel.HotelImage;
-import com.example.SkyNest.model.repository.hotel.HotelCardRepository;
-import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
-import com.example.SkyNest.model.repository.hotel.HotelRepository;
+import com.example.SkyNest.dto.PlaceNearHotelResponse;
+import com.example.SkyNest.dto.PlaceNearTheHotelRequest;
+import com.example.SkyNest.model.entity.hotel.*;
+import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.repository.hotel.*;
+import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -41,8 +42,18 @@ public class AHotelService {
     @Autowired
     private HotelCardRepository  hotelCardRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private PlaceNearHotelRepo placeNearHotelRepo;
+    @Autowired
+    private PlaceNearHotelImageRepo placeNearHotelImageRepo;
+
     @Value("${image.upload.dir}")
     private String uploadDir;
+
+    @Value("${image.upload.place.near.hotel}")
+    private String uploadImagePlace;
 
 
     public List<HotelResponse> showHotelInfo(){
@@ -125,13 +136,140 @@ public class AHotelService {
 
     }
 
+    public  Map<String ,String> createPlaceNearHotel(PlaceNearTheHotelRequest nearTheHotelRequest) {
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()) {
+            // message to explain that this user is not found in our system
+            return Map.of("message",
+                    "Sorry , this account is not found in our system");
+        }
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(nearTheHotelRequest.getHotelId(), userId);
+        if (hotelOptional.isEmpty()){
+            // message to explain that this user isn't have this hotel
+            return Map.of("message",
+                    "Sorry , you don't have hotel like this input info");
+        }
+        PlaceNearTheHotel placeNearTheHotel  = new PlaceNearTheHotel();
+        placeNearTheHotel.setName(nearTheHotelRequest.getPlaceName());
+        placeNearTheHotel.setDescription(nearTheHotelRequest.getDescription());
+        placeNearTheHotel.setAddress(hotelOptional.get().getAddress());
+        placeNearTheHotel.setHotel(hotelOptional.get());
+        this.placeNearHotelRepo.save(placeNearTheHotel);
+
+        return  Map.of("message",
+                 "Successfully added this place to your hotel");
+    }
+
+    @Transactional
+    public List<PlaceNearHotelResponse> showAllPlaceNearHotel(Long hotelId,boolean isAdmin){
+        String  jwt  = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+
+        Optional<User> userOptional  = this.userRepository.findById(userId);
+
+        if (userOptional.isEmpty()){
+            return null;
+        }
+
+        Optional<Hotel> hotelOptional = this.hotelRepository.findById(hotelId);
+        if (hotelOptional.isEmpty()){
+            return null;
+        }
+
+        List<PlaceNearTheHotel> places = hotelOptional.get().getPlaceNearTheHotelList();
+        List<PlaceNearHotelResponse> placeNearTheHotelList = new ArrayList<>();
+
+        for (PlaceNearTheHotel place : places){
+            PlaceNearHotelResponse placeNearHotelResponse = new PlaceNearHotelResponse();
+
+            placeNearHotelResponse.setPlaceId(place.getId());
+            placeNearHotelResponse.setPlaceName(place.getName());
+            placeNearHotelResponse.setPlaceDescription(place.getDescription());
+
+            List<ImageDTO> imageDTOList = new ArrayList<>();
+            for (PlaceNearTheHotelImage imagePlace : place.getPlaceNearTheHotelImageList()){
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(imagePlace.getId());
+                if (isAdmin) {
+                    imageDTO.setImageUrl("http://localhost:8080/admin/hotel/placeImage" + imagePlace.getName());
+                }
+                else {
+                    imageDTO.setImageUrl("http://localhost:8080/user/hotel/placeImage/" + imagePlace.getName());
+
+                }
+                imageDTOList.add(imageDTO);
+            }
+            placeNearHotelResponse.setImagePlaceList(imageDTOList);
+            placeNearTheHotelList.add(placeNearHotelResponse);
+        }
+
+        return placeNearTheHotelList;
+    }
 
 
+    @Transactional
+    public Map<String,String> uploadImageToPlace(Long placeId,MultipartFile image) throws IOException {
+        Optional<PlaceNearTheHotel> placeNearTheHotel = this.placeNearHotelRepo.findById(placeId);
+        if (placeNearTheHotel.isEmpty()){
+            return Map.of("message","This hotel is not found in our application");
+        }
+        String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
+        String imagePath = uploadImagePlace+image.getOriginalFilename();
+        PlaceNearTheHotelImage hotelImage = new PlaceNearTheHotelImage();
+        hotelImage.setName(uniqueImageName);
+        hotelImage.setPath(imagePath);
+        hotelImage.setType(image.getContentType());
+        hotelImage.setPlaceNearTheHotel(placeNearTheHotel.get());
+        this.placeNearHotelImageRepo.save(hotelImage);
+        image.transferTo(new File(imagePath).toPath());
+        return Map.of("message","Successfully Upload");
+
+    }
+
+    @Transactional
+    public Map<String,String> updatePlaceInformation(Long placeId,String placeName,String placeDescription){
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return Map.of("message",
+                    "Sorry, this account isn't found in our system");
+        }
+        Optional<PlaceNearTheHotel> placeNearTheHotel = this.placeNearHotelRepo.findById(placeId);
+
+       if (placeNearTheHotel.isEmpty()){
+           return Map.of("message",
+                   "Sorry , this place is not found in our system");
+       }
+       if (!placeNearTheHotel.get().getHotel().getUser().getId().equals(userId)){
+           return Map.of("message",
+                   "Sorry , can't update this place because you don't have  authorization on this place");
+       }
+
+       PlaceNearTheHotel updatePlaceNearTheHotel = placeNearTheHotel.get();
+       if (placeName!=null){
+           updatePlaceNearTheHotel.setName(placeName);
+       }
+       if (placeDescription!=null){
+           updatePlaceNearTheHotel.setDescription(placeDescription);
+       }
+       this.placeNearHotelRepo.save(updatePlaceNearTheHotel);
+
+    return Map.of("message",
+            "Successfully updated place info");
+    }
 
 
+    public Map<String ,String > deletePlace(Long placeId){
+        this.placeNearHotelRepo.deleteById(placeId);
 
-
-
+    return Map.of("message","Successfully Deleted");
+    }
 
 
 

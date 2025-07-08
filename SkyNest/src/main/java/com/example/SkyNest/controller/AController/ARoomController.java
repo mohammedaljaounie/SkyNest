@@ -45,7 +45,7 @@ public class ARoomController {
     }
 
 
-    @PostMapping("/uploadRoomImage")
+    @PostMapping("/uploadRoomImage/{hotelId}")
     public ResponseEntity<Map<String,String>> uploadRoomImage(
                                   @PathVariable Long hotelId ,
                                                            @RequestParam Long roomId

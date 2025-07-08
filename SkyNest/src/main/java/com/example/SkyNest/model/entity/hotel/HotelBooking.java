@@ -168,4 +168,6 @@ public class HotelBooking {
     public void setCurrentTotalAmount(double currentTotalAmount) {
         this.currentTotalAmount = currentTotalAmount;
     }
+
+    // getbooking by roomid (int roomId)
 }
