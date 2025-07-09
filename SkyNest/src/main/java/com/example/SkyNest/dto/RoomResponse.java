@@ -15,6 +15,14 @@ public class RoomResponse {
      private String ownerName;
      private List<ImageDTO> imageDTOList;
 
+
+     public RoomResponse(){
+
+     }
+    public RoomResponse(Long id) {
+        this.id = id;
+    }
+
     public Long getId() {
         return id;
     }

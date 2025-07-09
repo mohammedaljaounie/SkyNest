@@ -16,13 +16,13 @@ public class FirebaseController {
     private FirebaseService firebaseService;
 
     @PostMapping("/send")
-    public String sendNotification(
+    public void sendNotification(
             @RequestParam String title,
             @RequestParam String body,
             @RequestParam String fcmToken
     )throws  Exception{
 
-            return this.firebaseService.sendNotification(title, body, fcmToken);
+             this.firebaseService.sendNotification(title, body, fcmToken);
 
     }
 

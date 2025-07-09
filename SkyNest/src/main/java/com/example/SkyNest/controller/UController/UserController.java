@@ -1,5 +1,6 @@
 package com.example.SkyNest.controller.UController;
 
+import com.example.SkyNest.dto.NotificationResponse;
 import com.example.SkyNest.dto.UserInfo;
 import com.example.SkyNest.dto.UserRequestInfo;
 import com.example.SkyNest.service.UserService.UserService;
@@ -7,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -43,5 +45,14 @@ public class UserController {
     }
 
 
+
+    @GetMapping("/notifications")
+    public ResponseEntity<List<NotificationResponse>> notifications(){
+        List<NotificationResponse> responses = this.userService.notification();
+        if (responses!=null&&!responses.isEmpty()){
+            return ResponseEntity.ok(responses);
+        }
+        return ResponseEntity.status(400).body(null);
+    }
 
 }

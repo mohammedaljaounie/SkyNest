@@ -15,13 +15,9 @@ public class FirebaseService {
     @Autowired
     private FirebaseMessaging firebaseMessaging;
 
-    public String sendNotification(String title,String body,String fcmToken) throws Exception{
+    public void sendNotification(String title,String body,String fcmToken) throws Exception{
         
-            if (!StringUtils.hasText(fcmToken)) {
 
-                return "This is empty token ";
-
-            }
             Notification notification = Notification.builder()
                     .setTitle(title)
                     .setBody(body)
@@ -32,9 +28,7 @@ public class FirebaseService {
                     .setToken(fcmToken)
                     .build();
 
-
-            return firebaseMessaging.send(message);
-
+             firebaseMessaging.send(message);
     }
 
 

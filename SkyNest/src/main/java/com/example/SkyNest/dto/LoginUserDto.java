@@ -1,10 +1,14 @@
 package com.example.SkyNest.dto;
 
+import jakarta.validation.constraints.Email;
+
 public class LoginUserDto {
 
+    @Email
     private String email;
 
     private String password;
+    private String fcmToken;
 
     public String getEmail() {
         return email;
@@ -20,5 +24,13 @@ public class LoginUserDto {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getFcmToken() {
+        return fcmToken;
+    }
+
+    public void setFcmToken(String fcmToken) {
+        this.fcmToken = fcmToken;
     }
 }

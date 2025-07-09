@@ -195,7 +195,7 @@ public class AHotelService {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(imagePlace.getId());
                 if (isAdmin) {
-                    imageDTO.setImageUrl("http://localhost:8080/admin/hotel/placeImage" + imagePlace.getName());
+                    imageDTO.setImageUrl("http://localhost:8080/admin/hotel/placeImage/" + imagePlace.getName());
                 }
                 else {
                     imageDTO.setImageUrl("http://localhost:8080/user/hotel/placeImage/" + imagePlace.getName());

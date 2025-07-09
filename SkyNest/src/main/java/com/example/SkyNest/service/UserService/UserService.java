@@ -1,8 +1,11 @@
 package com.example.SkyNest.service.UserService;
 
+import com.example.SkyNest.dto.NotificationResponse;
 import com.example.SkyNest.dto.UserInfo;
 import com.example.SkyNest.dto.UserRequestInfo;
+import com.example.SkyNest.model.entity.userDetails.Notification;
 import com.example.SkyNest.model.entity.userDetails.User;
+import com.example.SkyNest.model.repository.userDetails.NotificationRepo;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -12,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,6 +32,9 @@ public class UserService {
     private static final RestTemplate restTemplate = new RestTemplate();
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private NotificationRepo notificationRepo;
 
 
     //todo : user profile by id
@@ -85,6 +93,27 @@ public class UserService {
         this.userRepository.save(user);
         return Map.of("message",
                 "Successfully Updated");
+    }
+
+    public List<NotificationResponse> notification(){
+        String jwt = http.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return null;
+        }
+        List<Notification> notificationList  = this.notificationRepo.showUserNotification(userId);
+
+        List<NotificationResponse> notificationResponses = new ArrayList<>();
+
+
+        for (Notification  notification : notificationList){
+            notificationResponses.add(new NotificationResponse(notification.getId(),notification.getNotificationDetails()));
+        }
+
+
+        return notificationResponses;
     }
 
 }

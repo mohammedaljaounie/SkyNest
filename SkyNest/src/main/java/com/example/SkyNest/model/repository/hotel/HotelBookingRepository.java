@@ -18,6 +18,11 @@ public interface HotelBookingRepository extends JpaRepository<HotelBooking,Long>
     @Query("SELECT hb FROM HotelBooking hb WHERE hb.user.id = :userId AND hb.hotel.id = :hotelId And hb.status = :status")
     List<HotelBooking> findByUserIdAndHotelIdAndStatus(Long userId, Long hotelId, StatusEnum status);
 
+    @Query ("select r from HotelBooking r where r.launchDate = :startDate and r.status = :status")
+    List<HotelBooking> bringInBookingsThatWillExpire(LocalDate startDate, StatusEnum status);
+
+    @Query("select r from HotelBooking r where r.departureDate = :endDate AND r.status = :status")
+    List<HotelBooking> bringBookingsThatWillStart(LocalDate endDate,StatusEnum status);
 
     Optional<HotelBooking> findByHotelId(Long hotelId);
 

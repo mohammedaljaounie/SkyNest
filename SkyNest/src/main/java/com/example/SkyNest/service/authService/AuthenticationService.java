@@ -67,6 +67,7 @@ public class AuthenticationService {
         user .setPassword(passwordEncoder.encode(input.getPassword()));
         user.setLongitude(input.getLongitude());
         user.setLatitude(input.getLatitude());
+        user.setFcmToken(input.getFcmToken());
         user.setLevel(0);
         user.setEnabled(false);
         Optional<Role> role = this.roleRepo.findByName("user");
@@ -93,6 +94,7 @@ return Map.of("message","Not Successfully added");
         user .setPassword(passwordEncoder.encode(input.getPassword()));
         user.setLongitude(input.getLongitude());
         user.setLatitude(input.getLatitude());
+        user.setFcmToken(null);
         user.setLevel(0);
         user.setEnabled(true);
         Optional<Role> role = this.roleRepo.findByName("admin");
@@ -136,14 +138,8 @@ return Map.of("message","Not Successfully added");
                 LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setToken(jwtToken);
                 loginResponse.setExpiresIn(jwtService.getExpirationTime());
-
-//               return Map.of("email",
-//                       user.get().getEmail(),
-//                       "message",
-//                       "Successfully Matches , look to your email to give code"
-//               );
-//           }
-//           return Map.of("message","Not Successfully Matches , your password it wrong");
+                User user1 = user.get();
+                user1.setFcmToken(loginUserDto.getFcmToken());
                 return loginResponse;
             }
             return null;

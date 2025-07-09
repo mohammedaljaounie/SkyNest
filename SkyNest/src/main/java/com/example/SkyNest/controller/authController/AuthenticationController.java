@@ -1,8 +1,12 @@
 package com.example.SkyNest.controller.authController;
 
 import com.example.SkyNest.dto.*;
+import com.example.SkyNest.model.entity.hotel.HotelBooking;
+import com.example.SkyNest.model.entity.hotel.Room;
+import com.example.SkyNest.model.repository.hotel.HotelBookingRepository;
 import com.example.SkyNest.model.repository.userDetails.OtpRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
+import com.example.SkyNest.myEnum.StatusEnum;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import com.example.SkyNest.service.authService.AuthenticationService;
 import com.example.SkyNest.service.authService.EmailService;
@@ -15,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 
 @RequestMapping("/auth")
@@ -41,6 +44,8 @@ public class AuthenticationController {
     @Autowired
     private UHotelService uHotelService;
 
+    @Autowired
+    private HotelBookingRepository hotelBookingRepository;
     public AuthenticationController(JwtService jwtService, AuthenticationService authenticationService) {
         this.jwtService = jwtService;
         this.authenticationService = authenticationService;
@@ -138,15 +143,12 @@ public class AuthenticationController {
 
         return this.uHotelService.showAllHotelByLocation(address);
     }
-    @GetMapping("/filterAvailableRoomsInHotel/{hotelId}")
-    public Set<RoomResponse> filter(@PathVariable Long hotelId,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate){
-       return uHotelService.filterAvailableRoomsInHotel(hotelId,startDate,endDate);
-    }
 
-    @GetMapping("/filterAvailableRoomsInHotel")
-    public Map<Long,Set<RoomResponse>> filterAll(@RequestParam String address,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate){
-        return uHotelService.filterAvailableRoomsInAllHotel(address,startDate,endDate);
-    }
+   @GetMapping("/rooms")
+    public List<HotelBooking> getRooms(){
+
+        return this.hotelBookingRepository.bringInBookingsThatWillExpire(LocalDate.now(), StatusEnum.Activated);
+   }
 
 
 }

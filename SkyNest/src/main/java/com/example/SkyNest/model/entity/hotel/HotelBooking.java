@@ -2,6 +2,7 @@ package com.example.SkyNest.model.entity.hotel;
 
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.myEnum.StatusEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

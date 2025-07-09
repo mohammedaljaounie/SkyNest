@@ -1,5 +1,6 @@
 package com.example.SkyNest.model.entity.hotel;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.*;
@@ -22,6 +23,7 @@ public class Room {
     private Hotel hotel;
 
     @ManyToMany(mappedBy = "rooms")
+    @JsonIgnore
     private Set<HotelBooking> hotelBookings = new HashSet<>();
 
 
