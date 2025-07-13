@@ -1,8 +1,8 @@
 package com.example.SkyNest.controller.AController;
 
-import com.example.SkyNest.dto.RoomRequest;
-import com.example.SkyNest.dto.RoomResponse;
-import com.example.SkyNest.dto.RoomUpdateRequest;
+import com.example.SkyNest.dto.hoteldto.RoomRequest;
+import com.example.SkyNest.dto.hoteldto.RoomResponse;
+import com.example.SkyNest.dto.hoteldto.RoomUpdateRequest;
 import com.example.SkyNest.service.AdminService.AHotelService.ARoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

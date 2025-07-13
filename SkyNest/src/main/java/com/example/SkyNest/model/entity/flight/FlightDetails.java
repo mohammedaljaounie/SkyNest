@@ -11,8 +11,6 @@ public class FlightDetails {
     private Long id;
     private int numberOfPerson;
     private double price;
-
-
     @OneToOne
     @JoinColumn(name = "flight_id",referencedColumnName = "id")
     private Flight flight;

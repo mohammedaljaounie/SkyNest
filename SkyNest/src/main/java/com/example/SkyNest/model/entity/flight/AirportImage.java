@@ -15,8 +15,8 @@ public class AirportImage {
     private String type;
 
     @ManyToOne
-    @JoinColumn(name = "hotel_id",referencedColumnName = "id")
-    private Hotel hotel;
+    @JoinColumn(name = "airport_id",referencedColumnName = "id")
+    private Airport airport;
 
     public Long getId() {
         return id;
@@ -50,11 +50,11 @@ public class AirportImage {
         this.type = type;
     }
 
-    public Hotel getHotel() {
-        return hotel;
+    public Airport getHotel() {
+        return this.airport;
     }
 
-    public void setHotel(Hotel hotel) {
-        this.hotel = hotel;
+    public void setHotel(Airport airport) {
+        this.airport = airport;
     }
 }

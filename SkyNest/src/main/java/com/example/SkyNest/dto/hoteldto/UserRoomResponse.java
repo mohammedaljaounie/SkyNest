@@ -1,4 +1,4 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
 
 import java.util.List;
 

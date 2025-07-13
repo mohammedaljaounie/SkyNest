@@ -16,6 +16,14 @@ public class AirportCard {
     @JoinColumn(name = "airport_id",referencedColumnName = "id")
     private Airport airport;
 
+    public AirportCard(){
+
+    }
+    public AirportCard(double totalBalance,Airport airport){
+        this.totalBalance = totalBalance;
+
+        this.airport = airport;
+    }
 
     public Long getId() {
         return id;

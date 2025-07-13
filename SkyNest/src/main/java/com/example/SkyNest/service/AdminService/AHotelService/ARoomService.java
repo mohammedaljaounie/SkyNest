@@ -1,9 +1,9 @@
 package com.example.SkyNest.service.AdminService.AHotelService;
 
-import com.example.SkyNest.dto.ImageDTO;
-import com.example.SkyNest.dto.RoomRequest;
-import com.example.SkyNest.dto.RoomResponse;
-import com.example.SkyNest.dto.RoomUpdateRequest;
+import com.example.SkyNest.dto.hoteldto.ImageDTO;
+import com.example.SkyNest.dto.hoteldto.RoomRequest;
+import com.example.SkyNest.dto.hoteldto.RoomResponse;
+import com.example.SkyNest.dto.hoteldto.RoomUpdateRequest;
 import com.example.SkyNest.model.entity.hotel.*;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.entity.userDetails.UserCard;
@@ -11,6 +11,7 @@ import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,7 +189,13 @@ public class ARoomService {
             roomResponse.setBasePrice(room.getBasePrice());
             roomResponse.setCurrentPrice(room.getCurrentPrice());
             roomResponse.setRoom_count(room.getRoomCount());
-            roomResponse.setRoom_type(room.getRoomType());
+            if (room.getRoomType().equals(TripTypeAndReservation.Deluxe)){
+                roomResponse.setRoom_type("Deluxe");
+
+            }else {
+                roomResponse.setRoom_type("Regular");
+
+            }
             roomResponse.setStatus(room.isStatus());
             roomResponse.setHotelName(room.getHotel().getName());
             roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
@@ -225,6 +232,7 @@ public class ARoomService {
         Room roomUpdate = room.get();
         roomUpdate.setBasePrice(roomRequest.getPrice());
         roomUpdate.setRoomCount(roomRequest.getRoom_count());
+
         roomUpdate.setRoomType(roomRequest.getRoom_type());
         roomUpdate.setStatus(roomRequest.isStatus());
         this.roomRepository.save(roomUpdate);

@@ -1,6 +1,6 @@
 package com.example.SkyNest.controller.SAController;
 
-import com.example.SkyNest.dto.RegisterUserDto;
+import com.example.SkyNest.dto.hoteldto.RegisterUserDto;
 import com.example.SkyNest.service.authService.AuthenticationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

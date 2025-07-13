@@ -1,10 +1,10 @@
 package com.example.SkyNest.controller.UController.UHotelController;
 
 
-import com.example.SkyNest.dto.HotelBookingRequest;
-import com.example.SkyNest.dto.HotelResponse;
-import com.example.SkyNest.dto.PlaceNearHotelResponse;
-import com.example.SkyNest.dto.UserBookingResponse;
+import com.example.SkyNest.dto.hoteldto.HotelBookingRequest;
+import com.example.SkyNest.dto.hoteldto.HotelResponse;
+import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
+import com.example.SkyNest.dto.hoteldto.UserBookingResponse;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import org.springframework.beans.factory.annotation.Autowired;

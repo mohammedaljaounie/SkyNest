@@ -1,5 +1,7 @@
 package com.example.SkyNest.model.entity.flight;
 
+import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -11,13 +13,13 @@ public class Flight {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String startingPoint;
     private String destination;
     private LocalDateTime StartingPointDate;
     private LocalDateTime destinationDate;
-    private boolean status;
-
+    private StatusEnum status;
+    private int numberOfChairs;
+    private TripTypeAndReservation tripType;
     @ManyToOne
     @JoinColumn(name = "airport_id",referencedColumnName = "id")
     private Airport airport;
@@ -62,11 +64,7 @@ public class Flight {
         this.destinationDate = destinationDate;
     }
 
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 
@@ -76,5 +74,25 @@ public class Flight {
 
     public void setAirport(Airport airport) {
         this.airport = airport;
+    }
+
+    public StatusEnum getStatus() {
+        return status;
+    }
+
+    public int getNumberOfChairs() {
+        return numberOfChairs;
+    }
+
+    public void setNumberOfChairs(int numberOfChairs) {
+        this.numberOfChairs = numberOfChairs;
+    }
+
+    public TripTypeAndReservation getTripType() {
+        return tripType;
+    }
+
+    public void setTripType(TripTypeAndReservation tripType) {
+        this.tripType = tripType;
     }
 }

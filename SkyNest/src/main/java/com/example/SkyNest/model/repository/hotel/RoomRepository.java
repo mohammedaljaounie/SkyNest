@@ -1,6 +1,7 @@
 package com.example.SkyNest.model.repository.hotel;
 
 import com.example.SkyNest.model.entity.hotel.Room;
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -13,7 +14,7 @@ public interface RoomRepository extends JpaRepository<Room,Long> {
 
 
    List<Room> findByHotelId(Long id);
-   List<Room> findByStatusAndRoomTypeAndHotelId(boolean status,String roomType,Long hotelId);
+   List<Room> findByStatusAndRoomTypeAndHotelId(boolean status, TripTypeAndReservation roomType, Long hotelId);
 
    int countByHotelId(Long id);
 

@@ -1,9 +1,9 @@
 package com.example.SkyNest.service.AdminService.AHotelService;
 
-import com.example.SkyNest.dto.HotelResponse;
-import com.example.SkyNest.dto.ImageDTO;
-import com.example.SkyNest.dto.PlaceNearHotelResponse;
-import com.example.SkyNest.dto.PlaceNearTheHotelRequest;
+import com.example.SkyNest.dto.hoteldto.HotelResponse;
+import com.example.SkyNest.dto.hoteldto.ImageDTO;
+import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
+import com.example.SkyNest.dto.hoteldto.PlaceNearTheHotelRequest;
 import com.example.SkyNest.model.entity.hotel.*;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.repository.hotel.*;
@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -198,7 +197,7 @@ public class AHotelService {
                     imageDTO.setImageUrl("http://localhost:8080/admin/hotel/placeImage/" + imagePlace.getName());
                 }
                 else {
-                    imageDTO.setImageUrl("http://localhost:8080/user/hotel/placeImage/" + imagePlace.getName());
+                    imageDTO.setImageUrl("/user/hotel/placeImage/" + imagePlace.getName());
 
                 }
                 imageDTOList.add(imageDTO);

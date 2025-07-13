@@ -1,8 +1,8 @@
 package com.example.SkyNest.controller.UController;
 
-import com.example.SkyNest.dto.NotificationResponse;
-import com.example.SkyNest.dto.UserInfo;
-import com.example.SkyNest.dto.UserRequestInfo;
+import com.example.SkyNest.dto.hoteldto.NotificationResponse;
+import com.example.SkyNest.dto.hoteldto.UserInfo;
+import com.example.SkyNest.dto.hoteldto.UserRequestInfo;
 import com.example.SkyNest.service.UserService.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

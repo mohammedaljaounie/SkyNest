@@ -1,6 +1,6 @@
 package com.example.SkyNest.service.SuperAdminService.SAHotelService;
 
-import com.example.SkyNest.dto.UserInfo;
+import com.example.SkyNest.dto.hoteldto.UserInfo;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +41,7 @@ public class SAUserService {
 
     public List<UserInfo> showBlockUsers(){
         final Long roleIdForUser = 3L;
-        List<User> userList = userRepository.findByRoleNameAndEnabled(SAUserService.user_role_name,false);
+        List<User> userList = userRepository.findByRoleNameAndEnabled(SAUserService.admin_role_name,false);
         List<UserInfo> userInfoList  = new ArrayList<>();
         for (User user : userList){
             UserInfo userInfo = new UserInfo(

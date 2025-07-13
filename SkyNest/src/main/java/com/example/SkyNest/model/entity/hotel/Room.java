@@ -1,5 +1,6 @@
 package com.example.SkyNest.model.entity.hotel;
 
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
@@ -12,7 +13,7 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String roomType;
+    private TripTypeAndReservation roomType;
     private int roomCount;
     private double basePrice;
     private double currentPrice;
@@ -35,11 +36,11 @@ public class Room {
         this.id = id;
     }
 
-    public String getRoomType() {
+    public TripTypeAndReservation getRoomType() {
         return roomType;
     }
 
-    public void setRoomType(String roomType) {
+    public void setRoomType(TripTypeAndReservation roomType) {
         this.roomType = roomType;
     }
 

@@ -1,16 +1,15 @@
 package com.example.SkyNest.service.UserService.UHotelService;
 
-import com.example.SkyNest.dto.*;
-import com.example.SkyNest.model.entity.flight.FlightBooking;
+import com.example.SkyNest.dto.hoteldto.*;
 import com.example.SkyNest.model.entity.hotel.*;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.entity.userDetails.UserCard;
-import com.example.SkyNest.model.repository.flight.FlightBookingRepo;
 import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.myEnum.DateStatus;
 import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +23,6 @@ import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class UHotelService {
@@ -427,7 +425,7 @@ public class UHotelService {
      * */
 
     @Transactional
-    public ResponseEntity<?> bookingRooms(HotelBookingRequest  bookingRequest)
+    public ResponseEntity<?> bookingRooms(HotelBookingRequest bookingRequest)
     {
       if (!UHotelService.checkDate(bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate())){
           // todo : stop because the date is wrong
@@ -695,7 +693,12 @@ public class UHotelService {
         roomResponse.setId(room.getId());
         roomResponse.setHotelName(room.getHotel().getName());
         roomResponse.setRoom_count(room.getRoomCount());
-        roomResponse.setRoom_type(room.getRoomType());
+        if (room.getRoomType().equals(TripTypeAndReservation.Deluxe)){
+            roomResponse.setRoom_type("Deluxe");
+        }else {
+            roomResponse.setRoom_type("Regular");
+        }
+
         roomResponse.setStatus(room.isStatus());
         roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
         roomResponse.setBasePrice(room.getBasePrice());

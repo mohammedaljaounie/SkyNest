@@ -1,10 +1,10 @@
 package com.example.SkyNest.service.authService;
 
 
-import com.example.SkyNest.dto.LoginResponse;
-import com.example.SkyNest.dto.LoginUserDto;
-import com.example.SkyNest.dto.OtpRequest;
-import com.example.SkyNest.dto.RegisterUserDto;
+import com.example.SkyNest.dto.hoteldto.LoginResponse;
+import com.example.SkyNest.dto.hoteldto.LoginUserDto;
+import com.example.SkyNest.dto.hoteldto.OtpRequest;
+import com.example.SkyNest.dto.hoteldto.RegisterUserDto;
 import com.example.SkyNest.model.entity.userDetails.OtpToken;
 import com.example.SkyNest.model.entity.userDetails.Role;
 import com.example.SkyNest.model.entity.userDetails.User;

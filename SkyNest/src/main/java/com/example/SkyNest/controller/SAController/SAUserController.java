@@ -1,6 +1,6 @@
 package com.example.SkyNest.controller.SAController;
 
-import com.example.SkyNest.dto.UserInfo;
+import com.example.SkyNest.dto.hoteldto.UserInfo;
 import com.example.SkyNest.service.SuperAdminService.SAHotelService.SAUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

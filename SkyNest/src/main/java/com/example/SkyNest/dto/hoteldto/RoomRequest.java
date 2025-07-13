@@ -1,17 +1,19 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
+
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 
 public class RoomRequest {
 
-    private String roomType;
+    private TripTypeAndReservation roomType;
 
     private double price;
 
 
-    public String getRoomType() {
+    public TripTypeAndReservation getRoomType() {
         return roomType;
     }
 
-    public void setRoomType(String roomType) {
+    public void setRoomType(TripTypeAndReservation roomType) {
         this.roomType = roomType;
     }
 

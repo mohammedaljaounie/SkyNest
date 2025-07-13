@@ -1,9 +1,11 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
+
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 
 public class RoomUpdateRequest {
     private double  price;
     private int  room_count ;
-    private String   room_type;
+    private TripTypeAndReservation room_type;
     private boolean status;
 
     public double getPrice() {
@@ -22,11 +24,11 @@ public class RoomUpdateRequest {
         this.room_count = room_count;
     }
 
-    public String getRoom_type() {
+    public TripTypeAndReservation getRoom_type() {
         return room_type;
     }
 
-    public void setRoom_type(String room_type) {
+    public void setRoom_type(TripTypeAndReservation room_type) {
         this.room_type = room_type;
     }
 

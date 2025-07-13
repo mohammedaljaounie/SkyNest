@@ -1,8 +1,8 @@
 package com.example.SkyNest.service.SuperAdminService.SAHotelService;
 
-import com.example.SkyNest.dto.HotelRequest;
-import com.example.SkyNest.dto.HotelRequestUpdate;
-import com.example.SkyNest.dto.SAHotelResponse;
+import com.example.SkyNest.dto.hoteldto.HotelRequest;
+import com.example.SkyNest.dto.hoteldto.HotelRequestUpdate;
+import com.example.SkyNest.dto.hoteldto.SAHotelResponse;
 import com.example.SkyNest.model.entity.hotel.Hotel;
 import com.example.SkyNest.model.entity.hotel.HotelCard;
 import com.example.SkyNest.model.entity.userDetails.User;

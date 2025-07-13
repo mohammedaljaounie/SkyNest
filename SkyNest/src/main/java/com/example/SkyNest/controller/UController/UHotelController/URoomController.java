@@ -1,8 +1,7 @@
 package com.example.SkyNest.controller.UController.UHotelController;
 
-import com.example.SkyNest.dto.UserRoomResponse;
+import com.example.SkyNest.dto.hoteldto.UserRoomResponse;
 import com.example.SkyNest.service.UserService.UHotelService.URoomService;
-import jdk.dynalink.linker.LinkerServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;

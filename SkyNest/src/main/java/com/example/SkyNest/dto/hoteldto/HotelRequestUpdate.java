@@ -1,27 +1,19 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
 
-import jakarta.persistence.Column;
+import com.example.SkyNest.model.entity.hotel.Hotel;
 
-public class HotelRequest {
+public class HotelRequestUpdate {
 
-    @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
-    private String email;
-    @Column(nullable = false)
+    private Hotel hotel;
+
     private double longitude;
-    @Column(nullable = false)
     private double latitude;
-
-
-
     public String getName() {
         return name;
     }
@@ -46,12 +38,12 @@ public class HotelRequest {
         this.address = address;
     }
 
-    public String getEmail() {
-        return email;
+    public Hotel getHotel() {
+        return hotel;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setHotel(Hotel hotel) {
+        this.hotel = hotel;
     }
 
     public double getLongitude() {

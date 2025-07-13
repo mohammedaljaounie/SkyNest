@@ -1,8 +1,8 @@
 package com.example.SkyNest.service.UserService;
 
-import com.example.SkyNest.dto.NotificationResponse;
-import com.example.SkyNest.dto.UserInfo;
-import com.example.SkyNest.dto.UserRequestInfo;
+import com.example.SkyNest.dto.hoteldto.NotificationResponse;
+import com.example.SkyNest.dto.hoteldto.UserInfo;
+import com.example.SkyNest.dto.hoteldto.UserRequestInfo;
 import com.example.SkyNest.model.entity.userDetails.Notification;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.repository.userDetails.NotificationRepo;

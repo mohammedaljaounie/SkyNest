@@ -1,14 +1,15 @@
 package com.example.SkyNest.service.UserService.UHotelService;
 
 
-import com.example.SkyNest.dto.ImageDTO;
-import com.example.SkyNest.dto.UserRoomResponse;
+import com.example.SkyNest.dto.hoteldto.ImageDTO;
+import com.example.SkyNest.dto.hoteldto.UserRoomResponse;
 import com.example.SkyNest.model.entity.hotel.Hotel;
 import com.example.SkyNest.model.entity.hotel.Room;
 import com.example.SkyNest.model.entity.hotel.RoomImage;
 import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.model.repository.hotel.RoomImageRepository;
 import com.example.SkyNest.model.repository.hotel.RoomRepository;
+import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +55,11 @@ public class URoomService {
                 roomResponse.setBasePrice(room.getBasePrice());
                 roomResponse.setCurrentPrice(room.getCurrentPrice());
                 roomResponse.setRoom_count(room.getRoomCount());
-                roomResponse.setRoom_type(room.getRoomType());
+                if (room.getRoomType().equals(TripTypeAndReservation.Deluxe)){
+                    roomResponse.setRoom_type("Deluxe");
+                }else{
+                    roomResponse.setRoom_type("Regular");
+                }
                 roomResponseList.add(roomResponse);
                 for (RoomImage roomImage : roomImages) {
                     ImageDTO imageDTO = new ImageDTO();
@@ -80,7 +85,12 @@ public class URoomService {
             roomResponse.setBasePrice(room.get().getBasePrice());
             roomResponse.setCurrentPrice(room.get().getCurrentPrice());
             roomResponse.setRoom_count(room.get().getRoomCount());
-            roomResponse.setRoom_type(room.get().getRoomType());
+            if (room.get().getRoomType().equals(TripTypeAndReservation.Deluxe)){
+                roomResponse.setRoom_type("Deluxe");
+
+            }else{
+                roomResponse.setRoom_type("Regular");
+            }
             for (RoomImage roomImage : roomImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());

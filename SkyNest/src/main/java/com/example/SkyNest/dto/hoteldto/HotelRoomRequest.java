@@ -1,4 +1,4 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
 
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Max;

@@ -1,13 +1,12 @@
 package com.example.SkyNest.controller.AController;
 
-import com.example.SkyNest.dto.HotelResponse;
-import com.example.SkyNest.dto.PlaceNearHotelResponse;
-import com.example.SkyNest.dto.PlaceNearTheHotelRequest;
+import com.example.SkyNest.dto.hoteldto.HotelResponse;
+import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
+import com.example.SkyNest.dto.hoteldto.PlaceNearTheHotelRequest;
 import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

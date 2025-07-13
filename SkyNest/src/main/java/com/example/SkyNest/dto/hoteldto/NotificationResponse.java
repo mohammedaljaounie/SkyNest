@@ -1,4 +1,4 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
 
 public class NotificationResponse {
 

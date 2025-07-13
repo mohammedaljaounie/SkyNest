@@ -14,18 +14,33 @@ public class Airport {
     private String name;
     @Column(nullable = false)
     private String description;
-
     private double avgRating;
-
     private int ratingCount;
-
+    @Column(nullable = false)
+    private double latitude;
+    @Column(nullable = false)
+    private double longitude;
     @Column(nullable = false)
     private String location;
-
     @OneToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
 
+    public Airport() {
+    }
+
+    public Airport(String name, String description, double avgRating
+            , int ratingCount, double latitude,
+                   double longitude, String location, User user) {
+        this.name = name;
+        this.description = description;
+        this.avgRating = avgRating;
+        this.ratingCount = ratingCount;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.location = location;
+        this.user = user;
+    }
 
     public Long getId() {
         return id;
@@ -81,5 +96,21 @@ public class Airport {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
     }
 }

@@ -1,7 +1,5 @@
-package com.example.SkyNest.dto;
+package com.example.SkyNest.dto.hoteldto;
 
-import com.example.SkyNest.model.entity.hotel.Hotel;
-import com.example.SkyNest.model.entity.hotel.Room;
 import jakarta.persistence.Column;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
