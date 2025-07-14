@@ -1,12 +1,13 @@
 package com.example.SkyNest.dto.hoteldto;
 
+import com.example.SkyNest.myEnum.RoomStatus;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 
 public class RoomUpdateRequest {
     private double  price;
     private int  room_count ;
     private TripTypeAndReservation room_type;
-    private boolean status;
+    private RoomStatus status;
 
     public double getPrice() {
         return price;
@@ -32,11 +33,11 @@ public class RoomUpdateRequest {
         this.room_type = room_type;
     }
 
-    public boolean isStatus() {
+    public RoomStatus isStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(RoomStatus status) {
         this.status = status;
     }
 }

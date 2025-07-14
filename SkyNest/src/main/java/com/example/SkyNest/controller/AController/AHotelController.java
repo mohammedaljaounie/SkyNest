@@ -3,21 +3,28 @@ package com.example.SkyNest.controller.AController;
 import com.example.SkyNest.dto.hoteldto.HotelResponse;
 import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
 import com.example.SkyNest.dto.hoteldto.PlaceNearTheHotelRequest;
+import com.example.SkyNest.model.entity.hotel.HotelImage;
+import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
 import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin/hotel")
@@ -34,6 +41,8 @@ public class AHotelController {
 
     @Autowired
     private HotelRepository hotelRepository;
+    @Autowired
+    private HotelImageRepository hotelImageRepository;
 
     @GetMapping("/showHotel_direct")
     public ResponseEntity<List<HotelResponse>> showHotelDirect(){
@@ -42,26 +51,40 @@ public class AHotelController {
                 ok(this.aHotelService.showHotelInfo());
     }
 
-    @PostMapping("/upload")
-    public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId,@RequestParam MultipartFile file) {
+@PostMapping("/upload")
+public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId ,@RequestParam("image") MultipartFile image) {
+    try {
+        Map<String,String > savedImage = aHotelService.saveImage(hotelId,image);
+        return ResponseEntity.ok(savedImage);
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("message","not successfully uploaded"));
+    }
+}
+
+
+
+
+        @GetMapping("/{fileName}")
+        public ResponseEntity<Resource> viewImage(@PathVariable String fileName) {
             try {
-                Map<String,String > message = aHotelService.uploadImage(hotelId,file);
-                return ResponseEntity.ok(message);
+                Resource image = aHotelService.loadImage(fileName,true);
+                String contentType = aHotelService.getImageContentType(fileName,true);
+
+                if (contentType == null) {
+                    contentType = "application/octet-stream";
+                }
+
+                return ResponseEntity.ok()
+                        .contentType(MediaType.parseMediaType(contentType))
+                        .body(image);
+
+            } catch (FileNotFoundException e) {
+                return ResponseEntity.notFound().build();
             } catch (IOException e) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message","Not Successfully uploaded"));
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
         }
-
-    @GetMapping("/{imageName}")
-    public ResponseEntity<?> viewImage(@PathVariable String imageName) throws Exception {
-
-            byte[] imageData = this.aHotelService.viewImage(imageName);
-
-            String contentType = Files.probeContentType(Path.of(uploadDir + imageName));
-            return ResponseEntity.ok().
-                    contentType(MediaType.parseMediaType(contentType)).body(imageData);
-
-    }
 
     @GetMapping("/total_balance/{hotelId}")
     public ResponseEntity<Map<String,Double>> getTotalBalanceForHotel(@PathVariable Long hotelId){
@@ -122,21 +145,30 @@ public class AHotelController {
 
     @DeleteMapping("/deletePlace/{placeId}")
     public ResponseEntity<Map<String,String>> deletePlace(@PathVariable Long placeId){
+        System.out.println("fad");
        return ResponseEntity.ok(this.aHotelService.deletePlace(placeId));
 
     }
 
-
     @GetMapping("/placeImage/{imageName}")
-    public ResponseEntity<?> viewPlaceImage(@PathVariable String imageName) throws Exception {
+    public ResponseEntity<Resource> viewPlaceImage(@PathVariable String imageName) {
+        try {
+            Resource image = aHotelService.loadImage(imageName,false);
+            String contentType = aHotelService.getImageContentType(imageName,false);
 
-        byte[] imageData = this.aHotelService.viewImage(imageName);
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
 
-        String contentType = Files.probeContentType(Path.of(uploadImagePlace + imageName));
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
 
-        return ResponseEntity.ok().
-                contentType(MediaType.parseMediaType(contentType)).body(imageData);
-
-
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 }

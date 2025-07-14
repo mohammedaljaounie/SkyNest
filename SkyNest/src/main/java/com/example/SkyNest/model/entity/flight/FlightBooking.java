@@ -1,7 +1,7 @@
 package com.example.SkyNest.model.entity.flight;
 
 import com.example.SkyNest.model.entity.userDetails.User;
-import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -20,7 +20,7 @@ public class FlightBooking {
     @Column(nullable = false)
     private String flightType;
 
-    private StatusEnum status;
+    private StatusEnumForBooking status;
 
     @Column(nullable = false)
     private LocalDateTime departureTime;
@@ -60,11 +60,11 @@ public class FlightBooking {
         this.flightType = flightType;
     }
 
-    public StatusEnum isStatus() {
+    public StatusEnumForBooking isStatus() {
         return status;
     }
 
-    public void setStatus(StatusEnum status) {
+    public void setStatus(StatusEnumForBooking status) {
         this.status = status;
     }
 

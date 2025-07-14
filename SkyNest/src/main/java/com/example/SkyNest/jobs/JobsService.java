@@ -7,7 +7,8 @@ import com.example.SkyNest.model.entity.userDetails.Notification;
 import com.example.SkyNest.model.repository.hotel.HotelBookingRepository;
 import com.example.SkyNest.model.repository.hotel.RoomRepository;
 import com.example.SkyNest.model.repository.userDetails.NotificationRepo;
-import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.RoomStatus;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,12 +38,12 @@ public class JobsService {
     @Transactional
     public void updateRoomStatusToEmpty() throws Exception {
         LocalDate currentDate = LocalDate.now().minusDays(1);
-        List<HotelBooking> hotelBookings = this.hotelBookingRepository.bringBookingsThatWillStart(currentDate,StatusEnum.Activated);
+        List<HotelBooking> hotelBookings = this.hotelBookingRepository.bringBookingsThatWillStart(currentDate, StatusEnumForBooking.Activated);
 
         for (HotelBooking booking  : hotelBookings ){
 
             for (Room room : booking.getRooms()){
-                room.setStatus(false);
+                room.setStatus(RoomStatus.EMPTY);
             }
 
             this.roomRepository.saveAll(booking.getRooms());
@@ -63,12 +64,12 @@ public class JobsService {
     @Scheduled(cron = "0 15 0 * * *",zone = "Asia/Damascus")
     @Transactional
     public void updateRoomStatusToFull() throws Exception {
-        List<HotelBooking> hotelBookings = this.hotelBookingRepository.bringInBookingsThatWillExpire(LocalDate.now(), StatusEnum.Activated);
+        List<HotelBooking> hotelBookings = this.hotelBookingRepository.bringInBookingsThatWillExpire(LocalDate.now(), StatusEnumForBooking.Activated);
         for (HotelBooking booking : hotelBookings){
             System.out.println(hotelBookings.size());
             for (Room room : booking.getRooms()){
 
-                room.setStatus(true);
+                room.setStatus(RoomStatus.BOOKING);
             }
             this.roomRepository.saveAll(booking.getRooms());
             if (booking.getUser().getFcmToken()==null||booking.getUser().getFcmToken().isBlank()){

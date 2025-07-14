@@ -1,33 +1,29 @@
 package com.example.SkyNest.controller.UController.UHotelController;
 
 
-import com.example.SkyNest.dto.hoteldto.HotelBookingRequest;
-import com.example.SkyNest.dto.hoteldto.HotelResponse;
-import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
-import com.example.SkyNest.dto.hoteldto.UserBookingResponse;
+import com.example.SkyNest.dto.hoteldto.*;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/user/hotel")
 public class UHotelController {
-
-    @Value("${image.upload.dir}")
-    private String imageUploadUser;
-
-    @Value("${image.upload.place.near.hotel}")
-    private String uploadImagePlace;
 
 
     @Autowired
@@ -52,6 +48,48 @@ public class UHotelController {
         return ResponseEntity.status(400).body(null);
     }
 
+    @GetMapping("/hotelImage/{fileName}")
+    public ResponseEntity<Resource> viewImage(@PathVariable String fileName) {
+        try {
+            Resource image = uHotelService.loadImage(fileName,true);
+            String contentType = uHotelService.getImageContentType(fileName,true);
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
+
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    @GetMapping("/{fileName}")
+    public ResponseEntity<Resource> viewHotelImage(@PathVariable String fileName) {
+        try {
+            Resource image = uHotelService.loadImage(fileName,true);
+            String contentType = uHotelService.getImageContentType(fileName,true);
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
+
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
     @GetMapping("/showHotelByLocation")
     public ResponseEntity<List<HotelResponse>> showHotelInfoByLocation(@RequestParam String location) {
        List<HotelResponse> hotelResponse = this.uHotelService.showAllHotelByLocation(location);
@@ -65,17 +103,6 @@ public class UHotelController {
         return ResponseEntity.ok(this.uHotelService.showHotelDirect());
     }
 
-    @GetMapping("/hotelImage/{imageName}")
-    public ResponseEntity<byte[]> viewHotelImage(@PathVariable String imageName) throws Exception {
-
-        byte[] image = this.uHotelService.viewImage(imageName);
-
-        String contentType = Files.probeContentType(Path.of(imageUploadUser + imageName));
-
-        return ResponseEntity.ok().
-                contentType(MediaType.parseMediaType(contentType)).body(image);
-
-    }
 
 
     @GetMapping("/activeReservation")
@@ -163,18 +190,51 @@ public class UHotelController {
         return ResponseEntity.status(400).body(null);
      }
 
+    @GetMapping("/placeImage/{fileName}")
+    public ResponseEntity<Resource> viewPlaceImage(@PathVariable String fileName) {
+        try {
+            Resource image = uHotelService.loadImage(fileName,false);
+            String contentType = uHotelService.getImageContentType(fileName,false);
 
-    @GetMapping("/placeImage/{imageName}")
-    public ResponseEntity<byte[]> viewPaceHotelImage(@PathVariable String imageName) throws Exception {
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
 
-        byte[] image = this.uHotelService.viewImage(imageName);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
 
-        String contentType = Files.probeContentType(Path.of(uploadImagePlace + imageName));
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 
-        return ResponseEntity.ok().
-                contentType(MediaType.parseMediaType(contentType)).body(image);
+    @GetMapping("/filterAvailableRoomsInHotel/{hotelId}")
+    public ResponseEntity<Set<RoomResponse>> filterAvailableRoomsInHotel(@PathVariable Long hotelId,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate){
+
+        Set<RoomResponse> responses = this.uHotelService.filterAvailableRoomsInHotel(hotelId, startDate, endDate);
+
+        if (responses!=null){
+            return ResponseEntity.ok(responses);
+        }
+
+
+        return ResponseEntity.status(400).body(null);
+    }
+
+
+    @GetMapping("/filterAvailableRoomsInAllHotel")
+    public ResponseEntity<?> filterAvailableRoomsInAllHotel(
+            @RequestParam String address,@RequestParam LocalDate startDate,@RequestParam LocalDate endDate ){
+        return this.uHotelService.filterAvailableRoomsInAllHotel(address, startDate, endDate);
 
     }
 
-}
+
+
+
+
+    }
 

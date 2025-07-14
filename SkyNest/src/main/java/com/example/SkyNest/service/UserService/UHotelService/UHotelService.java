@@ -8,18 +8,25 @@ import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.myEnum.DateStatus;
-import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.RoomStatus;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -49,7 +56,13 @@ public class UHotelService {
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
-    private static final String textOfRoom ="";
+    @Value("${image.upload.dir}")
+    private String uploadDir;
+
+    @Value("${image.upload.place.near.hotel}")
+    private String uploadImagePlace;
+
+
 
     public List<HotelResponse> showAllHotel(){
 
@@ -106,7 +119,7 @@ public class UHotelService {
         for (int i = 0; i < imageList.size() ; i++) {
             ImageDTO imageDTO = new ImageDTO();
             imageDTO.setId(imageList.get(i).getId());
-            imageDTO.setImageUrl("/user/hotel/"+imageList.get(i).getName());
+            imageDTO.setImageUrl("/user/hotel/hotelImage/"+imageList.get(i).getName());
             imageResponseList.add(imageDTO);
         }
         hotelResponse.setImageDTOList(imageResponseList);
@@ -156,16 +169,34 @@ public class UHotelService {
         return hotelResponseList;
     }
 
-    public byte[] viewImage(String imageName) throws Exception {
-        Optional<HotelImage> image = this.hotelImageRepository.findByName( imageName);
-        if (image.isPresent()){
-            String path = image.get().getPath();
-            File file = new File(path);
-            if (!file.exists()) throw new FileNotFoundException("Image file not found");
-            return Files.readAllBytes(file.toPath());
+    public Resource loadImage(String fileName,boolean isHotel) throws IOException {
+
+        Path filePath = null;
+        if (isHotel){
+             filePath = Paths.get(uploadDir).resolve(fileName);
+        }else{
+            filePath = Paths.get(uploadImagePlace).resolve(fileName);
+
         }
-        return null;
+
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("this image is not found"+fileName);
+        }
+
+        return new UrlResource(filePath.toUri());
     }
+
+    public String getImageContentType(String fileName,boolean isHotel) throws IOException {
+        Path filePath = null;
+        if (isHotel){
+            filePath = Paths.get(uploadDir).resolve(fileName);
+        }else{
+            filePath = Paths.get(uploadImagePlace).resolve(fileName);
+
+        }
+        return Files.probeContentType(filePath);
+    }
+
 
 
     //حجوزات ساريه
@@ -173,9 +204,9 @@ public class UHotelService {
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Activated,userId);
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnumForBooking.Activated,userId);
 
-        return  getUserBookingResponse(hotelBookingList,StatusEnum.Activated);
+        return  getUserBookingResponse(hotelBookingList, StatusEnumForBooking.Activated);
     }
 
     // حجوزات ملغيه
@@ -183,9 +214,9 @@ public class UHotelService {
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        List<HotelBooking> hotelBookingList    = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Canceled,userId);
+        List<HotelBooking> hotelBookingList    = this.hotelBookingRepository.findByStatusAndUserId(StatusEnumForBooking.Canceled,userId);
 
-        return getUserBookingResponse(hotelBookingList,StatusEnum.Canceled);
+        return getUserBookingResponse(hotelBookingList, StatusEnumForBooking.Canceled);
     }
 
     // حجوزات مرفوضه
@@ -193,15 +224,15 @@ public class UHotelService {
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId  = jwtService.extractId(token);
-        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnum.Unacceptable,userId);
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.findByStatusAndUserId(StatusEnumForBooking.Unacceptable,userId);
 
-   return getUserBookingResponse(hotelBookingList,StatusEnum.Unacceptable);
+   return getUserBookingResponse(hotelBookingList, StatusEnumForBooking.Unacceptable);
 
     }
 
 
     private List<UserBookingResponse> getUserBookingResponse(
-            List<HotelBooking> hotelBookingList, StatusEnum statusEnum){
+            List<HotelBooking> hotelBookingList, StatusEnumForBooking statusEnum){
 
         List<UserBookingResponse> userBookingResponseArrayList = new ArrayList<>();
         for (HotelBooking hotelBooking : hotelBookingList){
@@ -214,13 +245,12 @@ public class UHotelService {
             userBookingResponse.setNumberOfNights(UHotelService.calculateDaysBetweenTowDate(hotelBooking.getLaunchDate(),hotelBooking.getDepartureDate()));
             userBookingResponse.setAddress(hotelBooking.getHotel().getAddress());
             userBookingResponse.setTotalCost(hotelBooking.getTotalAmount());
-           if (statusEnum==StatusEnum.Activated)
+           if (statusEnum== StatusEnumForBooking.Activated)
             userBookingResponse.setStatusBooking("Activated");
-           else if (statusEnum==StatusEnum.Canceled)
+           else if (statusEnum== StatusEnumForBooking.Canceled)
                 userBookingResponse.setStatusBooking("Canceled");
            else
                userBookingResponse.setStatusBooking("Unacceptable");
-
 
             userBookingResponseArrayList.add(userBookingResponse);
         }
@@ -252,7 +282,7 @@ public class UHotelService {
             for (int j = 0; j <hotelImageList.size() ; j++) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(hotelImageList.get(j).getId());
-                imageDTO.setImageUrl("/user/hotel/"+hotelImageList.get(j).getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage"+hotelImageList.get(j).getName());
                 imageDTOS.add(imageDTO);
             }
             hotel.setImageDTOList(imageDTOS);
@@ -400,7 +430,7 @@ public class UHotelService {
     private boolean isReservation(Long userId , Long hotelId){
 
         List<HotelBooking> hotelBookingList   = this.
-                hotelBookingRepository.findByUserIdAndHotelIdAndStatus(userId, hotelId,StatusEnum.Activated);
+                hotelBookingRepository.findByUserIdAndHotelIdAndStatus(userId, hotelId, StatusEnumForBooking.Activated);
 
        if (hotelBookingList.isEmpty()){
            return false;
@@ -524,7 +554,7 @@ public class UHotelService {
                     new HotelBooking(
                             bookingRequest.getNumberOfPerson(),
                             bookingRequest.getSetOfRooms().size(),
-                            StatusEnum.Unacceptable,bookingRequest.getLaunchDate(),
+                            StatusEnumForBooking.Unacceptable,bookingRequest.getLaunchDate(),
                             bookingRequest.getDepartureDate(),
                             bookingRequest.getPaymentRatio(),totalCost,totalCost,0,
                             user.get(),
@@ -545,7 +575,7 @@ public class UHotelService {
                 new HotelBooking(
                         bookingRequest.getNumberOfPerson(),
                         bookingRequest.getSetOfRooms().size(),
-                        StatusEnum.Activated,bookingRequest.getLaunchDate(),
+                        StatusEnumForBooking.Activated,bookingRequest.getLaunchDate(),
                         bookingRequest.getDepartureDate(),
                         bookingRequest.getPaymentRatio(),totalCost,totalCost,theAmountToBePaid,
                         user.get(),
@@ -573,7 +603,7 @@ public class UHotelService {
         }
         List<RoomResponse> roomResponseList = convertRoomToDTO(this.roomRepository.findByHotelId(hotelId));
 
-        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.filterByDate(hotelId, startDate, endDate,StatusEnum.Activated);
+        List<HotelBooking> hotelBookingList = this.hotelBookingRepository.filterByDate(hotelId, startDate, endDate, StatusEnumForBooking.Activated);
 
         Set<RoomResponse> notBockedRoom  = new HashSet<>();
         if (!hotelBookingList.isEmpty()) {
@@ -602,16 +632,16 @@ public class UHotelService {
         return notBockedRoom;
     }
 
-    public Map<Long,Set<RoomResponse>> filterAvailableRoomsInAllHotel(
+    public ResponseEntity<?> filterAvailableRoomsInAllHotel(
             String address,LocalDate startDate,LocalDate endDate ){
         if (!UHotelService.checkDate(startDate,endDate)){
-            return null;
+            return ResponseEntity.status(400).body(Map.of("message","Wrong in date, correct your date"));
         }
 
         List<Hotel> hotelList = this.hotelRepository.findByAddress(address);
 
         if (hotelList.isEmpty()){
-            return null;
+            return ResponseEntity.status(400).body(Map.of("message","This hotel is not found in our application"));
         }
 
         Map<Long , Set<RoomResponse>> availableRooms = new HashMap<>();
@@ -628,7 +658,7 @@ public class UHotelService {
         }
 
 
-        return availableRooms;
+        return ResponseEntity.ok(availableRooms);
             }
 
     private List<RoomResponse> convertRoomToDTO(List<Room> rooms) {
@@ -646,7 +676,7 @@ public class UHotelService {
             for (RoomImage roomImage : roomImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("/user/hotel/" + roomImage.getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage" + roomImage.getName());
                 roomImages.add(imageDTO);
             }
             roomResponse.setImageDTOList(roomImages);
@@ -675,7 +705,7 @@ public class UHotelService {
             for (RoomImage roomImage : roomImageList ){
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("/user/hotel/"+roomImage.getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage"+roomImage.getName());
                 roomImages.add(imageDTO);
 
             }
@@ -698,8 +728,12 @@ public class UHotelService {
         }else {
             roomResponse.setRoom_type("Regular");
         }
+         if (room.isStatus().equals(RoomStatus.BOOKING)){
+             roomResponse.setStatus("Booking");
+         }else{
+             roomResponse.setStatus("Empty");
+         }
 
-        roomResponse.setStatus(room.isStatus());
         roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
         roomResponse.setBasePrice(room.getBasePrice());
         roomResponse.setCurrentPrice(room.getCurrentPrice());
@@ -769,7 +803,7 @@ public class UHotelService {
             return Map.of("message",
                     "sorry , this reservation is not found in system yet");
         }
-        if (hotelBooking.get().getStatus()!=StatusEnum.Activated){
+        if (hotelBooking.get().getStatus()!= StatusEnumForBooking.Activated){
             return Map.of("message",
                     "sorry , this reservation isn't Activated");
         }
@@ -794,7 +828,7 @@ public class UHotelService {
             case FREE : {
                 System.out.println("FREE");
                 HotelBooking updateHotelBooking = hotelBooking.get();
-                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                updateHotelBooking.setStatus(StatusEnumForBooking.Canceled);
                 updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid(),true);
                 updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid(),false);
                 this.hotelBookingRepository.save(updateHotelBooking);
@@ -805,7 +839,7 @@ public class UHotelService {
                 System.out.println("A_FINE");
                 HotelBooking updateHotelBooking = hotelBooking.get();
                 double fine = updateHotelBooking.getCurrentTotalAmount()*5/100;
-                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                updateHotelBooking.setStatus(StatusEnumForBooking.Canceled);
                 updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid()-fine,true);
                 updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid()-fine,false);
                 this.hotelBookingRepository.save(updateHotelBooking);
@@ -816,7 +850,7 @@ public class UHotelService {
             case FULL_AMOUNT:{
                 System.out.println("FULL_AMOUNT");
                 HotelBooking updateHotelBooking = hotelBooking.get();
-                updateHotelBooking.setStatus(StatusEnum.Canceled);
+                updateHotelBooking.setStatus(StatusEnumForBooking.Canceled);
                 this.hotelBookingRepository.save(updateHotelBooking);
                 isCancel=true;
 

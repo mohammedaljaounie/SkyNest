@@ -1,5 +1,6 @@
 package com.example.SkyNest.model.entity.hotel;
 
+import com.example.SkyNest.myEnum.RoomStatus;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ public class Room {
     private int roomCount;
     private double basePrice;
     private double currentPrice;
-    private boolean status;
+    private RoomStatus status;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id",referencedColumnName = "id")
@@ -60,11 +61,11 @@ public class Room {
         this.basePrice = basePrice;
     }
 
-    public boolean isStatus() {
+    public RoomStatus isStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(RoomStatus status) {
         this.status = status;
     }
 

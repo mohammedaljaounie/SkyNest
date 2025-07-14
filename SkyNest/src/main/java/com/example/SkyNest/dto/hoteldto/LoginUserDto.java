@@ -8,7 +8,6 @@ public class LoginUserDto {
     private String email;
 
     private String password;
-    private String fcmToken;
 
     public String getEmail() {
         return email;
@@ -26,11 +25,4 @@ public class LoginUserDto {
         this.password = password;
     }
 
-    public String getFcmToken() {
-        return fcmToken;
-    }
-
-    public void setFcmToken(String fcmToken) {
-        this.fcmToken = fcmToken;
-    }
 }

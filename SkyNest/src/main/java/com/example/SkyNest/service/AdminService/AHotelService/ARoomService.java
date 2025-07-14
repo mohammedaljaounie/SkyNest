@@ -10,12 +10,15 @@ import com.example.SkyNest.model.entity.userDetails.UserCard;
 import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
-import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.RoomStatus;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -81,7 +87,7 @@ public class ARoomService {
         room.setBasePrice(roomInfo.getPrice());
         room.setCurrentPrice(roomInfo.getPrice());
         room.setRoomCount(rooms+1);
-        room.setStatus(false);
+        room.setStatus(RoomStatus.EMPTY);
         room.setHotel(hotel.get());
         this.roomRepository.save(room);
 
@@ -102,27 +108,44 @@ public class ARoomService {
         if (room.isEmpty()){
             return Map.of("message","this room is not found in your hotel");
         }
-        String imagePath = uploadImageRoom+image.getOriginalFilename();
-        String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
+
+        String contentType = image.getContentType();
+        if (!("image/jpeg".equals(contentType) || "image/png".equals(contentType))) {
+            throw new IOException(" can you upload only JPG و PNG");
+        }
+
+        String extension = contentType.equals("image/png") ? ".png" : ".jpg";
+        String fileName = UUID.randomUUID() + extension;
+
+        Path folderPath = Paths.get(uploadImageRoom);
+        Files.createDirectories(folderPath);
+
+        Path filePath = folderPath.resolve(fileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
         RoomImage roomImage = new RoomImage();
-        roomImage.setName(uniqueImageName);
-        roomImage.setPath(imagePath);
+        roomImage.setName(fileName);
+        roomImage.setPath(folderPath.toString()+fileName);
         roomImage.setType(image.getContentType());
         roomImage.setRoom(room.get());
         this.roomImageRepository.save(roomImage);
-        image.transferTo(new File(imagePath).toPath());
+
         return Map.of("message","Successfully Upload");
     }
+    public Resource loadImage(String fileName) throws IOException {
 
-    public byte[] viewImage(String imageName) throws Exception {
-     Optional<RoomImage> image = this.roomImageRepository.findByName( imageName);
-     if (image.isPresent()){
-         String path = image.get().getPath();
-         File file = new File(path);
-         if (!file.exists()) throw new FileNotFoundException("Image file not found");
-         return Files.readAllBytes(file.toPath());
-     }
-       return null;
+          Path  filePath = Paths.get(uploadImageRoom).resolve(fileName);
+
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("this image is not found"+fileName);
+        }
+
+        return new UrlResource(filePath.toUri());
+    }
+
+    public String getImageContentType(String fileName) throws IOException {
+        Path filePath = Paths.get(uploadImageRoom).resolve(fileName);
+        return Files.probeContentType(filePath);
     }
     
     public ResponseEntity<List<RoomResponse>> getAllRoom(Long hotelID){
@@ -152,7 +175,7 @@ public class ARoomService {
         if (!Objects.equals(hotelOptional.get().getId(), hotelId)){
             return null;
         }
-        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(true,hotelId);
+        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(RoomStatus.BOOKING,hotelId);
         if (rooms.isEmpty()){
             return null;
         }
@@ -171,7 +194,7 @@ public class ARoomService {
         if (!Objects.equals(hotelOptional.get().getId(), hotelId)){
             return null;
         }
-        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(false,hotelId);
+        List<Room> rooms  = this.roomRepository.findByStatusAndHotelId(RoomStatus.EMPTY,hotelId);
         if (rooms.isEmpty()){
             return null;
         }
@@ -181,9 +204,10 @@ public class ARoomService {
 
     private  List<RoomResponse> getRoomResponses(List<Room> rooms) {
         List<RoomResponse> roomResponseList = new ArrayList<>();
-        List<ImageDTO> imageDTOList  = new ArrayList<>();
+
         for (Room room : rooms){
             List<RoomImage> roomImages  = roomImageRepository.findByRoomId(room.getId());
+            List<ImageDTO> imageDTOList  = new ArrayList<>();
             RoomResponse roomResponse = new RoomResponse();
             roomResponse.setId(room.getId());
             roomResponse.setBasePrice(room.getBasePrice());
@@ -196,17 +220,23 @@ public class ARoomService {
                 roomResponse.setRoom_type("Regular");
 
             }
-            roomResponse.setStatus(room.isStatus());
+            if (room.isStatus().equals(RoomStatus.BOOKING)){
+                roomResponse.setStatus("Booking");
+            }else{
+                roomResponse.setStatus("Empty");
+            }
+
             roomResponse.setHotelName(room.getHotel().getName());
             roomResponse.setOwnerName(room.getHotel().getUser().getFullName());
-            roomResponseList.add(roomResponse);
-            for (int i = 0; i <roomImages.size() ; i++) {
+
+            for (RoomImage roomImage : roomImages) {
                 ImageDTO imageDTO = new ImageDTO();
-                imageDTO.setId(roomImages.get(i).getId());
-                imageDTO.setImageUrl("http://localhost:8080/admin/room/"+roomImages.get(i).getName());
+                imageDTO.setId(roomImage.getId());
+                imageDTO.setImageUrl("http://localhost:8080/admin/room/" + roomImage.getName());
                 imageDTOList.add(imageDTO);
             }
             roomResponse.setImageDTOList(imageDTOList);
+            roomResponseList.add(roomResponse);
         }
         return roomResponseList;
     }
@@ -232,7 +262,6 @@ public class ARoomService {
         Room roomUpdate = room.get();
         roomUpdate.setBasePrice(roomRequest.getPrice());
         roomUpdate.setRoomCount(roomRequest.getRoom_count());
-
         roomUpdate.setRoomType(roomRequest.getRoom_type());
         roomUpdate.setStatus(roomRequest.isStatus());
         this.roomRepository.save(roomUpdate);
@@ -242,7 +271,6 @@ public class ARoomService {
 
     @Transactional
     public Map<String, String> deleteRoom(Long hotelId, Long roomId) {
-        System.out.println("START");
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
         Long userId = this.jwtService.extractId(token);
@@ -269,16 +297,16 @@ public class ARoomService {
                     "I'm Sorry , this room is not found in your hotel");
         }
 
-        delete(hotelId,userId,room.get());
-
+        delete(hotelId,room.get());
+        this.roomImageRepository.deleteAllByRoomId(roomId);
         this.roomRepository.deleteById(room.get().getId());
         return Map.of("message",
                 "Successfully Deleted");
     }
 
 
-    private void delete(Long hotelId, Long userId,Room roomInfo){
-        List<HotelBooking> bookingList = this.hotelBookingRepository.findAll();
+    private void delete(Long hotelId,Room roomInfo){
+        List<HotelBooking> bookingList = this.hotelBookingRepository.findAllByHotelId(hotelId);
 
         for (HotelBooking hotelBooking : bookingList){
           Set<Room> updateRoom = new HashSet<>();
@@ -289,14 +317,13 @@ public class ARoomService {
                  LocalDate today = LocalDate.now();
                  LocalDate start = hotelBooking.getLaunchDate();
                  LocalDate end = hotelBooking.getDepartureDate();
-                 StatusEnum isActive = hotelBooking.isStatus();
+                 StatusEnumForBooking isActive = hotelBooking.isStatus();
 
-                 if (( !today.isBefore(start) && !today.isAfter(end) ) && isActive==StatusEnum.Activated) {
+                 if (( !today.isBefore(start) && !today.isAfter(end) ) && isActive== StatusEnumForBooking.Activated) {
 
                      //المبلغ الكلي للغرفه خلال الايام يلي رح يتم الغائها من الحجز
                      double totalPrice = ARoomService.calculateTotalPrice(LocalDate.now(), hotelBooking.getDepartureDate(), room.getCurrentPrice());
                      double discountedAmount = totalPrice + (hotelBooking.getCurrentTotalAmount() * 5 / 100);
-                     System.out.println(discountedAmount);
                      if (hotelBooking.getPaymentRatio() == 100) {
 
                          // todo : update user card and hotel card + 5%
@@ -362,34 +389,38 @@ public class ARoomService {
         String token  = jwt.substring(7);
         Long userId = jwtService.extractId(token);
         Optional<User> userOptional = this.userRepository.findById(userId);
+        System.out.println("user");
         if (userOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this account is not found in our system");
         }
-        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(1L,userId);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelId,userId);
         if (hotelOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this hotel is not found in our app");
         }
+        System.out.println("hotel");
 
         if (price<=0){
             return Map.of("message",
                     "Sorry , Wrong price should not be zero or down");
         }
+        System.out.println("hotel");
         Optional<Room> roomOptional = this.roomRepository.findById(roomId);
         if (roomOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this room is not found in our system");
         }
-
+        System.out.println("room");
         if(!roomOptional.get().getHotel().getId().equals(hotelOptional.get().getId())){
           return Map.of("message",
                   "Sorry , you can't update room price your not authorization");
         }
-
+        System.out.println("if");
         Room room = roomOptional.get();
         room.setCurrentPrice(price);
         this.roomRepository.save(room);
+        System.out.println("update");
         return Map.of("message",
                 "Successfully  updated price");
     }

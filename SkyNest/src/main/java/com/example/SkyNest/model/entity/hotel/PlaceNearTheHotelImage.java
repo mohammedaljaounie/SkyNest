@@ -16,9 +16,9 @@ public class PlaceNearTheHotelImage {
     private String type;
 
     @ManyToOne()
-    @JoinColumn(name = "placeNear_id",referencedColumnName = "id")
+    @JoinColumn(name = "place_id",referencedColumnName = "id")
     @JsonIgnore
-    private PlaceNearTheHotel PlaceNearTheHotel;
+    private PlaceNearTheHotel placeNearTheHotel;
 
 
 
@@ -55,10 +55,10 @@ public class PlaceNearTheHotelImage {
     }
 
     public PlaceNearTheHotel getPlaceNearTheHotel() {
-        return PlaceNearTheHotel;
+        return placeNearTheHotel;
     }
 
     public void setPlaceNearTheHotel(PlaceNearTheHotel placeNearTheHotel) {
-        PlaceNearTheHotel = placeNearTheHotel;
+        this.placeNearTheHotel = placeNearTheHotel;
     }
 }

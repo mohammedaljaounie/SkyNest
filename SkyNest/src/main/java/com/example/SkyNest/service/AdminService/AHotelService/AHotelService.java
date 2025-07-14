@@ -12,14 +12,18 @@ import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 
@@ -90,34 +94,81 @@ public class AHotelService {
 
     }
 
-    public Map<String,String> uploadImage(Long hotelId,MultipartFile image) throws IOException {
-        Optional<Hotel> hotelOpt = this.hotelRepository.findById(hotelId);
-        if (hotelOpt.isEmpty()){
-            return Map.of("message","This hotel is not found in our application");
+//    public Map<String,String> uploadImage(Long hotelId,MultipartFile image) throws IOException {
+//        Optional<Hotel> hotelOpt = this.hotelRepository.findById(hotelId);
+//        if (hotelOpt.isEmpty()){
+//            return Map.of("message","This hotel is not found in our application");
+//        }
+//        String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
+//        String imagePath = uploadDir+image.getOriginalFilename();
+//
+//        HotelImage hotelImage = new HotelImage();
+//        hotelImage.setName(uniqueImageName);
+//        hotelImage.setPath(imagePath);
+//        hotelImage.setType(image.getContentType());
+//        hotelImage.setHotel(hotelOpt.get());
+//        this.hotelImageRepository.save(hotelImage);
+//        image.transferTo(new File(imagePath).toPath());
+//        return Map.of("message","Successfully Upload");
+//
+//    }
+
+    public Map<String,String> saveImage(Long hotelId,MultipartFile file) throws IOException {
+        if (file.isEmpty()) {
+            throw new IOException("this photo is empty");
         }
-        String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
-        String imagePath = uploadDir+image.getOriginalFilename();
 
-        HotelImage hotelImage = new HotelImage();
-        hotelImage.setName(uniqueImageName);
-        hotelImage.setPath(imagePath);
-        hotelImage.setType(image.getContentType());
-        hotelImage.setHotel(hotelOpt.get());
-        this.hotelImageRepository.save(hotelImage);
-        image.transferTo(new File(imagePath).toPath());
-        return Map.of("message","Successfully Upload");
+        Optional<Hotel> hotelOptional = this.hotelRepository.findById(hotelId);
+        if (hotelOptional.isEmpty()){
+            return Map.of("message","this hotel is not found in our app");
+        }
 
+        String contentType = file.getContentType();
+        if (!("image/jpeg".equals(contentType) || "image/png".equals(contentType))) {
+            throw new IOException(" can you upload only JPG و PNG");
+        }
+
+        String extension = contentType.equals("image/png") ? ".png" : ".jpg";
+        String fileName = UUID.randomUUID() + extension;
+
+        Path folderPath = Paths.get(uploadDir);
+        Files.createDirectories(folderPath);
+
+        Path filePath = folderPath.resolve(fileName);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        HotelImage meta = new HotelImage();
+        meta.setName(fileName);
+        meta.setPath(folderPath.toString()+fileName);
+        meta.setType(file.getContentType());
+        meta.setHotel(hotelOptional.get());
+        this.hotelImageRepository.save(meta);
+        return Map.of("message","successfully uploaded");
     }
 
-    public byte[] viewImage(String imageName) throws Exception {
-        Optional<HotelImage> image = this.hotelImageRepository.findByName(imageName);
-        if (image.isPresent()) {
-            String path = image.get().getPath();
-            File file = new File(path);
-            if (!file.exists()) throw new FileNotFoundException("Image file not found");
-            return Files.readAllBytes(file.toPath());
+    public Resource loadImage(String fileName,boolean isHotel) throws IOException {
+        Path filePath =null ;
+        if (isHotel) {
+            filePath = Paths.get(uploadDir).resolve(fileName);
+       }else {
+            filePath = Paths.get(uploadImagePlace).resolve(fileName);
         }
-        return null;
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("this image is not found"+fileName);
+        }
+
+        return new UrlResource(filePath.toUri());
+    }
+
+    public String getImageContentType(String fileName,boolean isHotel) throws IOException {
+        Path filePath = null;
+        if (isHotel){
+             filePath = Paths.get(uploadDir).resolve(fileName);
+        }else{
+             filePath = Paths.get(uploadImagePlace).resolve(fileName);
+        }
+
+        return Files.probeContentType(filePath);
     }
 
     public Double getTotalBalanceForHotel(Long hotelId){
@@ -212,19 +263,36 @@ public class AHotelService {
 
     @Transactional
     public Map<String,String> uploadImageToPlace(Long placeId,MultipartFile image) throws IOException {
-        Optional<PlaceNearTheHotel> placeNearTheHotel = this.placeNearHotelRepo.findById(placeId);
-        if (placeNearTheHotel.isEmpty()){
-            return Map.of("message","This hotel is not found in our application");
+        if (image.isEmpty()){
+            return Map.of("message","wrong , this image is empty");
         }
-        String uniqueImageName = UUID.randomUUID()+"_"+image.getOriginalFilename();
-        String imagePath = uploadImagePlace+image.getOriginalFilename();
-        PlaceNearTheHotelImage hotelImage = new PlaceNearTheHotelImage();
-        hotelImage.setName(uniqueImageName);
-        hotelImage.setPath(imagePath);
-        hotelImage.setType(image.getContentType());
-        hotelImage.setPlaceNearTheHotel(placeNearTheHotel.get());
-        this.placeNearHotelImageRepo.save(hotelImage);
-        image.transferTo(new File(imagePath).toPath());
+        Optional<PlaceNearTheHotel> placeNearTheHotelOptional = this.placeNearHotelRepo.findById(placeId);
+
+        if (placeNearTheHotelOptional.isEmpty()){
+            return Map.of("message","this place is not found around your hotel");
+        }
+
+        String contentType = image.getContentType();
+        if (!("image/jpeg".equals(contentType) || "image/png".equals(contentType))) {
+            throw new IOException(" can you upload only JPG و PNG");
+        }
+
+        String extension = contentType.equals("image/png") ? ".png" : ".jpg";
+        String fileName = UUID.randomUUID() + extension;
+
+        Path folderPath = Paths.get(uploadImagePlace);
+        Files.createDirectories(folderPath);
+
+        Path filePath = folderPath.resolve(fileName);
+        Files.copy(image.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        PlaceNearTheHotelImage placeNearTheHotelImage = new PlaceNearTheHotelImage();
+        placeNearTheHotelImage.setName(fileName);
+        placeNearTheHotelImage.setPath(folderPath.toString()+fileName);
+        placeNearTheHotelImage.setType(contentType);
+        placeNearTheHotelImage.setPlaceNearTheHotel(placeNearTheHotelOptional.get());
+        this.placeNearHotelImageRepo.save(placeNearTheHotelImage);
+
         return Map.of("message","Successfully Upload");
 
     }
@@ -265,6 +333,7 @@ public class AHotelService {
 
 
     public Map<String ,String > deletePlace(Long placeId){
+        this.placeNearHotelImageRepo.deleteAllByPlaceId(placeId);
         this.placeNearHotelRepo.deleteById(placeId);
 
     return Map.of("message","Successfully Deleted");

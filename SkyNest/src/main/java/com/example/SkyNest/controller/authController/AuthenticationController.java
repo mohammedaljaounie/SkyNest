@@ -5,7 +5,7 @@ import com.example.SkyNest.model.entity.hotel.HotelBooking;
 import com.example.SkyNest.model.repository.hotel.HotelBookingRepository;
 import com.example.SkyNest.model.repository.userDetails.OtpRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
-import com.example.SkyNest.myEnum.StatusEnum;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import com.example.SkyNest.service.UserService.UHotelService.UHotelService;
 import com.example.SkyNest.service.authService.AuthenticationService;
 import com.example.SkyNest.service.authService.EmailService;
@@ -136,18 +136,6 @@ public class AuthenticationController {
     public ResponseEntity<Map<String,String>> logout(){
         return ResponseEntity.ok(authenticationService.logout());
     }
-
-    @GetMapping("/hotels")
-    public List<HotelResponse> getA(@RequestParam String address){
-
-        return this.uHotelService.showAllHotelByLocation(address);
-    }
-
-   @GetMapping("/rooms")
-    public List<HotelBooking> getRooms(){
-
-        return this.hotelBookingRepository.bringInBookingsThatWillExpire(LocalDate.now(), StatusEnum.Activated);
-   }
 
 
 }

@@ -11,11 +11,17 @@ import com.example.SkyNest.model.repository.hotel.RoomImageRepository;
 import com.example.SkyNest.model.repository.hotel.RoomRepository;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +35,8 @@ public class URoomService {
     @Autowired
     private RoomImageRepository roomImageRepository;
 
+    @Value("${image.upload.room}")
+    private String uploadRoomImage;
 
         public List<UserRoomResponse> getAllRoomInHotel(Long hotelId){
 
@@ -47,9 +55,10 @@ public class URoomService {
 
         private  List<UserRoomResponse> getRoomResponse(List< Room > rooms) {
             List<UserRoomResponse> roomResponseList = new ArrayList<>();
-            List<ImageDTO> imageDTOList  = new ArrayList<>();
+
             for (Room room : rooms){
                 List<RoomImage> roomImages  = roomImageRepository.findByRoomId(room.getId());
+                List<ImageDTO> imageDTOList  = new ArrayList<>();
                 UserRoomResponse roomResponse = new UserRoomResponse();
                 roomResponse.setId(room.getId());
                 roomResponse.setBasePrice(room.getBasePrice());
@@ -64,7 +73,7 @@ public class URoomService {
                 for (RoomImage roomImage : roomImages) {
                     ImageDTO imageDTO = new ImageDTO();
                     imageDTO.setId(roomImage.getId());
-                    imageDTO.setImageUrl("/user/hotel/" + roomImage.getName());
+                    imageDTO.setImageUrl("/user/room/" + roomImage.getName());
                     imageDTOList.add(imageDTO);
                 }
                 roomResponse.setImageDTOList(imageDTOList);
@@ -102,20 +111,27 @@ public class URoomService {
             return roomResponse;
         }
 
-        public byte[] viewImage(String imageName) throws Exception {
-        Optional<RoomImage> image = this.roomImageRepository.findByName( imageName);
-        if (image.isPresent()){
-            String path = image.get().getPath();
-            File file = new File(path);
-            if (!file.exists()) throw new FileNotFoundException("Image file not found");
-            return Files.readAllBytes(file.toPath());
+    public Resource loadImage(String fileName) throws IOException {
+
+
+        Path filePath = Paths.get(uploadRoomImage).resolve(fileName);
+
+
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("this image is not found"+fileName);
         }
-        return null;
+
+        return new UrlResource(filePath.toUri());
+    }
+
+    public String getImageContentType(String fileName) throws IOException {
+        Path filePath = Paths.get(uploadRoomImage).resolve(fileName);
+        return Files.probeContentType(filePath);
     }
 
 
 
 
-    }
+}
 
 

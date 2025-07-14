@@ -1,8 +1,7 @@
 package com.example.SkyNest.model.entity.hotel;
 
 import com.example.SkyNest.model.entity.userDetails.User;
-import com.example.SkyNest.myEnum.StatusEnum;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -20,7 +19,7 @@ public class HotelBooking {
     private Long id;
     private int numberOfPerson;
     private int numberOfRoom;
-    private StatusEnum status;
+    private StatusEnumForBooking status;
     private LocalDate launchDate;
     private LocalDate departureDate;
     @Min(value = 20)
@@ -44,7 +43,7 @@ public class HotelBooking {
     public HotelBooking() {
     }
 
-    public HotelBooking(int numberOfPerson, int numberOfRoom, StatusEnum status
+    public HotelBooking(int numberOfPerson, int numberOfRoom, StatusEnumForBooking status
             , LocalDate launchDate, LocalDate departureDate, int paymentRatio
             , double totalAmount,double currentTotalAmount, double amountPaid, User user, Hotel hotel
             , Set<Room> rooms) {
@@ -86,11 +85,11 @@ public class HotelBooking {
         this.numberOfRoom = numberOfRoom;
     }
 
-    public StatusEnum isStatus() {
+    public StatusEnumForBooking isStatus() {
         return status;
     }
 
-    public void setStatus(StatusEnum status) {
+    public void setStatus(StatusEnumForBooking status) {
         this.status = status;
     }
 
@@ -154,7 +153,7 @@ public class HotelBooking {
         return rooms;
     }
 
-    public StatusEnum getStatus() {
+    public StatusEnumForBooking getStatus() {
         return status;
     }
 

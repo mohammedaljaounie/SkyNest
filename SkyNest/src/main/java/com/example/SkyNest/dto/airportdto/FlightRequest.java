@@ -1,37 +1,20 @@
-package com.example.SkyNest.model.entity.flight;
+package com.example.SkyNest.dto.airportdto;
 
-import com.example.SkyNest.myEnum.StatusEnumForBooking;
+import com.example.SkyNest.model.entity.flight.Airport;
 import com.example.SkyNest.myEnum.StatusEnumForFlight;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
-import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "flight")
-public class Flight {
+public class FlightRequest {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     private String startingPoint;
     private String destination;
     private LocalDateTime StartingPointDate;
     private LocalDateTime destinationDate;
-    private StatusEnumForFlight status;
     private int numberOfChairs;
     private TripTypeAndReservation tripType;
-    @ManyToOne
-    @JoinColumn(name = "airport_id",referencedColumnName = "id")
-    private Airport airport;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private Long  airportId;
 
     public String getStartingPoint() {
         return startingPoint;
@@ -65,22 +48,6 @@ public class Flight {
         this.destinationDate = destinationDate;
     }
 
-    public void setStatus(StatusEnumForFlight status) {
-        this.status = status;
-    }
-
-    public Airport getAirport() {
-        return airport;
-    }
-
-    public void setAirport(Airport airport) {
-        this.airport = airport;
-    }
-
-    public StatusEnumForFlight getStatus() {
-        return status;
-    }
-
     public int getNumberOfChairs() {
         return numberOfChairs;
     }
@@ -95,5 +62,13 @@ public class Flight {
 
     public void setTripType(TripTypeAndReservation tripType) {
         this.tripType = tripType;
+    }
+
+    public Long getAirportId() {
+        return airportId;
+    }
+
+    public void setAirportId(Long airportId) {
+        this.airportId = airportId;
     }
 }

@@ -4,6 +4,8 @@ import com.example.SkyNest.dto.hoteldto.UserRoomResponse;
 import com.example.SkyNest.service.UserService.UHotelService.URoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +13,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -18,8 +22,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/user/room")
 public class URoomController {
-    @Value("${image.upload.room}")
-    private String imageUploadUser;
+
 
     @Autowired
     private URoomService uRoomService;
@@ -54,18 +57,27 @@ public class URoomController {
 
 
     }
+    @GetMapping("/{fileName}")
+    public ResponseEntity<Resource> viewPlaceImage(@PathVariable String fileName) {
+        try {
+            Resource image = uRoomService.loadImage(fileName);
+            String contentType = uRoomService.getImageContentType(fileName);
 
-    @GetMapping("/{imageName}")
-    public ResponseEntity<byte[]> viewHotelImage(@PathVariable String imageName) throws Exception {
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
 
-        byte[] image = this.uRoomService.viewImage(imageName);
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
 
-        String contentType = Files.probeContentType(Path.of(imageUploadUser + imageName));
-
-        return ResponseEntity.ok().
-                contentType(MediaType.parseMediaType(contentType)).body(image);
-
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
+
 
 
 

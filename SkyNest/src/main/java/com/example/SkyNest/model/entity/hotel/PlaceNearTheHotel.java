@@ -24,7 +24,7 @@ public class PlaceNearTheHotel {
     @JoinColumn(name = "hotel_id",referencedColumnName = "id")
     private Hotel hotel;
 
-    @OneToMany(mappedBy = "PlaceNearTheHotel",cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "placeNearTheHotel",cascade = CascadeType.REMOVE)
     private List<PlaceNearTheHotelImage> placeNearTheHotelImageList;
 
     public Long getId() {

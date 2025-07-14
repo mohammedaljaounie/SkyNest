@@ -138,8 +138,6 @@ return Map.of("message","Not Successfully added");
                 LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setToken(jwtToken);
                 loginResponse.setExpiresIn(jwtService.getExpirationTime());
-                User user1 = user.get();
-                user1.setFcmToken(loginUserDto.getFcmToken());
                 return loginResponse;
             }
             return null;

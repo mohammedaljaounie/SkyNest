@@ -10,7 +10,7 @@ public class RoomResponse {
      private double currentPrice;
      private int  room_count ;
      private String   room_type;
-     private boolean status;
+     private String status;
      private String hotelName;
      private String ownerName;
      private List<ImageDTO> imageDTOList;
@@ -55,11 +55,11 @@ public class RoomResponse {
         this.room_type = room_type;
     }
 
-    public boolean isStatus() {
+    public String isStatus() {
         return status;
     }
 
-    public void setStatus(boolean status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 
