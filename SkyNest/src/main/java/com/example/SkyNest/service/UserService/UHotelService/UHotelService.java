@@ -130,12 +130,18 @@ public class UHotelService {
     public List<HotelResponse> showHotelDirect(){
         String jwt = request.getHeader("Authorization");
         String token = jwt.substring(7);
-        double longitude = jwtService.extractLongitude(token);
-        double latitude  = jwtService.extractLatitude(token);
+        Long userId = jwtService.extractId(token);
+        Optional<User> user = this.userRepository.findByIdAndRoleName(userId,"user");
+        if(user.isEmpty()){
+            return null;
+        }
+        double longitude = user.get().getLongitude();
+        double latitude  = user.get().getLatitude();
         System.out.println(longitude);
         System.out.println(latitude);
 //        List<Hotel> hotelList = this.hotelRepository.findAll();
-        List<Hotel> hotelList = this.hotelRepository.findNearestHotels(latitude,longitude,20);
+        List<Hotel> hotelList = this.hotelRepository.findNearbyHotels(latitude,longitude,100,20);
+        System.out.println(hotelList.size());
         if (hotelList.isEmpty()){
             return null;
         }

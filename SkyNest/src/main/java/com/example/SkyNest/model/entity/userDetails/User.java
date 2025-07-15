@@ -120,7 +120,7 @@ public class User implements UserDetails {
     }
 
     public double getLongitude() {
-        return longitude;
+        return this.longitude;
     }
 
     public void setLongitude(double longitude) {
@@ -128,7 +128,7 @@ public class User implements UserDetails {
     }
 
     public double getLatitude() {
-        return latitude;
+        return this.latitude;
     }
 
     public void setLatitude(double latitude) {

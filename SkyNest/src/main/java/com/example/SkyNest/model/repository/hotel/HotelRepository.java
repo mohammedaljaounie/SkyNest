@@ -19,43 +19,24 @@ public interface HotelRepository extends JpaRepository<Hotel,Long>{
     List<Hotel> findByAddress(String location);
 
     @Query(value = """
-    SELECT * 
-    FROM (
-        SELECT *, 
-        (6371 * acos(
-            cos(radians(:userLat)) * 
-            cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(:userLng)) + 
-            sin(radians(:userLat)) * 
-            sin(radians(latitude))
-        )) AS distance
-        FROM hotel
-    ) AS temp
-    ORDER BY distance 
-    LIMIT :limit
+    SELECT h.*, (
+        6371 * acos(
+            cos(radians(:userLat)) * cos(radians(h.latitude)) *
+            cos(radians(h.longitude) - radians(:userLng)) +
+            sin(radians(:userLat)) * sin(radians(h.latitude))
+        )
+    ) AS distance
+    FROM hotel h
+    HAVING distance <= :radiusKm
+    ORDER BY distance ASC
+    LIMIT :limitCount
     """, nativeQuery = true)
-    List<Hotel> findClosestHotels(
+    List<Hotel> findNearbyHotels(
             @Param("userLat") double userLat,
             @Param("userLng") double userLng,
-            @Param("limit") int limit);
-
-
-    @Query(value = """
-        SELECT *, 
-        (6371 * acos(
-            cos(radians(:userLat)) * cos(radians(latitude)) * 
-            cos(radians(longitude) - radians(:userLng)) + 
-            sin(radians(:userLat)) * sin(radians(latitude))
-        )) AS distance
-        FROM hotel
-        ORDER BY distance desc
-        LIMIT :limit
-        """, nativeQuery = true)
-    List<Hotel> findNearestHotels(
-            @Param("userLat") double userLat,
-            @Param("userLng") double userLng,
-            @Param("limit") int limit);
-
+            @Param("radiusKm") double radiusKm,
+            @Param("limitCount") int limitCount
+    );
 
 
 
