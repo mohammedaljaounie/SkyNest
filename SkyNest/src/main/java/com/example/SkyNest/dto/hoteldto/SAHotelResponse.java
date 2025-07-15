@@ -1,5 +1,8 @@
 package com.example.SkyNest.dto.hoteldto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SAHotelResponse {
 
     private String hotelName;
@@ -17,6 +20,8 @@ public class SAHotelResponse {
     private String ownerName;
 
     private String ownerEmail;
+
+    private List<ImageDTO> imageDTOS = new ArrayList<>();
 
 
     public String getHotelName() {
@@ -89,5 +94,13 @@ public class SAHotelResponse {
 
     public void setLatitude(double latitude) {
         this.latitude = latitude;
+    }
+
+    public List<ImageDTO> getImageDTOS() {
+        return imageDTOS;
+    }
+
+    public void setImageDTOS(List<ImageDTO> imageDTOS) {
+        this.imageDTOS = imageDTOS;
     }
 }

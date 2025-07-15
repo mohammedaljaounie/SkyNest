@@ -5,9 +5,14 @@ import com.example.SkyNest.dto.hoteldto.HotelRequestUpdate;
 import com.example.SkyNest.dto.hoteldto.SAHotelResponse;
 import com.example.SkyNest.service.SuperAdminService.SAHotelService.SAHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -68,6 +73,27 @@ public class SAHotelController {
     @GetMapping("/hotel-info")
     public ResponseEntity<SAHotelResponse> showHotelInfo(@RequestParam Long id){
         return ResponseEntity.ok(this.saHotelService.showHotelInfo(id));
+    }
+
+    @GetMapping("/hotelImage/{fileName}")
+    public ResponseEntity<Resource> viewPlaceImage(@PathVariable String fileName) {
+        try {
+            Resource image = saHotelService.loadImage(fileName);
+            String contentType = saHotelService.getImageContentType(fileName);
+
+            if (contentType == null) {
+                contentType = "application/octet-stream";
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .body(image);
+
+        } catch (FileNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 

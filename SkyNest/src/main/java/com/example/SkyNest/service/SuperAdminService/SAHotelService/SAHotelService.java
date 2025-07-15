@@ -2,16 +2,27 @@ package com.example.SkyNest.service.SuperAdminService.SAHotelService;
 
 import com.example.SkyNest.dto.hoteldto.HotelRequest;
 import com.example.SkyNest.dto.hoteldto.HotelRequestUpdate;
+import com.example.SkyNest.dto.hoteldto.ImageDTO;
 import com.example.SkyNest.dto.hoteldto.SAHotelResponse;
 import com.example.SkyNest.model.entity.hotel.Hotel;
 import com.example.SkyNest.model.entity.hotel.HotelCard;
+import com.example.SkyNest.model.entity.hotel.HotelImage;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.repository.hotel.HotelCardRepository;
+import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
 import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +40,11 @@ public class SAHotelService {
     @Autowired
     private HotelCardRepository hotelCardRepository;
 
+    @Autowired
+    private HotelImageRepository hotelImageRepository;
+
+    @Value("${image.upload.dir}")
+    private String uploadDir;
 
 
     public Map<String,String> createHotel(HotelRequest hotelInfo){
@@ -115,6 +131,7 @@ public class SAHotelService {
 
         Optional<Hotel> hotel = this.hotelRepository.findById(id);
         if (hotel.isPresent()){
+            this.hotelImageRepository.deleteAllByHotelId(id);
             this.hotelRepository.delete(hotel.get());
             return Map.of(
                     "message",
@@ -149,6 +166,15 @@ public class SAHotelService {
                 hotelResponse.setRatingCount(hotelList.get(i).getRatingCount());
                 hotelResponse.setOwnerName(hotelList.get(i).getUser().getFullName());
                 hotelResponse.setOwnerEmail(hotelList.get(i).getUser().getEmail());
+
+                List<ImageDTO>  imageDTOList = new ArrayList<>();
+                for (HotelImage hotelImage: hotelList.get(i).getHotelImageList()){
+                    ImageDTO imageDTO = new ImageDTO();
+                    imageDTO.setId(hotelImage.getId());
+                    imageDTO.setImageUrl("http://localhost:8080/super_admin/hotelImage/"+hotelImage.getName());
+                    imageDTOList.add(imageDTO);
+                }
+                hotelResponse.setImageDTOS(imageDTOList);
                 listHotelInfo.add(hotelResponse);
             }
             return listHotelInfo;
@@ -168,13 +194,37 @@ public class SAHotelService {
             hotelResponse.setRatingCount(hotel.get().getRatingCount());
             hotelResponse.setOwnerName(hotel.get().getUser().getFullName());
             hotelResponse.setOwnerEmail(hotel.get().getUser().getEmail());
+            List<ImageDTO> imageDTOList = new ArrayList<>();
+            for (HotelImage hotelImage: hotel.get().getHotelImageList()){
+                ImageDTO imageDTO = new ImageDTO();
+                imageDTO.setId(hotelImage.getId());
+                imageDTO.setImageUrl("http://localhost:8080/super_admin/hotelImage/"+hotelImage.getName());
+                imageDTOList.add(imageDTO);
+            }
+            hotelResponse.setImageDTOS(imageDTOList);
             return hotelResponse ;
         }
         return null;
     }
 
 
+    public Resource loadImage(String fileName) throws IOException {
 
+
+        Path filePath = Paths.get(uploadDir).resolve(fileName);
+
+
+        if (!Files.exists(filePath)) {
+            throw new FileNotFoundException("this image is not found"+fileName);
+        }
+
+        return new UrlResource(filePath.toUri());
+    }
+
+    public String getImageContentType(String fileName) throws IOException {
+        Path filePath = Paths.get(uploadDir).resolve(fileName);
+        return Files.probeContentType(filePath);
+    }
 
 
 

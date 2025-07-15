@@ -55,7 +55,10 @@ public class AHotelController {
 public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId ,@RequestParam("image") MultipartFile image) {
     try {
         Map<String,String > savedImage = aHotelService.saveImage(hotelId,image);
+        if (savedImage.get("message").equals("successfully uploaded"))
         return ResponseEntity.ok(savedImage);
+        else
+            return ResponseEntity.status(400).body(savedImage);
     } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("message","not successfully uploaded"));
@@ -114,7 +117,10 @@ public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId
     public ResponseEntity<Map<String,String>> uploadImageToPlace(@RequestParam Long placeId,@RequestParam MultipartFile file) {
         try {
             Map<String,String > message = aHotelService.uploadImageToPlace(placeId,file);
+            if (message.get("message").equals("Successfully Upload"))
             return ResponseEntity.ok(message);
+            else
+                return ResponseEntity.status(400).body(message);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message","Not Successfully uploaded"));
         }

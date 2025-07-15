@@ -25,7 +25,7 @@ public class FirebaseConfig {
 
     @Bean
     public FirebaseMessaging firebaseMessaging(FirebaseApp firebaseApp){
-        return FirebaseMessaging.getInstance();
+        return FirebaseMessaging.getInstance(firebaseApp);
     }
 
     /// bean for first connect with firebase app

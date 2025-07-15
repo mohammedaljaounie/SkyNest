@@ -16,7 +16,8 @@ public class FirebaseService {
     private FirebaseMessaging firebaseMessaging;
 
     public void sendNotification(String title,String body,String fcmToken) throws Exception{
-        
+
+        try {
 
             Notification notification = Notification.builder()
                     .setTitle(title)
@@ -28,7 +29,12 @@ public class FirebaseService {
                     .setToken(fcmToken)
                     .build();
 
-             firebaseMessaging.send(message);
+            firebaseMessaging.send(message);
+        }
+        catch (Exception e){
+
+            System.out.println("can't sent notification");
+        }
     }
 
 

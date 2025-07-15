@@ -15,4 +15,5 @@ public interface HotelImageRepository extends JpaRepository<HotelImage,Long> {
     List<HotelImage> findByHotelId(Long id);
 
 
+    void deleteAllByHotelId(Long id);
 }

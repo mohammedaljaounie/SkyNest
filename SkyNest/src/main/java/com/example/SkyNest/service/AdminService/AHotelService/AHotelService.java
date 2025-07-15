@@ -114,13 +114,21 @@ public class AHotelService {
 //    }
 
     public Map<String,String> saveImage(Long hotelId,MultipartFile file) throws IOException {
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return Map.of("message","your not found in our system");
+        }
         if (file.isEmpty()) {
             throw new IOException("this photo is empty");
         }
 
-        Optional<Hotel> hotelOptional = this.hotelRepository.findById(hotelId);
+        Optional<Hotel> hotelOptional = this.hotelRepository.findByIdAndUserId(hotelId,userId);
         if (hotelOptional.isEmpty()){
-            return Map.of("message","this hotel is not found in our app");
+            return Map.of("message","you are not have hotel same like this details");
         }
 
         String contentType = file.getContentType();
@@ -263,6 +271,15 @@ public class AHotelService {
 
     @Transactional
     public Map<String,String> uploadImageToPlace(Long placeId,MultipartFile image) throws IOException {
+        String jwt = request.getHeader("Authorization");
+        String token = jwt.substring(7);
+        Long userId = jwtService.extractId(token);
+
+        Optional<User> userOptional = this.userRepository.findById(userId);
+        if (userOptional.isEmpty()){
+            return Map.of("message","your not found in our system");
+        }
+
         if (image.isEmpty()){
             return Map.of("message","wrong , this image is empty");
         }
@@ -270,6 +287,10 @@ public class AHotelService {
 
         if (placeNearTheHotelOptional.isEmpty()){
             return Map.of("message","this place is not found around your hotel");
+        }
+        if (!placeNearTheHotelOptional.get().getHotel().getUser().getId().equals(userId)){
+
+            return Map.of("message","you can access on this place because this hotel is not your hotel");
         }
 
         String contentType = image.getContentType();
