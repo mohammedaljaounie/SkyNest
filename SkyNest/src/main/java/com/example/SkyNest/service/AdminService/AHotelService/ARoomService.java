@@ -4,10 +4,13 @@ import com.example.SkyNest.dto.hoteldto.ImageDTO;
 import com.example.SkyNest.dto.hoteldto.RoomRequest;
 import com.example.SkyNest.dto.hoteldto.RoomResponse;
 import com.example.SkyNest.dto.hoteldto.RoomUpdateRequest;
+import com.example.SkyNest.firebase.service.FirebaseService;
 import com.example.SkyNest.model.entity.hotel.*;
+import com.example.SkyNest.model.entity.userDetails.Notification;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.entity.userDetails.UserCard;
 import com.example.SkyNest.model.repository.hotel.*;
+import com.example.SkyNest.model.repository.userDetails.NotificationRepo;
 import com.example.SkyNest.model.repository.userDetails.UserCardRepository;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import com.example.SkyNest.myEnum.RoomStatus;
@@ -62,6 +65,10 @@ public class ARoomService {
     private HotelCardRepository hotelCardRepository ;
     @Autowired
     private UserCardRepository userCardRepository;
+    @Autowired
+    private FirebaseService firebaseService;
+    @Autowired
+    private NotificationRepo notificationRepo;
 
     // fetch hotel by user id then check  if user can accesses to this hotel
     public Map<String,String> createRoom(Long hotel_id, RoomRequest roomInfo){
@@ -384,12 +391,11 @@ public class ARoomService {
     }
 
     @Transactional
-    public Map<String ,String> updateRoomPrice(Long hotelId,Long roomId, double price){
+    public Map<String ,String> updateRoomPrice(Long hotelId,Long roomId, double price) throws Exception {
         String jwt = request.getHeader("Authorization");
         String token  = jwt.substring(7);
         Long userId = jwtService.extractId(token);
         Optional<User> userOptional = this.userRepository.findById(userId);
-        System.out.println("user");
         if (userOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this account is not found in our system");
@@ -399,28 +405,41 @@ public class ARoomService {
             return Map.of("message",
                     "Sorry , this hotel is not found in our app");
         }
-        System.out.println("hotel");
 
         if (price<=0){
             return Map.of("message",
                     "Sorry , Wrong price should not be zero or down");
         }
-        System.out.println("hotel");
         Optional<Room> roomOptional = this.roomRepository.findById(roomId);
         if (roomOptional.isEmpty()){
             return Map.of("message",
                     "Sorry , this room is not found in our system");
         }
-        System.out.println("room");
         if(!roomOptional.get().getHotel().getId().equals(hotelOptional.get().getId())){
           return Map.of("message",
                   "Sorry , you can't update room price your not authorization");
         }
-        System.out.println("if");
-        Room room = roomOptional.get();
-        room.setCurrentPrice(price);
-        this.roomRepository.save(room);
-        System.out.println("update");
+        if (price<roomOptional.get().getCurrentPrice()){
+            List<User> users = this.userRepository.findAllByRoleName("user");
+
+            for (User user : users){
+                String title = "SkyNest Application";
+                String body ="Hello Mohammed,\n" +
+                        " there are special offers available for you at Al Sham Hotel.\n" +
+                        " Hurry up to book and take advantage of the offer to achieve maximum savings.";
+                if (user.getFcmToken()!=null){
+                   this.firebaseService.sendNotification(title,body, user.getFcmToken());
+                   this.notificationRepo.save(new Notification(title+"\n"+body,user));
+                }
+            }
+            Room room = roomOptional.get();
+            room.setCurrentPrice(price);
+            this.roomRepository.save(room);
+        }else {
+            Room room = roomOptional.get();
+            room.setCurrentPrice(price);
+            this.roomRepository.save(room);
+        }
         return Map.of("message",
                 "Successfully  updated price");
     }

@@ -47,7 +47,7 @@ public class JobsService {
             }
 
             this.roomRepository.saveAll(booking.getRooms());
-            if (booking.getUser().getFcmToken()==null||booking.getUser().getFcmToken().isBlank()){
+            if (booking.getUser().getFcmToken()==null){
                 System.out.println("this user is not  have fcm token to send notification");
             }else {
                 String title = "SkyNest";
@@ -61,7 +61,7 @@ public class JobsService {
         }
     }
 
-    @Scheduled(cron = "0 15 0 * * *",zone = "Asia/Damascus")
+    @Scheduled(cron = "0 10 0 * * *",zone = "Asia/Damascus")
     @Transactional
     public void updateRoomStatusToFull() throws Exception {
         List<HotelBooking> hotelBookings = this.hotelBookingRepository.bringInBookingsThatWillExpire(LocalDate.now(), StatusEnumForBooking.Activated);
@@ -78,6 +78,7 @@ public class JobsService {
                 String title = "SkyNest";
                 String body = "Hello, your reservation at " + booking.getHotel().getName() + " Hotel has started today.\n" +
                         " We wish you a pleasant stay and thank you for using our application.";
+
                 this.firebaseService.sendNotification(title, body, booking.getUser().getFcmToken());
                 this.notificationRepo.save(new Notification(title+"\n"+body, booking.getUser()));
             }

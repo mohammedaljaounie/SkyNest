@@ -146,7 +146,7 @@ public class ARoomController {
     }
 
     @PostMapping("/update_price/{hotelId}")
-    public ResponseEntity<?> updateRoomPrice(@PathVariable Long hotelId,@RequestParam Long roomId,@RequestParam double price){
+    public ResponseEntity<?> updateRoomPrice(@PathVariable Long hotelId,@RequestParam Long roomId,@RequestParam double price) throws Exception {
         System.out.println("controller1 ");
         Map<String ,String> message = this.aRoomService.updateRoomPrice(hotelId,roomId, price);
         System.out.println("controller2");

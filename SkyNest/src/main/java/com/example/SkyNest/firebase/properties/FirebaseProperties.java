@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 @Component
 @ConfigurationProperties(prefix = "firebase")
 public class FirebaseProperties {
-
     @Value(value = "${firebase.service-account-path}")
     private Resource accountService;
 
