@@ -17,6 +17,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -33,7 +34,7 @@ public class URoomController {
         List<UserRoomResponse> userRoomResponses = this.uRoomService.getAllRoomInHotel(hotelId);
 
         if (userRoomResponses == null){
-            return ResponseEntity.status(204).body(null);
+            return ResponseEntity.status(204).body(Collections.emptyList());
         }
 
         return ResponseEntity.ok().body(userRoomResponses);

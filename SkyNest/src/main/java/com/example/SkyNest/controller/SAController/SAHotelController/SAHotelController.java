@@ -1,4 +1,4 @@
-package com.example.SkyNest.controller.SAController;
+package com.example.SkyNest.controller.SAController.SAHotelController;
 
 import com.example.SkyNest.dto.hoteldto.HotelRequest;
 import com.example.SkyNest.dto.hoteldto.HotelRequestUpdate;

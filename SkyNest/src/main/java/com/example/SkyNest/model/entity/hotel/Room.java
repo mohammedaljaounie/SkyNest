@@ -18,6 +18,9 @@ public class Room {
     private int roomCount;
     private double basePrice;
     private double currentPrice;
+    private int numberOfPerson;
+    private int numberOfBed;
+    private String isHasKitchen;
     private RoomStatus status;
 
     @ManyToOne
@@ -93,19 +96,31 @@ public class Room {
         this.hotelBookings = hotelBookings;
     }
 
+    public int getNumberOfPerson() {
+        return numberOfPerson;
+    }
 
-//
-//    @Override
-//    public boolean equals(Object o){
-//        RoomResponse room = (RoomResponse) o;
-//        return id.equals(room.getId()) ;
-//    }
-//
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(id);
-//    }
-//
+    public void setNumberOfPerson(int numberOfPerson) {
+        this.numberOfPerson = numberOfPerson;
+    }
 
+    public int getNumberOfBed() {
+        return numberOfBed;
+    }
+
+    public void setNumberOfBed(int numberOfBed) {
+        this.numberOfBed = numberOfBed;
+    }
+
+    public String getIsHasKitchen() {
+        return isHasKitchen;
+    }
+
+    public void setIsHasKitchen(String isHasKitchen) {
+        this.isHasKitchen = isHasKitchen;
+    }
+
+    public RoomStatus getStatus() {
+        return status;
+    }
 }

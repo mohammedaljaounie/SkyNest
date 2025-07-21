@@ -1,6 +1,7 @@
 package com.example.SkyNest.dto.airportdto;
 
 import jakarta.persistence.Column;
+import jakarta.validation.constraints.Email;
 
 
 public class AirportRequest {
@@ -23,7 +24,8 @@ public class AirportRequest {
     private double longitude;
 
     @Column(nullable = false)
-    private Long adminId;
+    @Email
+    private String email;
 
     public void setDescription(String description) {
         this.description = description;
@@ -65,11 +67,11 @@ public class AirportRequest {
         return this.name;
     }
 
-    public Long getAdminId() {
-        return this.adminId;
+    public String getEmail() {
+        return email;
     }
 
-    public void setAdminId(Long adminId) {
-        this.adminId = adminId;
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

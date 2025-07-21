@@ -4,6 +4,7 @@ import com.example.SkyNest.model.entity.hotel.HotelBooking;
 import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -38,6 +39,13 @@ public interface HotelBookingRepository extends JpaRepository<HotelBooking,Long>
 
     List<HotelBooking> findByStatusAndUserId(StatusEnumForBooking status, Long userId);
 
+
+    @Query(value = """
+    SELECT COUNT(*) AS total_bookings
+    FROM hotel_booking
+    WHERE MONTH(launch_date) = :month AND YEAR(launch_date) = :year AND hotel_id = :hotelId AND status = :status
+""", nativeQuery = true)
+    Long countBookingsForHotelInMonth(@Param("hotelId") Long hotelId, @Param("month") int month, @Param("year") int year,@Param("status") StatusEnumForBooking status);
 
 
 

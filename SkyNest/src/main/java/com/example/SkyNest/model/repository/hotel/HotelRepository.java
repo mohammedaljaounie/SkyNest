@@ -15,7 +15,7 @@ public interface HotelRepository extends JpaRepository<Hotel,Long>{
 
     List<Hotel> findByUserId(Long id);
 
-    @Query(value = "select h from Hotel h where h.address like concat('%',:location,'%')")
+    @Query(value = "select h from Hotel h where lower(h.address) like lower(concat(:location,'%'))")
     List<Hotel> findByAddress(String location);
 
     @Query(value = """
@@ -26,7 +26,7 @@ public interface HotelRepository extends JpaRepository<Hotel,Long>{
             sin(radians(:userLat)) * sin(radians(h.latitude))
         )
     ) AS distance
-    FROM hotel h
+    FROM Hotel h
     HAVING distance <= :radiusKm
     ORDER BY distance ASC
     LIMIT :limitCount
@@ -42,5 +42,9 @@ public interface HotelRepository extends JpaRepository<Hotel,Long>{
 
     @Query(value = "select h from Hotel h order by h.avgRating desc")
     List<Hotel> filterHotelByRating();
+
+    @Query("SELECT h FROM Hotel h WHERE LOWER(h.name) LIKE LOWER(CONCAT(:prefix, '%'))")
+    List<Hotel> findHotelByPrefix(@Param("prefix") String prefix);
+
 
 }

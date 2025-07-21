@@ -1,5 +1,10 @@
 package com.example.SkyNest.dto.airportdto;
 
+import com.example.SkyNest.dto.hoteldto.ImageDTO;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public class AirportResponse {
 
     private Long airportId;
@@ -11,6 +16,7 @@ public class AirportResponse {
     private String ownerName;
     private double avgRating;
     private int ratingCount;
+    private List<ImageDTO> airportImages = new ArrayList<>();
 
     public Long getAirportId() {
         return airportId;
@@ -82,5 +88,13 @@ public class AirportResponse {
 
     public void setRatingCount(int ratingCount) {
         this.ratingCount = ratingCount;
+    }
+
+    public List<ImageDTO> getAirportImages() {
+        return airportImages;
+    }
+
+    public void setAirportImages(List<ImageDTO> airportImages) {
+        this.airportImages = airportImages;
     }
 }

@@ -50,11 +50,11 @@ public class AirportImage {
         this.type = type;
     }
 
-    public Airport getHotel() {
+    public Airport getAirport() {
         return this.airport;
     }
 
-    public void setHotel(Airport airport) {
+    public void setAirport(Airport airport) {
         this.airport = airport;
     }
 }

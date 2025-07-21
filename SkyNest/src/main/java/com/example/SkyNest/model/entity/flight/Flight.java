@@ -1,11 +1,12 @@
 package com.example.SkyNest.model.entity.flight;
 
-import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import com.example.SkyNest.myEnum.StatusEnumForFlight;
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "flight")
@@ -16,14 +17,21 @@ public class Flight {
     private Long id;
     private String startingPoint;
     private String destination;
-    private LocalDateTime StartingPointDate;
+    private LocalDateTime startingPointDate;
     private LocalDateTime destinationDate;
     private StatusEnumForFlight status;
     private int numberOfChairs;
+    private int numberOfEmptyChairs;
     private TripTypeAndReservation tripType;
+    private double basePrice;
+    private double currentPrice;
+    private boolean enable;
     @ManyToOne
     @JoinColumn(name = "airport_id",referencedColumnName = "id")
     private Airport airport;
+
+    @OneToMany(mappedBy = "flight")
+    private List<FlightImage> flightImages = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -50,11 +58,11 @@ public class Flight {
     }
 
     public LocalDateTime getStartingPointDate() {
-        return StartingPointDate;
+        return startingPointDate;
     }
 
     public void setStartingPointDate(LocalDateTime startingPointDate) {
-        StartingPointDate = startingPointDate;
+        this.startingPointDate = startingPointDate;
     }
 
     public LocalDateTime getDestinationDate() {
@@ -95,5 +103,45 @@ public class Flight {
 
     public void setTripType(TripTypeAndReservation tripType) {
         this.tripType = tripType;
+    }
+
+    public double getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
+    }
+
+    public double getCurrentPrice() {
+        return currentPrice;
+    }
+
+    public void setCurrentPrice(double currentPrice) {
+        this.currentPrice = currentPrice;
+    }
+
+    public List<FlightImage> getFlightImages() {
+        return flightImages;
+    }
+
+    public void setFlightImages(List<FlightImage> flightImages) {
+        this.flightImages = flightImages;
+    }
+
+    public int getNumberOfEmptyChairs() {
+        return numberOfEmptyChairs;
+    }
+
+    public void setNumberOfEmptyChairs(int numberOfEmptyChairs) {
+        this.numberOfEmptyChairs = numberOfEmptyChairs;
+    }
+
+    public boolean isEnable() {
+        return enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
     }
 }

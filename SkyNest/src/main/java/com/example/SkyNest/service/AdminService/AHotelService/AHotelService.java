@@ -8,6 +8,7 @@ import com.example.SkyNest.model.entity.hotel.*;
 import com.example.SkyNest.model.entity.userDetails.User;
 import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
+import com.example.SkyNest.myEnum.StatusEnumForBooking;
 import com.example.SkyNest.service.authService.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,8 @@ public class AHotelService {
 
     @Value("${image.upload.place.near.hotel}")
     private String uploadImagePlace;
+    @Autowired
+    private HotelBookingRepository hotelBookingRepository;
 
 
     public List<HotelResponse> showHotelInfo(){
@@ -132,7 +135,7 @@ public class AHotelService {
         }
 
         String contentType = file.getContentType();
-        if (!("image/jpeg".equals(contentType) || "image/png".equals(contentType))) {
+         if (!("image/jpeg".equals(contentType) || "image/png".equals(contentType))) {
             throw new IOException(" can you upload only JPG و PNG");
         }
 
@@ -360,7 +363,8 @@ public class AHotelService {
     return Map.of("message","Successfully Deleted");
     }
 
-
-
+    public Long getHotelBookingsForHotel(Long hotelId, int month, int year) {
+        return this.hotelBookingRepository.countBookingsForHotelInMonth(hotelId, month, year,StatusEnumForBooking.Activated);
+    }
 
 }

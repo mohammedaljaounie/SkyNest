@@ -13,6 +13,9 @@ public class RoomResponse {
      private String status;
      private String hotelName;
      private String ownerName;
+     private int numberOfPerson;
+     private int numberOfBed;
+     private String isHasKitchen;
      private List<ImageDTO> imageDTOList;
 
 
@@ -95,6 +98,33 @@ public class RoomResponse {
         this.imageDTOList = imageDTOList;
     }
 
+    public String getStatus() {
+        return status;
+    }
+
+    public int getNumberOfPerson() {
+        return numberOfPerson;
+    }
+
+    public void setNumberOfPerson(int numberOfPerson) {
+        this.numberOfPerson = numberOfPerson;
+    }
+
+    public int getNumberOfBed() {
+        return numberOfBed;
+    }
+
+    public void setNumberOfBed(int numberOfBed) {
+        this.numberOfBed = numberOfBed;
+    }
+
+    public String getIsHasKitchen() {
+        return isHasKitchen;
+    }
+
+    public void setIsHasKitchen(String isHasKitchen) {
+        this.isHasKitchen = isHasKitchen;
+    }
 
     @Override
     public boolean equals(Object o){
@@ -107,13 +137,16 @@ public class RoomResponse {
                 status==roomResponse.status&&
                 hotelName.equals(roomResponse.hotelName)&&
                 ownerName.equals(roomResponse.ownerName)&&
+                numberOfPerson==roomResponse.numberOfPerson&&
+                numberOfBed==roomResponse.numberOfBed&&
+                isHasKitchen.equals(roomResponse.isHasKitchen)&&
                 imageDTOList.size()==roomResponse.imageDTOList.size();
     }
 
 
     @Override
     public int hashCode(){
-        return Objects.hash(id,basePrice,currentPrice,room_count,room_type,status,hotelName,ownerName,imageDTOList.size());
+        return Objects.hash(id,basePrice,currentPrice,room_count,room_type,status,hotelName,ownerName,numberOfPerson,numberOfBed,isHasKitchen,imageDTOList.size());
     }
 
 

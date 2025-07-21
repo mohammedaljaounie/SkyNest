@@ -1,4 +1,4 @@
-package com.example.SkyNest.controller.AController;
+package com.example.SkyNest.controller.AController.AHotelController;
 
 import com.example.SkyNest.dto.hoteldto.RoomRequest;
 import com.example.SkyNest.dto.hoteldto.RoomResponse;
@@ -15,8 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 

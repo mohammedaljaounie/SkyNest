@@ -3,6 +3,9 @@ package com.example.SkyNest.model.entity.flight;
 import com.example.SkyNest.model.entity.userDetails.User;
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "airport")
 public class Airport {
@@ -22,9 +25,11 @@ public class Airport {
     private double longitude;
     @Column(nullable = false)
     private String location;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
+    @OneToMany(mappedBy = "airport",cascade = CascadeType.REMOVE)
+    private List<AirportImage> airportImages = new ArrayList<>();
 
     public Airport() {
     }
@@ -112,5 +117,13 @@ public class Airport {
 
     public void setLongitude(double longitude) {
         this.longitude = longitude;
+    }
+
+    public List<AirportImage> getAirportImages() {
+        return airportImages;
+    }
+
+    public void setAirportImages(List<AirportImage> airportImages) {
+        this.airportImages = airportImages;
     }
 }

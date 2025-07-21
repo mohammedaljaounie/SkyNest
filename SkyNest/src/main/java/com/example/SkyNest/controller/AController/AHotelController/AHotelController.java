@@ -1,16 +1,14 @@
-package com.example.SkyNest.controller.AController;
+package com.example.SkyNest.controller.AController.AHotelController;
 
 import com.example.SkyNest.dto.hoteldto.HotelResponse;
 import com.example.SkyNest.dto.hoteldto.PlaceNearHotelResponse;
 import com.example.SkyNest.dto.hoteldto.PlaceNearTheHotelRequest;
-import com.example.SkyNest.model.entity.hotel.HotelImage;
 import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
 import com.example.SkyNest.model.repository.hotel.HotelRepository;
 import com.example.SkyNest.service.AdminService.AHotelService.AHotelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,12 +17,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/admin/hotel")
@@ -175,6 +169,17 @@ public ResponseEntity<Map<String,String>> uploadImage(@RequestParam Long hotelId
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+
+
+    @GetMapping("/bookingCount/{hotelId}")
+    public ResponseEntity<?> getBookingsForHotel(
+            @PathVariable Long hotelId,
+            @RequestParam int month,
+            @RequestParam int year) {
+        Long count = aHotelService.getHotelBookingsForHotel(hotelId, month, year);
+        return ResponseEntity.ok(Map.of("hotelId", hotelId, "totalBookings", count));
     }
 
 }

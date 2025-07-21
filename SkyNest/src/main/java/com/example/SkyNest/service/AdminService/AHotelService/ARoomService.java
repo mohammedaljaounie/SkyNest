@@ -95,6 +95,14 @@ public class ARoomService {
         room.setCurrentPrice(roomInfo.getPrice());
         room.setRoomCount(rooms+1);
         room.setStatus(RoomStatus.EMPTY);
+        room.setNumberOfPerson(roomInfo.getNumberOfPerson());
+        room.setNumberOfBed(roomInfo.getNumberOfBed());
+        if(roomInfo.isHasKitchen()){
+            room.setIsHasKitchen("Deluxe Kitchen");
+        }else {
+            room.setIsHasKitchen("Regular Kitchen");
+        }
+
         room.setHotel(hotel.get());
         this.roomRepository.save(room);
 
@@ -219,6 +227,9 @@ public class ARoomService {
             roomResponse.setId(room.getId());
             roomResponse.setBasePrice(room.getBasePrice());
             roomResponse.setCurrentPrice(room.getCurrentPrice());
+            roomResponse.setNumberOfPerson(room.getNumberOfPerson());
+            roomResponse.setNumberOfBed(room.getNumberOfBed());
+            roomResponse.setIsHasKitchen(room.getIsHasKitchen());
             roomResponse.setRoom_count(room.getRoomCount());
             if (room.getRoomType().equals(TripTypeAndReservation.Deluxe)){
                 roomResponse.setRoom_type("Deluxe");

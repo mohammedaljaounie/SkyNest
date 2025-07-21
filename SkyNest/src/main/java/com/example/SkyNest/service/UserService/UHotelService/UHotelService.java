@@ -148,6 +148,10 @@ public class UHotelService {
        return getHotelResponse(hotelList);
     }
 
+    public List<HotelResponse> getHotelByName(String name){
+        return getHotelResponse(this.hotelRepository.findHotelByPrefix(name));
+    }
+
     private static List<HotelResponse> getHotelResponse(List<Hotel> hotelList){
 
         List<HotelResponse> hotelResponseList = new ArrayList<>();
@@ -479,14 +483,14 @@ public class UHotelService {
            return ResponseEntity.status(403).body(Map.of("message",
                    "your not register in our application"));
       }
-        System.out.println("User");
+
       Optional<UserCard> userCard = this.userCardRepository.findByUserId(user.get().getId());
       if (userCard.isEmpty()){
 
           //todo : stop because user not has card to pay
           return ResponseEntity.status(403).body(Map.of("message","you don't have card to pay"));
       }
-        System.out.println("UserCard");
+
 
       Optional<Hotel> hotel = this.hotelRepository.findById(bookingRequest.getHotelId());
       if (hotel.isEmpty()){
@@ -546,9 +550,17 @@ public class UHotelService {
            }
 
 
-        double totalCost = UHotelService.calculateTotalPrice(realRooms,bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate());
+        double baseCost = UHotelService.calculateTotalPrice(realRooms,bookingRequest.getLaunchDate(),bookingRequest.getDepartureDate());
 
-        double theAmountToBePaid = totalCost* bookingRequest.getPaymentRatio()/100;
+        int userLevel = user.get().getLevel()%5;
+        double currentCost = 0;
+        if (userLevel>0){
+            currentCost = baseCost*(2*userLevel)/100;
+        }else {
+            currentCost = baseCost;
+        }
+
+        double theAmountToBePaid = currentCost* bookingRequest.getPaymentRatio()/100;
 
 
         if (!UHotelService.checkUserCard(userCard.get(),theAmountToBePaid)){
@@ -562,7 +574,7 @@ public class UHotelService {
                             bookingRequest.getSetOfRooms().size(),
                             StatusEnumForBooking.Unacceptable,bookingRequest.getLaunchDate(),
                             bookingRequest.getDepartureDate(),
-                            bookingRequest.getPaymentRatio(),totalCost,totalCost,0,
+                            bookingRequest.getPaymentRatio(),baseCost,currentCost,0,
                             user.get(),
                             hotel.get(),
                             new HashSet<>(realRooms)
@@ -583,12 +595,16 @@ public class UHotelService {
                         bookingRequest.getSetOfRooms().size(),
                         StatusEnumForBooking.Activated,bookingRequest.getLaunchDate(),
                         bookingRequest.getDepartureDate(),
-                        bookingRequest.getPaymentRatio(),totalCost,totalCost,theAmountToBePaid,
+                        bookingRequest.getPaymentRatio(),baseCost,currentCost,theAmountToBePaid,
                         user.get(),
                         hotel.get(),
                         new HashSet<>(realRooms)
                 )
         );
+
+        User updateUserLevel = user.get();
+        updateUserLevel.setLevel(updateUserLevel.getLevel()+1);
+        this.userRepository.save(updateUserLevel);
 
         return ResponseEntity.ok(Map.of("message",
                 "Successfully booking"));
@@ -682,7 +698,7 @@ public class UHotelService {
             for (RoomImage roomImage : roomImageList) {
                 ImageDTO imageDTO = new ImageDTO();
                 imageDTO.setId(roomImage.getId());
-                imageDTO.setImageUrl("/user/hotel/hotelImage" + roomImage.getName());
+                imageDTO.setImageUrl("/user/hotel/hotelImage/" + roomImage.getName());
                 roomImages.add(imageDTO);
             }
             roomResponse.setImageDTOList(roomImages);
@@ -728,6 +744,9 @@ public class UHotelService {
         RoomResponse roomResponse = new RoomResponse();
         roomResponse.setId(room.getId());
         roomResponse.setHotelName(room.getHotel().getName());
+        roomResponse.setNumberOfPerson(room.getNumberOfPerson());
+        roomResponse.setNumberOfBed(room.getNumberOfBed());
+        roomResponse.setIsHasKitchen(room.getIsHasKitchen());
         roomResponse.setRoom_count(room.getRoomCount());
         if (room.getRoomType().equals(TripTypeAndReservation.Deluxe)){
             roomResponse.setRoom_type("Deluxe");
@@ -883,6 +902,10 @@ public class UHotelService {
             return DateStatus.FULL_AMOUNT;
         }
     }
+
+
+
+
 
 }
 

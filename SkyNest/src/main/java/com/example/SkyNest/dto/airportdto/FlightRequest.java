@@ -1,7 +1,6 @@
 package com.example.SkyNest.dto.airportdto;
 
-import com.example.SkyNest.model.entity.flight.Airport;
-import com.example.SkyNest.myEnum.StatusEnumForFlight;
+
 import com.example.SkyNest.myEnum.TripTypeAndReservation;
 
 import java.time.LocalDateTime;
@@ -10,11 +9,12 @@ public class FlightRequest {
 
     private String startingPoint;
     private String destination;
-    private LocalDateTime StartingPointDate;
+    private LocalDateTime startingPointDate;
     private LocalDateTime destinationDate;
     private int numberOfChairs;
     private TripTypeAndReservation tripType;
     private Long  airportId;
+    private double basePrice;
 
     public String getStartingPoint() {
         return startingPoint;
@@ -33,11 +33,11 @@ public class FlightRequest {
     }
 
     public LocalDateTime getStartingPointDate() {
-        return StartingPointDate;
+        return startingPointDate;
     }
 
     public void setStartingPointDate(LocalDateTime startingPointDate) {
-        StartingPointDate = startingPointDate;
+        this.startingPointDate = startingPointDate;
     }
 
     public LocalDateTime getDestinationDate() {
@@ -70,5 +70,13 @@ public class FlightRequest {
 
     public void setAirportId(Long airportId) {
         this.airportId = airportId;
+    }
+
+    public double getBasePrice() {
+        return basePrice;
+    }
+
+    public void setBasePrice(double basePrice) {
+        this.basePrice = basePrice;
     }
 }

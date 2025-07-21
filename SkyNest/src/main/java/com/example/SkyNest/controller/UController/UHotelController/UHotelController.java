@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -38,6 +39,14 @@ public class UHotelController {
                 .body(this
                         .uHotelService
                         .showAllHotel());
+    }
+
+    @GetMapping("/searchByName")
+    public ResponseEntity<List<HotelResponse>> showAllHotelByName(@RequestParam String hotelName) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(this
+                        .uHotelService
+                        .getHotelByName(hotelName));
     }
 
     @GetMapping("/show-hotel/{id}")
@@ -95,7 +104,7 @@ public class UHotelController {
        List<HotelResponse> hotelResponse = this.uHotelService.showAllHotelByLocation(location);
         if (hotelResponse != null)
             return ResponseEntity.ok(hotelResponse);
-        return ResponseEntity.status(400).body(null);
+        return ResponseEntity.status(400).body(Collections.emptyList());
     }
 
     @GetMapping("/showHotelDirect")
@@ -144,7 +153,7 @@ public class UHotelController {
         List<HotelResponse> hotelResponseList = this.uHotelService.filterHotelByRating();
 
         if (hotelResponseList==null||hotelResponseList.isEmpty()){
-            return ResponseEntity.status(400).body(null);
+            return ResponseEntity.status(400).body(Collections.emptyList());
         }
 
         return ResponseEntity.ok().body(hotelResponseList);
@@ -187,7 +196,7 @@ public class UHotelController {
         if (placeResponse!=null) {
             return ResponseEntity.ok(placeResponse);
         }
-        return ResponseEntity.status(400).body(null);
+        return ResponseEntity.status(400).body(Collections.emptyList());
      }
 
     @GetMapping("/placeImage/{fileName}")
@@ -221,7 +230,7 @@ public class UHotelController {
         }
 
 
-        return ResponseEntity.status(400).body(null);
+        return ResponseEntity.status(400).body(Collections.emptySet());
     }
 
 
