@@ -41,4 +41,5 @@ public interface AirportRepo extends JpaRepository<Airport,Long> {
             @Param("limitCount") int limitCount
     );
 
+    List<Airport> findByUserId(Long userId);
 }

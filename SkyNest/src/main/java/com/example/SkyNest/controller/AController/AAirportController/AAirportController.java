@@ -1,5 +1,7 @@
 package com.example.SkyNest.controller.AController.AAirportController;
 
+import com.example.SkyNest.dto.airportdto.AirportResponse;
+import com.example.SkyNest.dto.airportdto.UpdateAirportInfoRequest;
 import com.example.SkyNest.service.AdminService.AAirportService.AAirportService;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
@@ -10,6 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -78,6 +82,35 @@ public class AAirportController {
         Long count = aAirportService.getAirportBookingsForAirport(airportId, month, year);
         return ResponseEntity.ok(Map.of("airportId", airportId, "totalBookings", count));
     }
+
+    @GetMapping("/showAirportsDirect")
+    public ResponseEntity<List<AirportResponse>> gitAirportForAdmin(){
+        List<AirportResponse> airportResponseList = this.aAirportService.gitAirportForAdmin();
+        if (airportResponseList!=null){
+            return ResponseEntity.ok(airportResponseList);
+        }
+        return ResponseEntity.status(400).body(Collections.emptyList());
+    }
+
+    @GetMapping("/showCertainAirport/{airportId}")
+    public ResponseEntity<AirportResponse> getCertainAirportForAdmin(@PathVariable Long airportId){
+        AirportResponse airportResponse = this.aAirportService.getCertainAirportForAdmin(airportId);
+        if (airportResponse!=null){
+            return ResponseEntity.ok(airportResponse);
+        }
+        return ResponseEntity.status(400).body(null);
+    }
+
+    @PutMapping("/updateAirportInfo")
+    public ResponseEntity<Map<String,String>> updateAirportInfo(@RequestBody UpdateAirportInfoRequest request){
+
+        Map<String,String> message = this.aAirportService.updateAirportInfo(request);
+        if (message.get("message").equals("Successfully Updated")){
+            return ResponseEntity.ok(message);
+        }
+        return ResponseEntity.status(400).body(message);
+    }
+
 
 
 }
