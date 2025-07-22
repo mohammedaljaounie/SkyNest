@@ -43,7 +43,7 @@ public class ApplicationUp implements ApplicationRunner {
             User userSuperAdmin = new User();
             userSuperAdmin  .setFullName("Mohammed samir");
             userSuperAdmin .setEmail("so2004m@gmail.com");
-            userSuperAdmin .setPassword(passwordEncoder.encode("12345"));
+            userSuperAdmin .setPassword(passwordEncoder.encode("123456789"));
             userSuperAdmin.setLatitude(32.124);
             userSuperAdmin.setLongitude(32.245);
             userSuperAdmin.setRole(superAdmin);
