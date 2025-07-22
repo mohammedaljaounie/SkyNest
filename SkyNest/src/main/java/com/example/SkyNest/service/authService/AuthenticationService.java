@@ -138,6 +138,7 @@ return Map.of("message","Not Successfully added");
                 LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setToken(jwtToken);
                 loginResponse.setExpiresIn(jwtService.getExpirationTime());
+                loginResponse.setRoleName(user.get().getRole().getName());
                 return loginResponse;
             }
             return null;
