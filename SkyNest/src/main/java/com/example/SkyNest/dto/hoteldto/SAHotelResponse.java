@@ -5,6 +5,7 @@ import java.util.List;
 
 public class SAHotelResponse {
 
+    private  Long hotelId;
     private String hotelName;
 
     private String description;
@@ -102,5 +103,13 @@ public class SAHotelResponse {
 
     public void setImageDTOS(List<ImageDTO> imageDTOS) {
         this.imageDTOS = imageDTOS;
+    }
+
+    public Long getHotelId() {
+        return hotelId;
+    }
+
+    public void setHotelId(Long hotelId) {
+        this.hotelId = hotelId;
     }
 }

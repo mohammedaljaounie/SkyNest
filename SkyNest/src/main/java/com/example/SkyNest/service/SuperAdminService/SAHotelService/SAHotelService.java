@@ -157,6 +157,7 @@ public class SAHotelService {
         }else {
             for (int i = 0; i < this.hotelRepository.findAll().size(); i++) {
                 SAHotelResponse hotelResponse = new SAHotelResponse();
+                hotelResponse.setHotelId(hotelList.get(i).getId());
                 hotelResponse.setHotelName(hotelList.get(i).getName());
                 hotelResponse.setAddress(hotelList.get(i).getAddress());
                 hotelResponse.setLongitude(hotelList.get(i).getLongitude());
@@ -185,6 +186,7 @@ public class SAHotelService {
         Optional<Hotel> hotel = this.hotelRepository.findById(id);
         if (hotel.isPresent()){
             SAHotelResponse hotelResponse  = new SAHotelResponse();
+            hotelResponse.setHotelId(hotel.get().getId());
             hotelResponse.setHotelName(hotel.get().getName());
             hotelResponse.setAddress(hotel.get().getAddress());
             hotelResponse.setLongitude(hotel.get().getLongitude());
