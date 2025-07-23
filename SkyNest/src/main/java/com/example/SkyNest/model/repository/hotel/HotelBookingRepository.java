@@ -48,5 +48,5 @@ public interface HotelBookingRepository extends JpaRepository<HotelBooking,Long>
     Long countBookingsForHotelInMonth(@Param("hotelId") Long hotelId, @Param("month") int month, @Param("year") int year,@Param("status") StatusEnumForBooking status);
 
 
-
+    void deleteByHotelId(Long id);
 }

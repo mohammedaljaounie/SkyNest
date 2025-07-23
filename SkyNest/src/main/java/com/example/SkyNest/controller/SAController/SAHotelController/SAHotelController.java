@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/super_admin")
+@RequestMapping("/super_admin/hotel")
 public class SAHotelController {
 
     @Autowired
@@ -51,10 +51,10 @@ public class SAHotelController {
     }
 
 
-    @DeleteMapping("/delete-hotel/")
-    public ResponseEntity<Map<String,String>> deleteHotel(@RequestParam Long id){
+    @DeleteMapping("/delete-hotel/{hotelId}")
+    public ResponseEntity<Map<String,String>> deleteHotel(@PathVariable Long hotelId){
 
-        Map<String,String> message = saHotelService.deleteHotel(id);
+        Map<String,String> message = saHotelService.deleteHotel(hotelId);
 
         if (message.get("message").equals("Successfully Deleted")){
             return ResponseEntity.ok(message);

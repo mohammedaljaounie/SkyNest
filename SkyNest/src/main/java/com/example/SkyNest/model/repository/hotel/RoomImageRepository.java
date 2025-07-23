@@ -4,6 +4,7 @@ import com.example.SkyNest.model.entity.hotel.RoomImage;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,10 @@ public interface RoomImageRepository extends JpaRepository<RoomImage,Long> {
 
      void deleteAllByRoomId(Long roomId);
 
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM RoomImage ri WHERE ri.room.hotel.id = :hotelId")
+    void deleteByHotelId(@Param("hotelId") Long hotelId);
 
 
 }

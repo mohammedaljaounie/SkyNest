@@ -8,9 +8,7 @@ import com.example.SkyNest.model.entity.hotel.Hotel;
 import com.example.SkyNest.model.entity.hotel.HotelCard;
 import com.example.SkyNest.model.entity.hotel.HotelImage;
 import com.example.SkyNest.model.entity.userDetails.User;
-import com.example.SkyNest.model.repository.hotel.HotelCardRepository;
-import com.example.SkyNest.model.repository.hotel.HotelImageRepository;
-import com.example.SkyNest.model.repository.hotel.HotelRepository;
+import com.example.SkyNest.model.repository.hotel.*;
 import com.example.SkyNest.model.repository.userDetails.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -42,7 +40,12 @@ public class SAHotelService {
 
     @Autowired
     private HotelImageRepository hotelImageRepository;
-
+    @Autowired
+    private HotelBookingRepository hotelBookingRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+     @Autowired
+     private RoomImageRepository roomImageRepository;
     @Value("${image.upload.dir}")
     private String uploadDir;
 
@@ -131,8 +134,19 @@ public class SAHotelService {
 
         Optional<Hotel> hotel = this.hotelRepository.findById(id);
         if (hotel.isPresent()){
+            System.out.println("This is in side");
             this.hotelImageRepository.deleteAllByHotelId(id);
-            this.hotelRepository.delete(hotel.get());
+            System.out.println("Image");
+            this.hotelBookingRepository.deleteByHotelId(id);
+            System.out.println("Reservation");
+            this.hotelCardRepository.deleteByHotelId(id);
+            System.out.println("hotel card");
+            this.roomImageRepository.deleteByHotelId(id);
+            System.out.println("room image");
+            this.roomRepository.deleteByHotelId(id);
+            System.out.println("room");
+            this.hotelRepository.deleteById(hotel.get().getId());
+            System.out.println("hotel");
             return Map.of(
                     "message",
                     "Successfully Deleted"

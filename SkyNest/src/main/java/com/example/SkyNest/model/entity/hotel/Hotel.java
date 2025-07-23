@@ -37,10 +37,12 @@ public class Hotel {
     @JoinColumn(name = "user_id",referencedColumnName = "id")
     private User user;
 
+    @OneToOne(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    private HotelCard hotelCard;
     @OneToMany(mappedBy = "hotel")
     private List<HotelImage> hotelImageList;
 
-    @OneToMany(mappedBy = "hotel")
+    @OneToMany(mappedBy = "hotel" ,cascade = CascadeType.REMOVE)
     private List<PlaceNearTheHotel> placeNearTheHotelList;
 
     public Long getId() {
@@ -129,5 +131,13 @@ public class Hotel {
 
     public void setPlaceNearTheHotelList(List<PlaceNearTheHotel> placeNearTheHotelList) {
         this.placeNearTheHotelList = placeNearTheHotelList;
+    }
+
+    public HotelCard getHotelCard() {
+        return hotelCard;
+    }
+
+    public void setHotelCard(HotelCard hotelCard) {
+        this.hotelCard = hotelCard;
     }
 }
