@@ -56,9 +56,9 @@ public class UAirportController {
 
 
     @GetMapping("/searchByName")
-    public ResponseEntity<AirportResponse> searchByName(@RequestParam String airportName){
-        AirportResponse airportResponse = this.uAirportService.searchByName(airportName);
-        if (airportResponse!=null){
+    public ResponseEntity<List<AirportResponse>> searchByName(@RequestParam String airportName){
+        List<AirportResponse> airportResponse = this.uAirportService.searchByName(airportName);
+        if (!airportResponse.isEmpty()){
             return ResponseEntity.ok(airportResponse);
         }
         return ResponseEntity.status(400).body(null);

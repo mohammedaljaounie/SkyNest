@@ -18,8 +18,8 @@ public interface AirportRepo extends JpaRepository<Airport,Long> {
     @Query("select a from Airport a order by a.avgRating desc")
     List<Airport> getAirportOrderByRating();
 
-    @Query("select a from Airport a where a.name like  CONCAT('%', :airportName, '%') ")
-    Optional<Airport> findByName(String airportName);
+    @Query("select a from Airport a where a.name like  CONCAT(:airportName, '%') ")
+    List<Airport> findByName(String airportName);
 
     @Query(value = """
     SELECT a.*, (

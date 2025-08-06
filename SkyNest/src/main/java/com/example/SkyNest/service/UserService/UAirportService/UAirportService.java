@@ -107,11 +107,17 @@ public class UAirportService {
         return airportResponseList;
     }
 
-    public AirportResponse searchByName(String airportName) {
-        Optional<Airport> airport = this.airportRepo.findByName(airportName);
+    public List<AirportResponse> searchByName(String airportName) {
+        List<Airport> airportList = this.airportRepo.findByName(airportName);
 
-        return airport.map(value -> SAAirportService.getAirportResponse(value, StatusRole.USER)).orElse(null);
+        List<AirportResponse> airportResponseList = new ArrayList<>();
 
+        for (Airport airport : airportList){
+
+            airportResponseList.add(SAAirportService.getAirportResponse(airport,StatusRole.USER));
+        }
+
+        return airportResponseList;
     }
 
     @Transactional
