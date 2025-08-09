@@ -21,10 +21,10 @@ public interface FlightRepo extends JpaRepository<Flight,Long> {
     List<Flight> findInCompleteFlight(Long airportId, StatusEnumForFlight enumForFlight, boolean enable);
 
     @Query(value = "select f from Flight f where f.startingPoint like  CONCAT(:startingPoint, '%') and f.destination like  CONCAT(:destination, '%') and f.status = :status and f.startingPointDate > :threshold and f.enable = :enable")
-    List<Flight> findAvailableFlightsForStartAndEndPointInAll(String startPoint, String destination, StatusEnumForFlight status, LocalDateTime threshold,boolean enable);
+    List<Flight> findAvailableFlightsForStartAndEndPointInAll(String startingPoint, String destination, StatusEnumForFlight status, LocalDateTime threshold,boolean enable);
 
     @Query(value = "select f from Flight f where f.airport.id = :airportId and f.startingPoint like  CONCAT(:startingPoint, '%') and f.destination like  CONCAT(:destination, '%') and f.status = :status and f.startingPointDate > :threshold and f.enable = :enable")
-    List<Flight> findAvailableFlightsForStartAndEndPointInCertainAirport(Long airportId, String startPoint, String destination, StatusEnumForFlight status, LocalDateTime threshold,boolean enable);
+    List<Flight> findAvailableFlightsForStartAndEndPointInCertainAirport(Long airportId, String startingPoint, String destination, StatusEnumForFlight status, LocalDateTime threshold,boolean enable);
 
     @Query("SELECT f FROM Flight f WHERE f.startingPointDate BETWEEN :startDate AND :endDate AND f.startingPointDate > :nowPlus10 AND f.startingPoint like  CONCAT(:startingPoint, '%') AND f.destination like  CONCAT(:destination, '%') AND f.status = :status and f.enable = :enable")
     List<Flight> findAvailableFlightsForDateAndLocation(

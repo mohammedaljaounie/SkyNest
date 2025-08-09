@@ -3,8 +3,13 @@ package com.example.SkyNest.controller.UController.UAirportController;
 import com.example.SkyNest.dto.airportdto.FilterFlightInfo;
 import com.example.SkyNest.dto.airportdto.FlightBookingResponse;
 import com.example.SkyNest.dto.airportdto.FlightResponse;
+import com.example.SkyNest.model.entity.flight.Flight;
+import com.example.SkyNest.model.repository.flight.FlightRepo;
+import com.example.SkyNest.myEnum.StatusEnumForFlight;
 import com.example.SkyNest.service.AdminService.AAirportService.AFlightService;
 import com.example.SkyNest.service.UserService.UAirportService.UFlightService;
+import org.checkerframework.checker.units.qual.A;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -20,6 +25,8 @@ import java.util.List;
 @RequestMapping("/user/flight")
 public class UFlightController {
 
+    @Autowired
+    private FlightRepo flightRepo;
 
     private final AFlightService aFlightService;
     private final UFlightService uFlightService;
@@ -104,6 +111,7 @@ public class UFlightController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
 
 
 }

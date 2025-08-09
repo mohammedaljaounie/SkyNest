@@ -121,8 +121,9 @@ public class UFlightService {
     public List<FlightResponse> searchFlightByStartPointAndDestinationInAllAirport(String startPoint,String destination){
 
         LocalDateTime threshold = LocalDateTime.now().plusHours(10);
-
+        System.out.println("time "+threshold);
         List<Flight> flightList = this.flightRepo.findAvailableFlightsForStartAndEndPointInAll(startPoint, destination,StatusEnumForFlight.Incomplete,threshold,true);
+        System.out.println("flight size : "+flightList.size());
         List<FlightResponse>flightResponseList = new ArrayList<>();
         for (Flight flight : flightList){
             flightResponseList.add(AFlightService.getFlightResponse(flight,false));
