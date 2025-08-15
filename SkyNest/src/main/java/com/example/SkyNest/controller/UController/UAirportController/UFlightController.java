@@ -74,18 +74,18 @@ public class UFlightController {
         return ResponseEntity.ok(this.uFlightService.viewIncorrectFlight());
     }
 
-    @GetMapping("/searchByStartingAndEndingPointInAll")
+    @PostMapping("/searchByStartingAndEndingPointInAll")
     public ResponseEntity<List<FlightResponse>> findAvailableFlightsForStartAndEndPointInAll(@RequestParam String startPoint,@RequestParam String destination){
         return ResponseEntity.ok(this.uFlightService.searchFlightByStartPointAndDestinationInAllAirport(startPoint, destination));
     }
 
 
-    @GetMapping("/searchByStartingAndEndingPoint/{airportId}")
+    @PostMapping("/searchByStartingAndEndingPoint/{airportId}")
     public ResponseEntity<List<FlightResponse>> findAvailableFlightsForStartAndEndPointInCertainAirport(@PathVariable Long airportId,@RequestParam String startPoint,@RequestParam String destination){
         return ResponseEntity.ok(this.uFlightService.searchFlightByStartPointAndDestinationInCertainAirport(airportId,startPoint, destination));
     }
 
-    @GetMapping("/searchAvailableFlightsForDateAndLocation")
+    @PostMapping("/searchAvailableFlightsForDateAndLocation")
     public ResponseEntity<List<FlightResponse>> searchAvailableFlightsForDateAndLocation(@RequestBody FilterFlightInfo info){
         return ResponseEntity.ok(this.uFlightService.searchAvailableFlightsForDateAndLocation(info));
     }
