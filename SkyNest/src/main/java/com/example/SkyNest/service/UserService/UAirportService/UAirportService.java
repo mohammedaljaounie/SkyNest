@@ -224,7 +224,6 @@ public class UAirportService {
             flightBooking.setStatus(StatusEnumForBooking.Activated);
         }else {
             flightBooking.setStatus(StatusEnumForBooking.Unacceptable);
-
         }
 
         flightBooking.setUser(user);

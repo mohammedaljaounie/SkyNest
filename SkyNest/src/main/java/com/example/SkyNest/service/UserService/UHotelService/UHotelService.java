@@ -854,8 +854,9 @@ public class UHotelService {
                 System.out.println("FREE");
                 HotelBooking updateHotelBooking = hotelBooking.get();
                 updateHotelBooking.setStatus(StatusEnumForBooking.Canceled);
-                updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid(),true);
-                updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid(),false);
+                double amountMustReturn = updateHotelBooking.getAmountPaid()/100*updateHotelBooking.getCurrentTotalAmount();
+                updateUserCard(userCard.get(), amountMustReturn,true);
+                updateHotelCard(hotelCard.get(), amountMustReturn,false);
                 this.hotelBookingRepository.save(updateHotelBooking);
                 isCancel=true;
             }
@@ -864,9 +865,10 @@ public class UHotelService {
                 System.out.println("A_FINE");
                 HotelBooking updateHotelBooking = hotelBooking.get();
                 double fine = updateHotelBooking.getCurrentTotalAmount()*5/100;
+                double amountMustReturn = (updateHotelBooking.getAmountPaid()-5)/100*updateHotelBooking.getCurrentTotalAmount();
                 updateHotelBooking.setStatus(StatusEnumForBooking.Canceled);
-                updateUserCard(userCard.get(), updateHotelBooking.getAmountPaid()-fine,true);
-                updateHotelCard(hotelCard.get(), updateHotelBooking.getAmountPaid()-fine,false);
+                updateUserCard(userCard.get(), amountMustReturn,true);
+                updateHotelCard(hotelCard.get(), amountMustReturn,false);
                 this.hotelBookingRepository.save(updateHotelBooking);
                 isCancel=true;
 
